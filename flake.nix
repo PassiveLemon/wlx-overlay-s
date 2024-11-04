@@ -29,10 +29,17 @@
         };
       };
       packages = {
-        default = pkgs.wlx-overlay-s.overrideAttrs { 
+        default = pkgs.wlx-overlay-s.overrideAttrs (prevAttrs: { 
           version = "0.6";
           src = ./.;
-        };
+
+          buildInputs = prevAttrs.buildInputs ++ [
+            pkgs.cmake
+            pkgs.python3
+            pkgs.libGL
+            pkgs.wayland
+          ];
+        });
       };
     };
   };
