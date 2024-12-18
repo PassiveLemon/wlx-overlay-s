@@ -30,66 +30,20 @@
         };
       };
       packages = {
-        default = pkgs.rustPlatform.buildRustPackage {
-          pname = "wlx-overlay-s";
-          version = "0.6-unstable-11-04-2024";
-
+        default = pkgs.wlx-overlay-s.overrideAttrs (prevAttrs: {
+          version = "0-unstable-2024-12-9";
           src = ./.;
 
-          cargoLock = {
-            lockFile = ./Cargo.lock;
-            outputHashes = {
-              "libmonado-rs-0.1.0" = "sha256-ja7OW/YSmfzaQoBhu6tec9v8fyNDknLekE2eY7McLPE=";
-              "openxr-0.18.0" = "sha256-ktkbhmExstkNJDYM/HYOwAwv3acex7P9SP0KMAOKhQk=";
-              "ovr_overlay-0.0.0" = "sha256-5IMEI0IPTacbA/1gibYU7OT6r+Bj+hlQjDZ3Kg0L2gw=";
-              "smithay-0.3.0" = "sha256-I6XXB5Kort09440dbXQ0+2F4U3ulq1c9x3od+gQ6Chs=";
-              "vulkano-0.34.0" = "sha256-0ZIxU2oItT35IFnS0YTVNmM775x21gXOvaahg/B9sj8=";
-              "wlx-capture-0.3.12" = "sha256-32WnAnNUSfsAA8WB9da3Wqb4acVlXh6HWsY9tPzCHEE=";
-            };
-          };
+          useFetchCargoVendor = true;
+          cargoHash = "";
 
-          nativeBuildInputs = with pkgs; [
-            makeWrapper
-            pkg-config
-            rustPlatform.bindgenHook
-          ];
-
-          buildInputs = with pkgs; [
+          buildInputs = prevAttrs.buildInputs ++ (with pkgs; [
             cmake
-            python3
             libGL
+            python3
             wayland
-            alsa-lib
-            dbus
-            fontconfig
-            libxkbcommon
-            openvr
-            openxr-loader
-            pipewire
-            xorg.libX11
-            xorg.libXext
-            xorg.libXrandr
-          ];
-
-          env.SHADERC_LIB_DIR = "${lib.getLib pkgs.shaderc}/lib";
-
-          postPatch = ''
-            substituteAllInPlace src/res/watch.yaml \
-              --replace '"pactl"' '"${lib.getExe' pkgs.pulseaudio "pactl"}"'
-
-            # TODO: src/res/keyboard.yaml references 'whisper_stt'
-          '';
-
-          postInstall = ''
-            patchelf $out/bin/wlx-overlay-s \
-              --add-needed ${lib.getLib pkgs.wayland}/lib/libwayland-client.so.0 \
-              --add-needed ${lib.getLib pkgs.libxkbcommon}/lib/libxkbcommon.so.0 \
-              --add-needed ${lib.getLib pkgs.libGL}/lib/libEGL.so.1 \
-              --add-needed ${lib.getLib pkgs.libGL}/lib/libGL.so.1 \
-              --add-needed ${lib.getLib pkgs.vulkan-loader}/lib/libvulkan.so.1 \
-              --add-needed ${lib.getLib pkgs.libuuid}/lib/libuuid.so.1
-          '';
-        };
+          ]);
+        });
       };
     };
   };
