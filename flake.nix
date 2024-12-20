@@ -17,7 +17,6 @@
     perSystem = { self', system, ... }:
     let
       pkgs = import inputs.nixpkgs { inherit system; };
-      lib = pkgs.lib;
     in
     {
       # To use, just checkout the last stable release and enter the shell
@@ -32,6 +31,7 @@
       packages = {
         default = pkgs.wlx-overlay-s.overrideAttrs (prevAttrs: {
           version = "0-unstable-2024-12-9";
+
           src = ./.;
 
           useFetchCargoVendor = true;
