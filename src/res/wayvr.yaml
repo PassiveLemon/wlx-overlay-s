@@ -7,7 +7,7 @@ version: 1
 
 # Set to true if you want to make Wyland server instantly available
 # (used for remote starting external processes)
-run_compositor_at_start: false 
+run_compositor_at_start: true 
 
 # Automatically close overlays with zero window count?
 auto_hide: true
@@ -58,3 +58,4 @@ catalogs:
         exec: "cage"
         args: "chromium -- --incognito"
         
+
