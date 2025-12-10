@@ -18,35 +18,24 @@
       lib = pkgs.lib;
     in
     {
-      # To use, just run `nix run .#default -- --uidev=watch`
+      # To use uidev, run `nix run .#uidev`
+      # The devShell doesn't really work due to vulkan library import issues
       devShells = {
         default = pkgs.mkShell {
           packages = [
             self'.packages.default.nativeBuildInputs
             self'.packages.default.buildInputs
           ];
+          shellHook = ''
+            export SHADERC_LIB_DIR=${lib.getLib pkgs.shaderc}/lib
+          '';
         };
       };
       packages = {
-        # Pinned to v25.4.0 because uidev doesn't work in newer versions
         default = pkgs.callPackage ./package.nix { inherit lib pkgs; };
-
-        # Doesn't build with uidev for some reason
-        overrideTest = pkgs.wlx-overlay-s.overrideAttrs (finalAttrs: prevAttrs: {
-          buildFeatures = [ "uidev" ];
-
-          buildInputs = prevAttrs.buildInputs ++ (with pkgs; [
-            cmake
-            vulkan-loader
-            xorg.libXcursor
-            xorg.libXi
-          ]);
-
-          postFixup = ''
-            wrapProgram $out/bin/wlx-overlay-s \
-              --suffix LD_LIBRARY_PATH : ${pkgs.lib.makeLibraryPath finalAttrs.buildInputs}
-          '';
-        });
+        uidev = self'.packages.default.overrideAttrs {
+          meta.mainProgram = "uidev";
+        };
       };
     };
   };

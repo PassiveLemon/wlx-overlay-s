@@ -1,26 +1,11 @@
 { lib, pkgs, ... }:
 pkgs.rustPlatform.buildRustPackage rec {
   pname = "wlx-overlay-s";
-  version = "25.4.0";
+  version = "67435d5fc9bd4469a5c96ba7743e45761db0e7c3";
 
-  src = pkgs.fetchFromGitHub {
-    owner = "galister";
-    repo = "wlx-overlay-s";
-    rev = "v${version}";
-    hash = "sha256-sddB0DhtCRbCaj+yksm3UOdy0NJ5FVZeQx4eNkqLBqI=";
-  };
+  src = ./.;
 
-  useFetchCargoVendor = true;
-  cargoHash = "sha256-OwRUjjUMkQIIh9LGWioqDb7dgYForPrJnf/lmDKDmwk=";
-
-  postPatch = ''
-    substituteAllInPlace src/res/watch.yaml \
-      --replace '"pactl"' '"${lib.getExe' pkgs.pulseaudio "pactl"}"'
-
-    # TODO: src/res/keyboard.yaml references 'whisper_stt'
-  '';
-
-  buildFeatures = [ "uidev" ];
+  cargoHash = "sha256-ISKsYwIC1R4nMzakStKrCEtOxJfne8H6TCQLpNG6owE=";
 
   nativeBuildInputs = with pkgs; [
     makeWrapper
@@ -32,11 +17,15 @@ pkgs.rustPlatform.buildRustPackage rec {
     alsa-lib
     dbus
     fontconfig
+    gtk3
+    gdk-pixbuf
+    glib
     libGL
     libxkbcommon
     openvr
     openxr-loader
     pipewire
+    shaderc
     xorg.libX11
     xorg.libXext
     xorg.libXrandr
@@ -49,12 +38,21 @@ pkgs.rustPlatform.buildRustPackage rec {
     xorg.libXi
   ];
 
+  env.SHADERC_LIB_DIR = "${lib.getLib pkgs.shaderc}/lib";
+
+  # Even though vulkan-loader is in buildInputs, it has to be added to the list for it to work for some reason
   postFixup = ''
     wrapProgram $out/bin/wlx-overlay-s \
       --suffix LD_LIBRARY_PATH : ${pkgs.lib.makeLibraryPath buildInputs}
+
+    wrapProgram $out/bin/uidev \
+      --suffix LD_LIBRARY_PATH : ${pkgs.lib.makeLibraryPath (buildInputs ++ [ pkgs.vulkan-loader ])}
   '';
 
-  env.SHADERC_LIB_DIR = "${lib.getLib pkgs.shaderc}/lib";
+  postInstall = ''
+    install -Dm644 $src/wlx-overlay-s/wlx-overlay-s.desktop $out/share/applications/wlx-overlay-s.desktop
+    install -Dm644 $src/wlx-overlay-s/wlx-overlay-s.svg $out/share/icons/hicolor/scalable/apps/wlx-overlay-s.svg
+  '';
 
   meta = with lib; {
     description = "Wayland/X11 desktop overlay for SteamVR and OpenXR, Vulkan edition";
