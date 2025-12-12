@@ -14,17 +14,20 @@ env:
 jobs:
   make_release:
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./wlx-overlay-s
     steps:
       - uses: actions/checkout@v3
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.9
       - name: Prepare Environment
         run: |
-          .github/workflows/scripts/appimage_prepare_env.sh
+          ../.github/workflows/scripts/appimage_prepare_env.sh
       - name: Cargo Build
         run: |
           cargo build --release
-          cp target/release/wlx-overlay-s ${APPDIR}/usr/bin
+          cp ../target/release/wlx-overlay-s ${APPDIR}/usr/bin
           chmod +x ${APPDIR}/usr/bin/wlx-overlay-s
 
       - name: Package AppImage
@@ -57,7 +60,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_KEY }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: target/release/wlx-overlay-s
+          asset_path: ../target/release/wlx-overlay-s
           asset_name: wlx-overlay-s
           asset_content_type: application/octet-stream
 
