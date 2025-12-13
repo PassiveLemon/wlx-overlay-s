@@ -9,7 +9,7 @@ use std::{
 use glam::vec2;
 use slotmap::Key;
 use wgui::{
-    components::{checkbox::ComponentCheckbox, slider::ComponentSlider},
+    components::{button::ComponentButton, checkbox::ComponentCheckbox, slider::ComponentSlider},
     event::{CallbackDataCommon, EventAlterables, EventCallback},
     parser::Fetchable,
     widget::EventResult,
@@ -251,6 +251,17 @@ fn make_edit_panel(app: &mut AppState) -> anyhow::Result<EditModeWrapPanel> {
                         .enqueue(TaskType::Overlay(OverlayTask::Modify(sel, task)));
                     Ok(EventResult::Consumed)
                 }),
+                "::EditModeToggleGrab" => Box::new(move |_common, _data, app, state| {
+                    let sel = OverlaySelector::Id(*state.id.borrow());
+                    app.tasks.enqueue(TaskType::Overlay(OverlayTask::Modify(
+                        sel,
+                        Box::new(|_app, owc| {
+                            let state = owc.active_state.as_mut().unwrap(); //want panic
+                            state.grabbable = !state.grabbable;
+                        }),
+                    )));
+                    Ok(EventResult::Consumed)
+                }),
                 "::EditModeTab" => {
                     let tab_name = args.next().unwrap().to_owned();
                     Box::new(move |common, _data, _app, state| {
@@ -329,6 +340,11 @@ fn reset_panel(
         alterables: &mut alterables,
         state: &panel.layout.state,
     };
+
+    let c = panel
+        .parser_state
+        .fetch_component_as::<ComponentButton>("top_grab")?;
+    c.set_sticky_state(&mut common, !state.grabbable);
 
     let c = panel
         .parser_state

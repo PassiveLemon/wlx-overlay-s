@@ -98,6 +98,13 @@ pub fn parse_text_style(attribs: &[AttribPair]) -> TextStyle {
 					print_invalid_attrib(key, value);
 				}
 			}
+			"wrap" => {
+				if let Ok(y) = value.parse::<i32>() {
+					style.wrap = y == 1;
+				} else {
+					print_invalid_attrib(key, value);
+				}
+			}
 			_ => {}
 		}
 	}

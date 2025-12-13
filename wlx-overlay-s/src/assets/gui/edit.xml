@@ -1,6 +1,4 @@
 <layout>
-  <include src="theme.xml" />
-
   <macro name="button_style"
     margin="2" overflow="hidden" box_sizing="border_box"
     border_color="~color_accent_translucent" border="2" round="8" color="~color_accent_5" color2="~color_accent_1" gradient="vertical"
@@ -42,6 +40,7 @@
             <div flex_direction="column" gap="8">
               <div flex_direction="row" gap="4">
                 <TopButton sticky="1" id="top_lock" src="edit/lock_open.svg" tooltip="EDIT_MODE.LOCK_INTERACTION" press="::EditModeToggleLock" />
+                <TopButton sticky="1" id="top_grab" src="edit/disable-grab.svg" tooltip="EDIT_MODE.DISABLE_GRAB" press="::EditModeToggleGrab" />
                 <TopButton sticky="0" id="top_pos" src="edit/anchor.svg" tooltip="EDIT_MODE.POSITIONING" press="::EditModeTab pos" />
                 <TopButton sticky="0" id="top_alpha" src="edit/fade.svg" tooltip="EDIT_MODE.OPACITY" press="::EditModeTab alpha" />
                 <TopButton sticky="0" id="top_curve" src="edit/curve.svg" tooltip="EDIT_MODE.ADJUST_CURVATURE" press="::EditModeTab curve" />

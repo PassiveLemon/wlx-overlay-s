@@ -285,7 +285,7 @@ pub fn create_keyboard(
             transform: Affine3A::from_scale_rotation_translation(
                 Vec3::ONE * width,
                 Quat::from_rotation_x(-10f32.to_radians()),
-                vec3(0.0, -0.5, -0.5),
+                vec3(0.0, -0.65, -0.5),
             ),
             ..OverlayWindowState::default()
         },
