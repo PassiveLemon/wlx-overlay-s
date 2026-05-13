@@ -1,0 +1,13 @@
+<layout>
+  <elements>
+    <image src_builtin="dashboard/splash.png" min_width="431" min_height="128" />
+
+    <rectangle color="#FFFFFF11" width="100%" height="2"/>
+      
+    <label weight="bold" size="32" text="Hi there!"/>
+    <label weight="bold" size="20" text="Thank you for installing WayVR ❤️"/>
+    
+    <label size="20" margin_top="16" text="Let us guide you through your first steps."/>
+    <label size="20" text="Press &quot;Next&quot; button below to get started."/>
+  </elements>
+</layout>

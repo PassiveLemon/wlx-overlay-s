@@ -1,0 +1,5 @@
+<layout>
+  <elements>
+    <label text="Page 2" weight="bold" size="20"/>
+  </elements>
+</layout>

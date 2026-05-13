@@ -26,7 +26,10 @@ use wlx_common::{
 
 use crate::{
 	assets,
-	tab::{Tab, TabType, apps::TabApps, games::TabGames, home::TabHome, monado::TabMonado, settings::TabSettings},
+	tab::{
+		Tab, TabType, apps::TabApps, games::TabGames, home::TabHome, monado::TabMonado, settings::TabSettings,
+		welcome::TabWelcome,
+	},
 	util::{
 		popup_manager::{MountPopupOnceParams, PopupManager, PopupManagerParams},
 		toast_manager::ToastManager,
@@ -390,6 +393,7 @@ impl<T: 'static> Frontend<T> {
 		self.layout.remove_children(widget_content.id);
 
 		let (tab_translation, icon_path) = match tab_type {
+			TabType::Welcome => ("GETTING_STARTED", "dashboard/welcome.svg"),
 			TabType::Home => ("HOME_SCREEN", "dashboard/home.svg"),
 			TabType::Apps => ("APPLICATIONS", "dashboard/apps.svg"),
 			TabType::Games => ("GAMES", "dashboard/games.svg"),
@@ -400,6 +404,7 @@ impl<T: 'static> Frontend<T> {
 		self.set_tab_title(tab_translation, icon_path)?;
 
 		let tab: Box<dyn Tab<T>> = match tab_type {
+			TabType::Welcome => Box::new(TabWelcome::new(self, widget_content.id, data)?),
 			TabType::Home => Box::new(TabHome::new(self, widget_content.id, data)?),
 			TabType::Apps => Box::new(TabApps::new(self, widget_content.id, data)?),
 			TabType::Games => Box::new(TabGames::new(self, widget_content.id)?),

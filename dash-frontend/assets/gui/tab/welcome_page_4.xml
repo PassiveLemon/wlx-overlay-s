@@ -1,0 +1,7 @@
+<layout>
+  <elements>
+    <label text="Page 4" shadow="#000000" shadow_x="10" shadow_y="10" color="#FF00FF" size="30"/>
+    <label text="Page 4" shadow="#000000" shadow_x="10" shadow_y="10" weight="bold" color="#FFFF00" size="30"/>
+    <label text="Page 4" shadow="#000000" shadow_x="10" shadow_y="10" color="#00FFFF" size="30"/>
+  </elements>
+</layout>

@@ -5,6 +5,7 @@ pub mod games;
 pub mod home;
 pub mod monado;
 pub mod settings;
+pub mod welcome;
 
 #[derive(Clone, Copy, Debug)]
 pub enum TabType {
@@ -13,6 +14,7 @@ pub enum TabType {
 	Games,
 	Monado,
 	Settings,
+	Welcome,
 }
 
 pub trait Tab<T> {

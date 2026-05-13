@@ -1,0 +1,22 @@
+<layout>
+  <template name="Pip">
+    <rectangle id="pip" width="8" height="8" round="100%" color="${COLOR}"/>
+  </template>
+  
+  <elements>
+    <div flex_direction="column" flex_grow="1" gap="16" align_items="center" overflow_y="hidden">
+      <!-- Content -->
+      <div id="content" flex_direction="column" flex_grow="1" align_items="center" justify_content="center" gap="16" overflow_y="scroll">
+        <!-- filled-in at runtime -->
+      </div>
+      <!-- Page buttons -->
+      <div flex_direction="row" gap="8" align_items="center">
+        <Button id="btn_prev" width="32" height="32" round="100%" sprite_src_builtin="dashboard/arrow_left.svg" />
+        <div id="pips" gap="4" align_items="center">
+          <!-- filled-in at runtime -->
+        </div>
+        <Button id="btn_next" width="32" height="32" round="100%" sprite_src_builtin="dashboard/arrow_right.svg" />
+      </div>
+    </div>
+  </elements>
+</layout>
