@@ -1,5 +1,3 @@
-use std::{collections::HashMap, rc::Rc};
-
 use wgui::{
 	assets::AssetPath,
 	components::button::{ButtonClickCallback, ComponentButton},
@@ -7,7 +5,7 @@ use wgui::{
 	globals::WguiGlobals,
 	i18n::Translation,
 	layout::{Layout, WidgetID},
-	parser::{Fetchable, ParseDocumentParams, ParserState},
+	parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 	renderer_vk::text::custom_glyph::CustomGlyphData,
 	widget::{image::WidgetImage, label::WidgetLabel},
 };
@@ -54,17 +52,10 @@ fn populate_res_pips(
 	layout.remove_children(id_parent);
 
 	let mut populate_res_pip = |res: SkymapResolution| -> anyhow::Result<()> {
-		let mut tpar = HashMap::<Rc<str>, Rc<str>>::new();
+		let mut tpar = TemplateParams::new();
 		let downloaded = entry.is_downloaded(res).unwrap_or(false);
-		tpar.insert(
-			Rc::from("color"),
-			if downloaded {
-				Rc::from("#11aa40")
-			} else {
-				Rc::from("#444444")
-			},
-		);
-		tpar.insert(Rc::from("text"), res.get_display_str_simple().into());
+		tpar.insert("color", if downloaded { "#11aa40" } else { "#444444" });
+		tpar.insert("text", res.get_display_str_simple());
 		parser_state.realize_template(&doc_params(&globals), "ResolutionPip", layout, id_parent, tpar)?;
 
 		Ok(())

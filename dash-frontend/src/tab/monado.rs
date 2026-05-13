@@ -13,7 +13,7 @@ use wgui::{
 	drawing::Color,
 	globals::WguiGlobals,
 	layout::{Layout, WidgetID},
-	parser::{self, Fetchable, ParseDocumentParams, ParserState},
+	parser::{self, Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 	task::Tasks,
 };
 use wlx_common::{
@@ -383,15 +383,16 @@ fn mount_sessions_list(
 	layout.remove_children(id_parent);
 
 	for (session_id, session) in sessions {
-		let mut params = HashMap::new();
+		let mut params = TemplateParams::new();
 
-		params.insert(
-			Rc::from("text"),
-			Rc::from(format!(
+		params.insert_rc(
+			"text",
+			format!(
 				"{} (ID {})",
 				session.resolved_name.as_ref().map_or("Unknown", |s| s.as_str()),
 				session_id,
-			)),
+			)
+			.into(),
 		);
 
 		let data = state.realize_template(
@@ -427,10 +428,10 @@ fn mount_graph(
 	limits: (f32, f32),
 ) -> anyhow::Result<DebugGraph> {
 	let globals = layout.state.globals.clone();
-	let mut params = HashMap::new();
-	params.insert(Rc::from("name"), Rc::from(name));
-	params.insert(Rc::from("limit_min"), Rc::from(limits.0.to_string()));
-	params.insert(Rc::from("limit_max"), Rc::from(limits.1.to_string()));
+	let mut params = TemplateParams::new();
+	params.insert("name", name);
+	params.insert_rc("limit_min", limits.0.to_string().into());
+	params.insert_rc("limit_max", limits.1.to_string().into());
 
 	let data = state.realize_template(
 		&doc_params_tab_debug_timings(&globals),
@@ -652,25 +653,15 @@ impl SubtabProcessList {
 		client: &dash_interface::MonadoClient,
 		tasks: &Tasks<Task>,
 	) -> anyhow::Result<()> {
-		let mut par = HashMap::<Rc<str>, Rc<str>>::new();
-		par.insert(
-			"checked".into(),
-			if client.is_primary {
-				Rc::from("1")
-			} else {
-				Rc::from("0")
-			},
-		);
-		par.insert(
-			"name".into(),
-			format!("{} (Client ID: {})", client.name, client.id).into(),
-		);
-		par.insert("flag_active".into(), yesno(client.is_active).into());
-		par.insert("flag_focused".into(), yesno(client.is_focused).into());
-		par.insert("flag_io_active".into(), yesno(client.is_io_active).into());
-		par.insert("flag_overlay".into(), yesno(client.is_overlay).into());
-		par.insert("flag_primary".into(), yesno(client.is_primary).into());
-		par.insert("flag_visible".into(), yesno(client.is_visible).into());
+		let mut par = TemplateParams::new();
+		par.insert("checked", if client.is_primary { "1" } else { "0" });
+		par.insert_rc("name", format!("{} (Client ID: {})", client.name, client.id).into());
+		par.insert("flag_active", yesno(client.is_active));
+		par.insert("flag_focused", yesno(client.is_focused));
+		par.insert("flag_io_active", yesno(client.is_io_active));
+		par.insert("flag_overlay", yesno(client.is_overlay));
+		par.insert("flag_primary", yesno(client.is_primary));
+		par.insert("flag_visible", yesno(client.is_visible));
 
 		let globals = layout.state.globals.clone();
 

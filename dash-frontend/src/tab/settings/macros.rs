@@ -1,4 +1,4 @@
-use std::{collections::HashMap, rc::Rc};
+use std::rc::Rc;
 
 use crate::tab::settings::{self, SettingType, Task, horiz_cell, mount_requires_restart};
 use wgui::{
@@ -8,7 +8,7 @@ use wgui::{
 		slider::ComponentSlider,
 	},
 	layout::{Layout, WidgetID},
-	parser::{Fetchable, ParseDocumentParams, ParserState},
+	parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 	task::Tasks,
 	widget::label::WidgetLabel,
 	windowing::context_menu,
@@ -24,10 +24,10 @@ pub fn options_category(
 	let id = mp.idx.to_string();
 	mp.idx += 1;
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("translation"), Rc::from(translation));
-	params.insert(Rc::from("icon"), Rc::from(icon));
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
+	let mut params = TemplateParams::new();
+	params.insert("translation", translation);
+	params.insert("icon", icon);
+	params.insert("id", &id);
 
 	mp.parser_state
 		.instantiate_template(mp.doc_params, "SettingsGroupBox", mp.layout, parent, params)?;
@@ -39,20 +39,20 @@ pub fn options_checkbox(mp: &mut MacroParams, parent: WidgetID, setting: Setting
 	let id = mp.idx.to_string();
 	mp.idx += 1;
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
+	let mut params = TemplateParams::new();
+	params.insert("id", &id);
 
 	match setting.get_translation() {
-		Ok(translation) => params.insert(Rc::from("translation"), translation.into()),
-		Err(raw_text) => params.insert(Rc::from("text"), raw_text.into()),
+		Ok(translation) => params.insert("translation", translation),
+		Err(raw_text) => params.insert("text", raw_text),
 	};
 
 	if let Some(tooltip) = setting.get_tooltip() {
-		params.insert(Rc::from("tooltip"), Rc::from(tooltip));
+		params.insert("tooltip", tooltip);
 	}
 
 	let checked = if *setting.mut_bool(mp.config) { "1" } else { "0" };
-	params.insert(Rc::from("checked"), Rc::from(checked));
+	params.insert("checked", checked);
 
 	let id_cell = horiz_cell(mp.layout, parent)?;
 
@@ -86,23 +86,23 @@ pub fn options_slider_f32(
 	let id = mp.idx.to_string();
 	mp.idx += 1;
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
+	let mut params = TemplateParams::new();
+	params.insert("id", &id);
 
 	match setting.get_translation() {
-		Ok(translation) => params.insert(Rc::from("translation"), translation.into()),
-		Err(raw_text) => params.insert(Rc::from("text"), raw_text.into()),
+		Ok(translation) => params.insert("translation", translation),
+		Err(raw_text) => params.insert("text", raw_text),
 	};
 
 	if let Some(tooltip) = setting.get_tooltip() {
-		params.insert(Rc::from("tooltip"), Rc::from(tooltip));
+		params.insert("tooltip", tooltip);
 	}
 
 	let value = setting.mut_f32(mp.config).to_string();
-	params.insert(Rc::from("value"), Rc::from(value));
-	params.insert(Rc::from("min"), Rc::from(min.to_string()));
-	params.insert(Rc::from("max"), Rc::from(max.to_string()));
-	params.insert(Rc::from("step"), Rc::from(step.to_string()));
+	params.insert_rc("value", value.into());
+	params.insert_rc("min", min.to_string().into());
+	params.insert_rc("max", max.to_string().into());
+	params.insert_rc("step", step.to_string().into());
 
 	let id_cell = horiz_cell(mp.layout, parent)?;
 
@@ -136,25 +136,25 @@ pub fn options_range_f32(
 	let id = mp.idx.to_string();
 	mp.idx += 1;
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
+	let mut params = TemplateParams::new();
+	params.insert("id", &id);
 
 	match setting.get_translation() {
-		Ok(translation) => params.insert(Rc::from("translation"), translation.into()),
-		Err(raw_text) => params.insert(Rc::from("text"), raw_text.into()),
+		Ok(translation) => params.insert("translation", translation),
+		Err(raw_text) => params.insert("text", raw_text),
 	};
 
 	if let Some(tooltip) = setting.get_tooltip() {
-		params.insert(Rc::from("tooltip"), Rc::from(tooltip));
+		params.insert("tooltip", tooltip);
 	}
 
 	let value = setting.mut_f32(mp.config).to_string();
 	let value2 = setting2.mut_f32(mp.config).to_string();
-	params.insert(Rc::from("value"), Rc::from(value));
-	params.insert(Rc::from("value2"), Rc::from(value2));
-	params.insert(Rc::from("min"), Rc::from(min.to_string()));
-	params.insert(Rc::from("max"), Rc::from(max.to_string()));
-	params.insert(Rc::from("step"), Rc::from(step.to_string()));
+	params.insert_rc("value", value.into());
+	params.insert_rc("value2", value2.into());
+	params.insert_rc("min", min.to_string().into());
+	params.insert_rc("max", max.to_string().into());
+	params.insert_rc("step", step.to_string().into());
 
 	let id_cell = horiz_cell(mp.layout, parent)?;
 
@@ -191,25 +191,25 @@ pub fn options_slider_i32(
 	let id = mp.idx.to_string();
 	mp.idx += 1;
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
+	let mut params = TemplateParams::new();
+	params.insert("id", &id);
 
 	match setting.get_translation() {
-		Ok(translation) => params.insert(Rc::from("translation"), translation.into()),
-		Err(raw_text) => params.insert(Rc::from("text"), raw_text.into()),
+		Ok(translation) => params.insert("translation", translation),
+		Err(raw_text) => params.insert("text", raw_text),
 	};
 
 	if let Some(tooltip) = setting.get_tooltip() {
-		params.insert(Rc::from("tooltip"), Rc::from(tooltip));
+		params.insert("tooltip", tooltip);
 	}
 
 	let id_cell = horiz_cell(mp.layout, parent)?;
 
 	let value = setting.mut_i32(mp.config).to_string();
-	params.insert(Rc::from("value"), Rc::from(value));
-	params.insert(Rc::from("min"), Rc::from(min.to_string()));
-	params.insert(Rc::from("max"), Rc::from(max.to_string()));
-	params.insert(Rc::from("step"), Rc::from(step.to_string()));
+	params.insert_rc("value", value.into());
+	params.insert_rc("min", min.to_string().into());
+	params.insert_rc("max", max.to_string().into());
+	params.insert_rc("step", step.to_string().into());
 
 	mp.parser_state
 		.instantiate_template(mp.doc_params, "SliderSetting", mp.layout, id_cell, params)?;
@@ -239,16 +239,16 @@ where
 	let id = mp.idx.to_string();
 	mp.idx += 1;
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
+	let mut params = TemplateParams::new();
+	params.insert("id", &id);
 
 	match setting.get_translation() {
-		Ok(translation) => params.insert(Rc::from("translation"), translation.into()),
-		Err(raw_text) => params.insert(Rc::from("text"), raw_text.into()),
+		Ok(translation) => params.insert("translation", translation),
+		Err(raw_text) => params.insert("text", raw_text),
 	};
 
 	if let Some(tooltip) = setting.get_tooltip() {
-		params.insert(Rc::from("tooltip"), Rc::from(tooltip));
+		params.insert("tooltip", tooltip);
 	}
 
 	let id_cell = horiz_cell(mp.layout, parent)?;
@@ -316,10 +316,10 @@ pub fn options_danger_button(
 	let id = mp.idx.to_string();
 	mp.idx += 1;
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
-	params.insert(Rc::from("translation"), Rc::from(translation));
-	params.insert(Rc::from("icon"), Rc::from(icon));
+	let mut params = TemplateParams::new();
+	params.insert("id", &id);
+	params.insert("translation", translation);
+	params.insert("icon", icon);
 
 	mp.parser_state
 		.instantiate_template(mp.doc_params, "DangerButton", mp.layout, parent, params)?;
@@ -345,9 +345,9 @@ pub fn options_autostart_app(
 	let id = mp.idx.to_string();
 	mp.idx += 1;
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
-	params.insert(Rc::from("text"), Rc::from(text));
+	let mut params = TemplateParams::new();
+	params.insert("id", &id);
+	params.insert("text", text);
 
 	mp.parser_state
 		.instantiate_template(mp.doc_params, "AutostartApp", mp.layout, parent, params)?;

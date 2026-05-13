@@ -1,10 +1,10 @@
 use crate::windowing::{OverlayID, backend::OverlayEventData, window::OverlayCategory};
 use slotmap::{Key, SecondaryMap};
-use std::{collections::HashMap, rc::Rc};
+use std::rc::Rc;
 use wgui::{
     components::button::ComponentButton,
     layout::Layout,
-    parser::{Fetchable, ParseDocumentParams, ParserState},
+    parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 };
 
 #[derive(Default)]
@@ -37,12 +37,12 @@ impl OverlayList {
                 self.overlay_buttons.clear();
 
                 for (i, meta) in metas.iter().enumerate() {
-                    let mut params = HashMap::new();
+                    let mut params = TemplateParams::new();
 
                     let (template, root) = match meta.category {
                         OverlayCategory::Screen => {
-                            params.insert(
-                                "display".into(),
+                            params.insert_rc(
+                                "display",
                                 format!(
                                     "{}{}",
                                     (*meta.name).chars().next().unwrap_or_default(),
@@ -53,8 +53,8 @@ impl OverlayList {
                             ("Screen", panels_root)
                         }
                         OverlayCategory::Mirror => {
-                            params.insert(
-                                "display".into(),
+                            params.insert_rc(
+                                "display",
                                 (*meta.name).chars().last().unwrap().to_string().into(),
                             );
                             ("Mirror", panels_root)
@@ -66,17 +66,16 @@ impl OverlayList {
                                 "edit/panel.svg".into()
                             };
 
-                            params.insert("icon".into(), icon);
+                            params.insert_rc("icon", icon);
                             ("Panel", panels_root)
                         }
                         OverlayCategory::WayVR => {
                             params.insert(
-                                "icon".into(),
+                                "icon",
                                 meta.icon
                                     .as_ref()
                                     .expect("WayVR overlay without Icon attribute!")
-                                    .as_ref()
-                                    .into(),
+                                    .as_ref(),
                             );
                             ("App", apps_root)
                         }
@@ -106,8 +105,8 @@ impl OverlayList {
                         continue;
                     }
 
-                    params.insert("idx".into(), i.to_string().into());
-                    params.insert("name".into(), meta.name.as_ref().into());
+                    params.insert_rc("idx", i.to_string().into());
+                    params.insert("name", meta.name.as_ref());
                     parser_state
                         .instantiate_template(doc_params, template, layout, root, params)?;
                     let overlay_button = parser_state

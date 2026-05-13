@@ -1,9 +1,9 @@
-use std::{collections::HashMap, rc::Rc};
+use std::rc::Rc;
 
 use wgui::{
     components::button::ComponentButton,
     layout::Layout,
-    parser::{Fetchable, ParseDocumentParams, ParserState},
+    parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 };
 
 use crate::windowing::backend::OverlayEventData;
@@ -45,9 +45,9 @@ impl SetList {
                 self.set_buttons.clear();
 
                 for i in 0..*num_sets {
-                    let mut params = HashMap::new();
-                    params.insert("idx".into(), i.to_string().into());
-                    params.insert("display".into(), (i + 1).to_string().into());
+                    let mut params = TemplateParams::new();
+                    params.insert_rc("idx", i.to_string().into());
+                    params.insert_rc("display", (i + 1).to_string().into());
                     parser_state
                         .instantiate_template(doc_params, "Set", layout, sets_root, params)?;
                     let set_button =

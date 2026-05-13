@@ -1,4 +1,4 @@
-use std::{collections::HashMap, rc::Rc};
+use std::rc::Rc;
 
 use crate::{
 	frontend::{FrontendTask, FrontendTasks},
@@ -16,7 +16,7 @@ use wgui::{
 	globals::WguiGlobals,
 	i18n::Translation,
 	layout::{Layout, WidgetID},
-	parser::{Fetchable, ParseDocumentParams, ParserState},
+	parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 	renderer_vk::text::custom_glyph::CustomGlyphData,
 	task::Tasks,
 	widget::{image::WidgetImage, label::WidgetLabel},
@@ -73,14 +73,14 @@ fn mount_resolution_button(
 	tasks: &Tasks<Task>,
 	already_downloaded: bool,
 ) -> anyhow::Result<()> {
-	let mut t = HashMap::<Rc<str>, Rc<str>>::new();
-	t.insert(Rc::from("text"), Rc::from(res.get_display_str()));
+	let mut t = TemplateParams::new();
+	t.insert("text", res.get_display_str());
 	t.insert(
-		Rc::from("sprite"),
-		Rc::from(match already_downloaded {
+		"sprite",
+		match already_downloaded {
 			true => "dashboard/check.svg",
 			false => "dashboard/download.svg",
-		}),
+		},
 	);
 	let data = parser_state.realize_template(doc_params, "ResolutionButton", layout, parent_id, t)?;
 	let button = data.fetch_component_as::<ComponentButton>("button")?;

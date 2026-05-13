@@ -1,5 +1,3 @@
-use std::{collections::HashMap, rc::Rc};
-
 use crate::{
 	frontend::{FrontendTask, FrontendTasks},
 	util::popup_manager::{MountPopupOnceParams, PopupHolder},
@@ -11,7 +9,7 @@ use wgui::{
 	globals::WguiGlobals,
 	i18n::Translation,
 	layout::{Layout, WidgetID},
-	parser::{Fetchable, ParseDocumentParams, ParserState},
+	parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 	task::Tasks,
 	widget::label::WidgetLabel,
 };
@@ -91,8 +89,8 @@ impl View {
 		}
 
 		for entry in par.entries {
-			let mut t_par = HashMap::<Rc<str>, Rc<str>>::new();
-			t_par.insert(Rc::from("icon"), Rc::from(entry.icon));
+			let mut t_par = TemplateParams::new();
+			t_par.insert("icon", entry.icon);
 
 			let data =
 				parser_state.realize_template(&doc_params(&par.globals), "DialogBoxButton", layout, id_buttons, t_par)?;

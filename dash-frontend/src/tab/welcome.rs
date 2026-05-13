@@ -1,11 +1,11 @@
-use std::{collections::HashMap, marker::PhantomData, rc::Rc};
+use std::marker::PhantomData;
 
 use wgui::{
 	assets::AssetPath,
 	components::button::ComponentButton,
 	globals::WguiGlobals,
 	layout::{Layout, WidgetID},
-	parser::{Fetchable, ParseDocumentParams, ParserState},
+	parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 	task::Tasks,
 };
 
@@ -103,16 +103,13 @@ impl<T> TabWelcome<T> {
 		let globals = layout.state.globals.clone();
 
 		for i in 0..PAGE_COUNT {
-			let mut vars = HashMap::<Rc<str>, Rc<str>>::new();
+			let mut params = TemplateParams::new();
 			let is_selected = i == self.current_page;
-			vars.insert(
-				Rc::from("COLOR"),
-				Rc::from(if is_selected { "#FFFFFF" } else { "#FFFFFF11" }),
-			);
+			params.insert("COLOR", if is_selected { "#FFFFFF" } else { "#FFFFFF11" });
 
 			self
 				.state
-				.instantiate_template(&doc_params(&globals), "Pip", layout, self.id_pips, vars)?
+				.instantiate_template(&doc_params(&globals), "Pip", layout, self.id_pips, params)?
 		}
 
 		Ok(())

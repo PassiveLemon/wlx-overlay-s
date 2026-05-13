@@ -8,7 +8,7 @@ use wgui::{
 	globals::WguiGlobals,
 	i18n::Translation,
 	layout::{Layout, WidgetID},
-	parser::{Fetchable, ParseDocumentParams, ParserState},
+	parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 	task::Tasks,
 	widget::label::WidgetLabel,
 };
@@ -149,8 +149,8 @@ impl View {
 
 		// app icon
 		if let Some(icon_path) = &params.entry.icon_path {
-			let mut template_params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-			template_params.insert("path".into(), icon_path.clone());
+			let mut template_params = TemplateParams::new();
+			template_params.insert("path", icon_path);
 			state.instantiate_template(
 				doc_params,
 				"ApplicationIcon",

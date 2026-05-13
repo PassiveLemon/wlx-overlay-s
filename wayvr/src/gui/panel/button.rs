@@ -1,6 +1,5 @@
 use std::{
     cell::RefCell,
-    collections::HashMap,
     process::{Child, Command, Stdio},
     rc::Rc,
     str::FromStr,
@@ -17,7 +16,7 @@ use wgui::{
     },
     layout::Layout,
     log::LogErr,
-    parser::{self, AttribPair, CustomAttribsInfoOwned, Fetchable, ParserState},
+    parser::{self, AttribPair, CustomAttribsInfoOwned, Fetchable, ParserState, TemplateParams},
     taffy,
     widget::EventResult,
     windowing::context_menu::{Blueprint, ContextMenu, OpenParams},
@@ -219,12 +218,12 @@ pub(super) fn setup_custom_button<S: 'static>(
                     };
 
                     // pass attribs with key `_context_{name}` to the context_menu template
-                    let mut template_params = HashMap::new();
+                    let mut template_params = TemplateParams::new();
                     for AttribPair { attrib, value } in &attribs.pairs {
                         const PREFIX: &str = "_context_";
                         #[allow(clippy::manual_strip)]
                         if attrib.starts_with(PREFIX) {
-                            template_params.insert(attrib[PREFIX.len()..].into(), value.clone());
+                            template_params.insert_rc(attrib[PREFIX.len()..].into(), value.clone());
                         }
                     }
 

@@ -59,10 +59,13 @@ pub struct Template {
 	node: roxmltree::NodeId, // belongs to node_document which could be included in another file
 }
 
+#[derive(Clone, Default)]
+pub struct TemplateParams(HashMap<Rc<str>, Rc<str>>);
+
 struct ParserFile {
 	path: AssetPathOwned,
 	document: Rc<XmlDocument>,
-	template_parameters: HashMap<Rc<str>, Rc<str>>,
+	template_parameters: TemplateParams,
 }
 
 /*
@@ -102,6 +105,24 @@ pub trait Fetchable {
 
 	/// Retrieve a widget by string ID and down‑cast its inner value to type `T` (see `widget/mod.rs`)
 	fn fetch_widget_as<'a, T: 'static>(&self, state: &'a LayoutState, id: &str) -> anyhow::Result<RefMut<'a, T>>;
+}
+
+impl TemplateParams {
+	pub fn new() -> Self {
+		Self(HashMap::new())
+	}
+
+	pub const fn from_hashmap(map: HashMap<Rc<str>, Rc<str>>) -> Self {
+		Self(map)
+	}
+
+	pub fn insert(&mut self, key: &str, value: &str) -> Option<Rc<str>> {
+		self.0.insert(Rc::from(key), Rc::from(value))
+	}
+
+	pub fn insert_rc(&mut self, key: &str, value: Rc<str>) -> Option<Rc<str>> {
+		self.0.insert(Rc::from(key), value)
+	}
 }
 
 impl ParserData {
@@ -232,7 +253,7 @@ impl ParserState {
 		template_name: &str,
 		layout: &mut Layout,
 		widget_id: WidgetID,
-		template_parameters: HashMap<Rc<str>, Rc<str>>,
+		template_parameters: TemplateParams,
 	) -> anyhow::Result<ParserData> {
 		let mut parser_data =
 			self.parse_template_only(doc_params, template_name, layout, widget_id, template_parameters)?;
@@ -253,7 +274,7 @@ impl ParserState {
 		template_name: &str,
 		layout: &mut Layout,
 		widget_id: WidgetID,
-		template_parameters: HashMap<Rc<str>, Rc<str>>,
+		template_parameters: TemplateParams,
 	) -> anyhow::Result<ParserData> {
 		let Some(template) = self.data.templates.get(template_name) else {
 			anyhow::bail!(
@@ -292,7 +313,7 @@ impl ParserState {
 		template_name: &str,
 		layout: &mut Layout,
 		widget_id: WidgetID,
-		template_parameters: HashMap<Rc<str>, Rc<str>>,
+		template_parameters: TemplateParams,
 	) -> anyhow::Result<()> {
 		let mut data_local = self.parse_template_only(doc_params, template_name, layout, widget_id, template_parameters)?;
 
@@ -303,7 +324,7 @@ impl ParserState {
 	pub(crate) fn context_menu_parse_cells(
 		&mut self,
 		template_name: &str,
-		template_params: &HashMap<Rc<str>, Rc<str>>,
+		template_params: &TemplateParams,
 	) -> anyhow::Result<Vec<context_menu::Cell>> {
 		let Some(template) = self.data.templates.get(template_name) else {
 			anyhow::bail!("no template named \"{template_name}\" found");
@@ -647,7 +668,7 @@ fn require_tag_by_name<'a>(node: &roxmltree::Node<'a, 'a>, name: &str) -> anyhow
 
 fn parse_widget_other_internal(
 	template: &Rc<Template>,
-	template_parameters: HashMap<Rc<str>, Rc<str>>,
+	template_parameters: TemplateParams,
 	file: &ParserFile,
 	ctx: &mut ParserContext,
 	parent_id: WidgetID,
@@ -685,10 +706,16 @@ fn parse_widget_other(
 		return Ok(()); // not critical
 	};
 
-	let template_parameters: HashMap<Rc<str>, Rc<str>> =
+	let template_params: HashMap<Rc<str>, Rc<str>> =
 		attribs.iter().map(|a| (a.attrib.clone(), a.value.clone())).collect();
 
-	parse_widget_other_internal(&template, template_parameters, file, ctx, parent_id)
+	parse_widget_other_internal(
+		&template,
+		TemplateParams::from_hashmap(template_params),
+		file,
+		ctx,
+		parent_id,
+	)
 }
 
 fn parse_tag_include(
@@ -788,7 +815,7 @@ fn parse_tag_var<'a>(ctx: &mut ParserContext, tag_name: &str, node: roxmltree::N
 	ctx.insert_var(key, value);
 }
 
-pub fn replace_vars(input: &str, vars: &HashMap<Rc<str>, Rc<str>>) -> Rc<str> {
+pub fn replace_vars(input: &str, vars: &TemplateParams) -> Rc<str> {
 	let re = regex::Regex::new(r"\$\{([^}]*)\}").unwrap();
 
 	/*if !vars.is_empty() {
@@ -798,7 +825,7 @@ pub fn replace_vars(input: &str, vars: &HashMap<Rc<str>, Rc<str>>) -> Rc<str> {
 	let out = re.replace_all(input, |captures: &regex::Captures| {
 		let input_var = &captures[1];
 
-		if let Some(replacement) = vars.get(input_var) {
+		if let Some(replacement) = vars.0.get(input_var) {
 			replacement.clone()
 		} else {
 			// failed to find var, return an empty string
@@ -811,12 +838,7 @@ pub fn replace_vars(input: &str, vars: &HashMap<Rc<str>, Rc<str>>) -> Rc<str> {
 
 #[allow(clippy::manual_strip)]
 #[allow(clippy::single_match_else)]
-fn process_attrib(
-	template_parameters: &HashMap<Rc<str>, Rc<str>>,
-	ctx: &ParserContext,
-	key: &str,
-	value: &str,
-) -> AttribPair {
+fn process_attrib(template_parameters: &TemplateParams, ctx: &ParserContext, key: &str, value: &str) -> AttribPair {
 	if value.starts_with('~') {
 		let name = &value[1..];
 
@@ -1299,7 +1321,7 @@ fn get_doc_from_asset_path(
 	let file = ParserFile {
 		path: asset_path.to_owned(),
 		document: document.clone(),
-		template_parameters: Default::default(),
+		template_parameters: TemplateParams::new(),
 	};
 
 	Ok((file, tag_layout.id()))

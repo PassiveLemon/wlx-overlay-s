@@ -1,4 +1,4 @@
-use std::{collections::HashMap, rc::Rc, time::Duration};
+use std::{rc::Rc, time::Duration};
 
 use crate::{
     app_misc,
@@ -20,7 +20,7 @@ use wgui::{
     event::{self, CallbackMetadata, EventListenerKind},
     layout::LayoutUpdateParams,
     log::LogErr,
-    parser::{Fetchable, ParseDocumentParams},
+    parser::{Fetchable, ParseDocumentParams, TemplateParams},
     renderer_vk::util,
     taffy::{self, prelude::length},
     widget::{EventResult, div::WidgetDiv, rectangle::WidgetRectangle},
@@ -108,34 +108,34 @@ pub(super) fn create_keyboard_panel(
             };
 
             // todo: make this easier to maintain somehow
-            let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-            params.insert(Rc::from("id"), my_id.clone());
-            params.insert(Rc::from("width"), Rc::from(key_width.to_string()));
-            params.insert(Rc::from("height"), Rc::from(key_height.to_string()));
+            let mut params = TemplateParams::new();
+            params.insert_rc("id", my_id.clone());
+            params.insert_rc("width", key_width.to_string().into());
+            params.insert_rc("height", key_height.to_string().into());
 
             let mut label = key.label.into_iter();
             label
                 .next()
-                .and_then(|s| params.insert("text".into(), s.into()));
+                .and_then(|s| params.insert_rc("text", s.into()));
 
             match key.cap_type {
                 KeyCapType::LetterAltGr => {
                     label
                         .next()
-                        .and_then(|s| params.insert("text_altgr".into(), s.into()));
+                        .and_then(|s| params.insert_rc("text_altgr", s.into()));
                 }
                 KeyCapType::Symbol => {
                     label
                         .next()
-                        .and_then(|s| params.insert("text_shift".into(), s.into()));
+                        .and_then(|s| params.insert_rc("text_shift", s.into()));
                 }
                 KeyCapType::SymbolAltGr => {
                     label
                         .next()
-                        .and_then(|s| params.insert("text_shift".into(), s.into()));
+                        .and_then(|s| params.insert_rc("text_shift", s.into()));
                     label
                         .next()
-                        .and_then(|s| params.insert("text_altgr".into(), s.into()));
+                        .and_then(|s| params.insert_rc("text_altgr", s.into()));
                 }
                 _ => {}
             }

@@ -1,9 +1,7 @@
-use std::collections::HashMap;
-
 use slotmap::Key;
 use wgui::{
     layout::Layout,
-    parser::{Fetchable, ParseDocumentParams, ParserState},
+    parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 };
 
 use crate::{
@@ -40,7 +38,7 @@ impl DeviceList {
                 layout.remove_children(devices_root);
 
                 for (i, device) in app.input_state.devices.iter().enumerate() {
-                    let mut params = HashMap::new();
+                    let mut params = TemplateParams::new();
 
                     if matches!(device.role, TrackedDeviceRole::None) {
                         continue;
@@ -48,7 +46,7 @@ impl DeviceList {
 
                     let template = device.role.as_ref();
 
-                    params.insert("idx".into(), i.to_string().into());
+                    params.insert_rc("idx", i.to_string().into());
                     parser_state.instantiate_template(
                         doc_params,
                         template,

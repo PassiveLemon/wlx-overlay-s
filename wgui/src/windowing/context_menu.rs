@@ -1,17 +1,15 @@
-use std::{collections::HashMap, rc::Rc};
-
-use glam::Vec2;
-
 use crate::{
 	assets::AssetPath,
 	components::{ComponentTrait, button::ComponentButton},
 	globals::WguiGlobals,
 	i18n::Translation,
 	layout::Layout,
-	parser::{self, Fetchable, ParserState},
+	parser::{self, Fetchable, ParserState, TemplateParams},
 	task::Tasks,
 	windowing::window::{WguiWindow, WguiWindowParams, WguiWindowParamsExtra, WguiWindowPlacement},
 };
+use glam::Vec2;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Cell {
@@ -25,7 +23,7 @@ pub enum Blueprint {
 	Cells(Vec<Cell>),
 	Template {
 		template_name: Rc<str>,
-		template_params: HashMap<Rc<str>, Rc<str>>,
+		template_params: TemplateParams,
 	},
 }
 
@@ -124,10 +122,10 @@ impl ContextMenu {
 		let id_buttons = inner_parser.get_widget_id("buttons")?;
 
 		for (idx, cell) in cells.iter().enumerate() {
-			let mut par = HashMap::new();
-			par.insert(Rc::from("text"), cell.title.generate(&mut globals.i18n()));
+			let mut par = TemplateParams::new();
+			par.insert_rc("text", cell.title.generate(&mut globals.i18n()));
 			if let Some(tooltip) = cell.tooltip.as_ref() {
-				par.insert(Rc::from("tooltip_str"), tooltip.generate(&mut globals.i18n()));
+				par.insert_rc("tooltip_str", tooltip.generate(&mut globals.i18n()));
 			}
 
 			let mut data_cell = inner_parser.parse_template_only(&doc_params, "Cell", layout, id_buttons, par)?;

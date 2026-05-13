@@ -1,16 +1,10 @@
-use std::{
-	cell::RefCell,
-	collections::{HashMap, VecDeque},
-	marker::PhantomData,
-	rc::Rc,
-};
-
+use std::{cell::RefCell, collections::VecDeque, marker::PhantomData, rc::Rc};
 use wgui::{
 	assets::AssetPath,
 	components::button::{ButtonClickCallback, ComponentButton},
 	globals::WguiGlobals,
 	layout::{WidgetID, WidgetPair},
-	parser::{Fetchable, ParseDocumentParams, ParserState},
+	parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 };
 use wlx_common::desktop_finder::DesktopEntry;
 
@@ -242,8 +236,8 @@ impl AppList {
 		let category_name = get_category_name(entry);
 		if category_name != self.prev_category_name {
 			self.prev_category_name = String::from(category_name);
-			let mut params = HashMap::<Rc<str>, Rc<str>>::new();
-			params.insert("text".into(), category_name.into());
+			let mut params = TemplateParams::new();
+			params.insert("text", category_name);
 
 			parser_state.realize_template(
 				doc_params,
@@ -255,11 +249,11 @@ impl AppList {
 		}
 
 		{
-			let mut params = HashMap::new();
+			let mut params = TemplateParams::new();
 
 			// entry icon
-			params.insert(
-				"src_ext".into(),
+			params.insert_rc(
+				"src_ext",
 				entry
 					.icon_path
 					.as_ref()
@@ -268,14 +262,14 @@ impl AppList {
 
 			// entry fallback (question mark) icon
 			params.insert(
-				"src".into(),
+				"src",
 				if entry.icon_path.is_none() {
-					"dashboard/terminal.svg".into()
+					"dashboard/terminal.svg"
 				} else {
-					"".into()
+					""
 				},
 			);
-			params.insert("name".into(), entry.app_name.clone());
+			params.insert("name", &entry.app_name);
 
 			let data = parser_state.realize_template(
 				doc_params,
