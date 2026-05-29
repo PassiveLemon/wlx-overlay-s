@@ -15,6 +15,7 @@ Glossary:
 - Display: A virtual monitor located in WayVR environment. It has a specific resolution and it contains virtual windows.
 - Set: A list of virtual overlays you can interact with
 - Watch: An overlay anchored to your left hand in which you can display a dashboard, see your current date and time or toggle your sets.
+- Skymap: An equirectangular skybox
 End of glossary.
 
 You will be given the input in the code blocks which needs to be translated to {TARGET_LANG} language. Write only the result in codeblocks, do not explain. Keep any newlines and other important formatting-required identifiers as-is, in the same state.

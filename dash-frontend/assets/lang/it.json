@@ -109,7 +109,19 @@
 		"LANGUAGE": "Lingua",
 		"REQUIRES_RESTART": "Richiede riavvio",
 		"GRID_OPACITY": "Opacità della griglia del pavimento",
-		"GRID_OPACITY_HELP": "Opacità della griglia del pavimento quando lo skybox è abilitato"
+		"GRID_OPACITY_HELP": "Opacità della griglia del pavimento quando lo skybox è abilitato",
+		"BROWSE_ONLINE_CATALOG": "Sfoglia catalogo online...",
+		"BROWSE_SKYMAPS": "Sfoglia skymap",
+		"COLOR_KEYING": "Keying del colore",
+		"NO_SKYMAPS_FOUND": "Nessuna skymap trovata",
+		"SELECT_VARIANT": "Seleziona variante",
+		"SHOW_WELCOME_SCREEN": "Mostra schermata di benvenuto",
+		"SKYBOX": "Skybox",
+		"SKYMAP_ALREADY_DOWNLOADED": "Questa skymap è già stata scaricata. Seleziona l'azione desiderata.",
+		"WATCH_VIEW_ANGLE": "Angoli di visualizzazione Watch",
+		"WATCH_VIEW_ANGLE_HELP": "Controlla come l'orologio sfuma",
+		"XR_CLICK_SENSITIVITY": "Sensibilità trigger XR",
+		"XR_CLICK_SENSITIVITY_HELP": "Valori di pressione e rilascio per i grilletti analogici"
 	},
 	"APPLICATION_LAUNCHER": "Lanciatore applicazioni",
 	"APPLICATION_STARTED": "Applicazione avviata",
@@ -158,5 +170,16 @@
 		"STOP": "Interrompi",
 		"FORCE_KILL": "Uccidi forzatamente"
 	},
-	"DEBUG_INFO": "Informazioni di debug"
+	"DEBUG_INFO": "Informazioni di debug",
+	"CREATION_DATE": "Data di creazione",
+	"DOWNLOADER": "Downloader",
+	"DOWNLOAD_AGAIN": "Scarica di nuovo",
+	"DOWNLOADING_FILE": "Download del file in corso...",
+	"GETTING_STARTED": "Inizio rapido",
+	"MODIFICATION_DATE": "Data di modifica",
+	"LOADING": "Caricamento...",
+	"APPLY": "Applica",
+	"RELOAD_FROM_DISK": "Ricarica da disco",
+	"TARGET_PATH": "Percorso di destinazione",
+	"VERSION": "Versione"
 }

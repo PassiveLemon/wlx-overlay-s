@@ -2,7 +2,6 @@ import { exit } from "process";
 import * as fsp from "fs/promises";
 import path from "path";
 import * as fs from "fs";
-import ollama from 'ollama'
 
 const model_name = process.env["MODEL"] as string;
 const template_name = process.env["TEMPLATE"] as string;
@@ -24,7 +23,8 @@ if (lang_path === undefined) {
 Try one of these:
 LANG_PATH=../../uidev/assets/lang/ ./run.sh
 LANG_PATH=../../dash-frontend/assets/lang/ ./run.sh
-LANG_PATH=../../wayvr/src/assets/lang/ ./run.sh`);
+LANG_PATH=../../wayvr/src/assets/lang/ ./run.sh`,
+	);
 	exit(-1);
 }
 
@@ -37,24 +37,28 @@ if (lang_path === undefined || !fs.existsSync(lang_path)) {
 const current_path = path.resolve(__dirname);
 const templates_path = path.resolve(__dirname + "/templates");
 
-async function loop_object(obj: any, initial_str: string, callback: (key: string, value: string) => Promise<void>) {
+async function loop_object(
+	obj: any,
+	initial_str: string,
+	callback: (key: string, value: string) => Promise<void>,
+) {
 	for (var key in obj) {
 		let full_key = initial_str + key;
 		if (typeof obj[key] === "object" && obj[key] !== null) {
-			await loop_object(obj[key], full_key + ".", callback)
+			await loop_object(obj[key], full_key + ".", callback);
 		} else if (obj.hasOwnProperty(key)) {
-			await callback(full_key, obj[key])
+			await callback(full_key, obj[key]);
 		}
 	}
 }
 
 function extract_backticks(str: string) {
 	const regex = /`([^`]+)`/g;
-	return str.match(regex)?.map(match => match.slice(1, -1).trim());
+	return str.match(regex)?.map((match) => match.slice(1, -1).trim());
 }
 
 function set_i18n_key(obj: any, key: string, value: string | undefined) {
-	const parts = key.split('.');
+	const parts = key.split(".");
 	let cur_level = obj;
 	for (let i = 0; i < parts.length - 1; i++) {
 		const part = parts[i]!;
@@ -67,7 +71,7 @@ function set_i18n_key(obj: any, key: string, value: string | undefined) {
 }
 
 function key_exists(obj: any, key: string) {
-	const parts = key.split('.');
+	const parts = key.split(".");
 	let level = obj;
 
 	for (let i = 0; i < parts.length; i++) {
@@ -79,7 +83,7 @@ function key_exists(obj: any, key: string) {
 	}
 
 	return true;
-};
+}
 
 interface Example {
 	key: string;
@@ -89,14 +93,24 @@ interface Example {
 
 interface Template {
 	full_name: string; // "Polish"
-	examples: Example[]
+	examples: Example[];
 }
 
-function gen_prompt(description: string, template: Template, key: string, english_translation: string) {
+function gen_prompt(
+	description: string,
+	template: Template,
+	key: string,
+	english_translation: string,
+) {
 	let num = 1;
 	for (const example of template.examples) {
 		description += "\nExample " + num + ":\n\n";
-		description += "Translate key `" + example.key + "` from English to " + template.full_name + ":\n\n";
+		description +=
+			"Translate key `" +
+			example.key +
+			"` from English to " +
+			template.full_name +
+			":\n\n";
 		description += "```\n";
 		description += example.en + "\n";
 		description += "```\n\n";
@@ -107,7 +121,12 @@ function gen_prompt(description: string, template: Template, key: string, englis
 		num += 1;
 	}
 	description += "\nEnd of examples.\n\n";
-	description += "Translate key `" + key + "` from English to " + template.full_name + ":\n\n";
+	description +=
+		"Translate key `" +
+		key +
+		"` from English to " +
+		template.full_name +
+		":\n\n";
 	description += "```\n";
 	description += english_translation + "\n";
 	description += "```\n";
@@ -115,24 +134,39 @@ function gen_prompt(description: string, template: Template, key: string, englis
 }
 
 async function run() {
-	const template = JSON.parse(await fsp.readFile(templates_path + "/" + template_name + ".json", "utf-8")) as Template;
+	const template = JSON.parse(
+		await fsp.readFile(templates_path + "/" + template_name + ".json", "utf-8"),
+	) as Template;
 
-	let description_txt = await fsp.readFile(current_path + "/description.txt", "utf-8");
-	description_txt = description_txt.replaceAll("{TARGET_LANG}", template.full_name);
+	let description_txt = await fsp.readFile(
+		current_path + "/description.txt",
+		"utf-8",
+	);
+	description_txt = description_txt.replaceAll(
+		"{TARGET_LANG}",
+		template.full_name,
+	);
 
-	const orig_english_json = JSON.parse(await fsp.readFile(lang_path + "/en.json") as any);
+	const orig_english_json = JSON.parse(
+		(await fsp.readFile(lang_path + "/en.json")) as any,
+	);
 
 	let orig_translated_json = {};
 	try {
-		orig_translated_json = JSON.parse((await fsp.readFile(lang_path + "/" + template_name + ".json")).toString());
-	}
-	catch (_e) { }
+		orig_translated_json = JSON.parse(
+			(
+				await fsp.readFile(lang_path + "/" + template_name + ".json")
+			).toString(),
+		);
+	} catch (_e) {}
 
 	let llm_translated_json = {};
 	const translated_json_path = lang_path + "/" + template_name + ".json";
 	if (await fsp.exists(translated_json_path)) {
 		console.log("Loading file", translated_json_path);
-		llm_translated_json = JSON.parse((await fsp.readFile(translated_json_path)).toString());
+		llm_translated_json = JSON.parse(
+			(await fsp.readFile(translated_json_path)).toString(),
+		);
 	}
 
 	let total_count = 0;
@@ -144,7 +178,10 @@ async function run() {
 		if (!key_exists(orig_english_json, key)) {
 			console.log("Removing key", key);
 			set_i18n_key(llm_translated_json, key, undefined);
-			fsp.writeFile(translated_json_path, JSON.stringify(llm_translated_json, undefined, 2));
+			fsp.writeFile(
+				translated_json_path,
+				JSON.stringify(llm_translated_json, undefined, "\t"),
+			);
 		}
 	});
 
@@ -159,25 +196,50 @@ async function run() {
 
 		console.log("Translating", key, "...");
 
-		const prompt = gen_prompt(description_txt, template, key, english_translation);
+		const prompt = gen_prompt(
+			description_txt,
+			template,
+			key,
+			english_translation,
+		);
 
-		const response = await ollama.chat({
-			model: model_name,
-			messages: [{ role: "user", content: prompt }],
-			options: {
+		const response = await fetch("http://localhost:8080/v1/chat/completions", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				model: model_name,
+				messages: [{ role: "user", content: prompt }],
+				chat_template_kwargs: {
+					enable_thinking: false,
+				},
 				seed: 12345,
-			}
-		})
+			}),
+		});
+		if (!response.ok) {
+			const errorBody = await response.text();
+			throw new Error("API error " + response.status + ": " + errorBody);
+		}
+		const json = (await response.json()) as any;
 
-		const msg = extract_backticks(response.message.content);
+		if (!json.choices || !json.choices[0] || !json.choices[0].message) {
+			console.log("Full response:", JSON.stringify(json, null, "\t"));
+			throw new Error("Unexpected response format: " + JSON.stringify(json));
+		}
+
+		const msg = extract_backticks(json.choices[0].message.content);
 		if (msg === undefined || msg[0] === undefined) {
-			throw new Error("backticks failed. Raw content: " + response.message.content);
+			throw new Error(
+				"backticks failed. Raw content: " + json.choices[0].message.content,
+			);
 		}
 
 		console.log(" >>>", msg);
 
 		set_i18n_key(llm_translated_json, key, msg[0]);
-		fsp.writeFile(translated_json_path, JSON.stringify(llm_translated_json, undefined, 2));
+		fsp.writeFile(
+			translated_json_path,
+			JSON.stringify(llm_translated_json, undefined, "\t"),
+		);
 	});
 
 	console.log("Translation", template_name, "finished");

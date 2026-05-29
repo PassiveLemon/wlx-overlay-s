@@ -84,7 +84,19 @@
 		"REQUIRES_RESTART": "Wymaga restartu",
 		"MISC": "Różne",
 		"GRID_OPACITY": "Przezroczystość siatki podłogowej",
-		"GRID_OPACITY_HELP": "Przezroczystość siatki podłogowej, gdy włączony jest skybox"
+		"GRID_OPACITY_HELP": "Przezroczystość siatki podłogowej, gdy włączony jest skybox",
+		"BROWSE_ONLINE_CATALOG": "Przeglądaj katalog online...",
+		"BROWSE_SKYMAPS": "Przeglądaj skymaps",
+		"COLOR_KEYING": "Kluczowanie kolorem",
+		"NO_SKYMAPS_FOUND": "Nie znaleziono skymap",
+		"SELECT_VARIANT": "Wybierz wariant",
+		"SHOW_WELCOME_SCREEN": "Pokaż ekran powitalny",
+		"SKYBOX": "Skymap",
+		"SKYMAP_ALREADY_DOWNLOADED": "Ta skymapa została już pobrana. Wybierz żądaną akcję.",
+		"WATCH_VIEW_ANGLE": "Kąty widzenia Watch",
+		"WATCH_VIEW_ANGLE_HELP": "Kontroluj, jak zegarek zanika",
+		"XR_CLICK_SENSITIVITY": "Czułość spustu XR",
+		"XR_CLICK_SENSITIVITY_HELP": "Wartości naciśnięcia i zwolnienia dla spustów analogowych"
 	},
 	"APPLICATION_LAUNCHER": "Uruchamiacz aplikacji",
 	"APPLICATIONS": "Aplikacje",
@@ -159,5 +171,16 @@
 		"STOP": "Zatrzymaj",
 		"FORCE_KILL": "Wymuś zakończenie"
 	},
-	"DEBUG_INFO": "Informacje debugowania"
+	"DEBUG_INFO": "Informacje debugowania",
+	"CREATION_DATE": "Data utworzenia",
+	"DOWNLOADER": "Pobieranie",
+	"DOWNLOAD_AGAIN": "Pobierz ponownie",
+	"DOWNLOADING_FILE": "Pobieranie pliku...",
+	"GETTING_STARTED": "Rozpoczęcie",
+	"MODIFICATION_DATE": "Data modyfikacji",
+	"LOADING": "Ładowanie...",
+	"APPLY": "Zastosuj",
+	"RELOAD_FROM_DISK": "Przeładuj z dysku",
+	"TARGET_PATH": "Ścieżka docelowa",
+	"VERSION": "Wersja"
 }

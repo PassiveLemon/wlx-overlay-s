@@ -88,7 +88,19 @@
 		"LANGUAGE": "Sprache",
 		"REQUIRES_RESTART": "Erfordert Neustart",
 		"GRID_OPACITY": "Bodenraster-Undurchsichtigkeit",
-		"GRID_OPACITY_HELP": "Undurchsichtigkeit des Bodenrasters, wenn der Skybox aktiviert ist"
+		"GRID_OPACITY_HELP": "Undurchsichtigkeit des Bodenrasters, wenn der Skybox aktiviert ist",
+		"BROWSE_ONLINE_CATALOG": "Online-Katalog durchsuchen...",
+		"BROWSE_SKYMAPS": "Skymaps durchsuchen",
+		"COLOR_KEYING": "Farbschlüsselung",
+		"NO_SKYMAPS_FOUND": "Keine Skymaps gefunden",
+		"SELECT_VARIANT": "Variante auswählen",
+		"SHOW_WELCOME_SCREEN": "Begrüßungsbildschirm anzeigen",
+		"SKYBOX": "Skybox",
+		"SKYMAP_ALREADY_DOWNLOADED": "Diese Skymap wurde bereits heruntergeladen. Wählen Sie die gewünschte Aktion aus.",
+		"WATCH_VIEW_ANGLE": "Betrachtungswinkel der Watch",
+		"WATCH_VIEW_ANGLE_HELP": "Steuerung, wie die Watch ausgeblendet wird",
+		"XR_CLICK_SENSITIVITY": "XR-Trigger-Empfindlichkeit",
+		"XR_CLICK_SENSITIVITY_HELP": "Drücken- und Loslass-Werte für analoge Trigger"
 	},
 	"HELLO": "Hallo!",
 	"AUDIO": {
@@ -158,5 +170,16 @@
 		"STOP": "Stopp",
 		"FORCE_KILL": "Erzwinge Beenden"
 	},
-	"DEBUG_INFO": "Debug-Informationen"
+	"DEBUG_INFO": "Debug-Informationen",
+	"CREATION_DATE": "Erstellungsdatum",
+	"DOWNLOADER": "Downloader",
+	"DOWNLOAD_AGAIN": "Erneut herunterladen",
+	"DOWNLOADING_FILE": "Datei wird heruntergeladen...",
+	"GETTING_STARTED": "Erste Schritte",
+	"MODIFICATION_DATE": "Änderungsdatum",
+	"LOADING": "Laden...",
+	"APPLY": "Anwenden",
+	"RELOAD_FROM_DISK": "Von Festplatte neu laden",
+	"TARGET_PATH": "Zielpfad",
+	"VERSION": "Version"
 }

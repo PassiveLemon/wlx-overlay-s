@@ -109,7 +109,19 @@
 		"LANGUAGE": "语言",
 		"REQUIRES_RESTART": "需要重启",
 		"GRID_OPACITY": "地面网格不透明度",
-		"GRID_OPACITY_HELP": "启用天空盒时地板网格的不透明度"
+		"GRID_OPACITY_HELP": "启用天空盒时地板网格的不透明度",
+		"BROWSE_ONLINE_CATALOG": "浏览在线目录...",
+		"BROWSE_SKYMAPS": "浏览 Skymaps",
+		"COLOR_KEYING": "颜色键控",
+		"NO_SKYMAPS_FOUND": "未找到 Skymaps",
+		"SELECT_VARIANT": "选择变体",
+		"SHOW_WELCOME_SCREEN": "显示欢迎屏幕",
+		"SKYBOX": "Skybox",
+		"SKYMAP_ALREADY_DOWNLOADED": "此 Skymap 已下载。请选择所需操作。",
+		"WATCH_VIEW_ANGLE": "Watch 视角角度",
+		"WATCH_VIEW_ANGLE_HELP": "控制表盘的淡出方式",
+		"XR_CLICK_SENSITIVITY": "XR 扳机灵敏度",
+		"XR_CLICK_SENSITIVITY_HELP": "模拟触发器的按下与释放值"
 	},
 	"APPLICATION_LAUNCHER": "应用启动器",
 	"APPLICATION_STARTED": "应用已启动",
@@ -158,5 +170,16 @@
 		"STOP": "停止",
 		"FORCE_KILL": "强制关闭"
 	},
-	"DEBUG_INFO": "调试信息"
+	"DEBUG_INFO": "调试信息",
+	"CREATION_DATE": "创建日期",
+	"DOWNLOADER": "下载器",
+	"DOWNLOAD_AGAIN": "重新下载",
+	"DOWNLOADING_FILE": "正在下载文件...",
+	"GETTING_STARTED": "入门指南",
+	"MODIFICATION_DATE": "修改日期",
+	"LOADING": "正在加载...",
+	"APPLY": "应用",
+	"RELOAD_FROM_DISK": "从磁盘重新加载",
+	"TARGET_PATH": "目标路径",
+	"VERSION": "版本"
 }

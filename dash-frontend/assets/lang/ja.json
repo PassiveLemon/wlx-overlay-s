@@ -88,7 +88,19 @@
 		"LANGUAGE": "言語",
 		"REQUIRES_RESTART": "再起動が必要です",
 		"GRID_OPACITY": "フロアグリッドの不透明度",
-		"GRID_OPACITY_HELP": "スカイボックスが有効なときの床グリッドの不透明度"
+		"GRID_OPACITY_HELP": "スカイボックスが有効なときの床グリッドの不透明度",
+		"BROWSE_ONLINE_CATALOG": "オンラインカタログを閲覧...",
+		"BROWSE_SKYMAPS": "Skymapを閲覧",
+		"COLOR_KEYING": "カラーキーイング",
+		"NO_SKYMAPS_FOUND": "スカイマップが見つかりません",
+		"SELECT_VARIANT": "バリアントを選択",
+		"SHOW_WELCOME_SCREEN": "ウェルカムスクリーンを表示する",
+		"SKYBOX": "スカイボックス",
+		"SKYMAP_ALREADY_DOWNLOADED": "このスカイマップは既にダウンロードされています。希望のアクションを選択してください。",
+		"WATCH_VIEW_ANGLE": "Watchの表示角度",
+		"WATCH_VIEW_ANGLE_HELP": "ウォッチのフェードアウト具合を調整する",
+		"XR_CLICK_SENSITIVITY": "XRトリガー感度",
+		"XR_CLICK_SENSITIVITY_HELP": "アナログトリガーの押し込みと離しの値"
 	},
 	"HELLO": "こんにちは！",
 	"AUDIO": {
@@ -158,5 +170,16 @@
 		"STOP": "停止",
 		"FORCE_KILL": "強制終了"
 	},
-	"DEBUG_INFO": "デバッグ情報"
+	"DEBUG_INFO": "デバッグ情報",
+	"CREATION_DATE": "作成日",
+	"DOWNLOADER": "ダウンローダー",
+	"DOWNLOAD_AGAIN": "再ダウンロード",
+	"DOWNLOADING_FILE": "ファイルをダウンロード中...",
+	"GETTING_STARTED": "はじめに",
+	"MODIFICATION_DATE": "更新日",
+	"LOADING": "読み込み中...",
+	"APPLY": "適用",
+	"RELOAD_FROM_DISK": "ディスクからリロード",
+	"TARGET_PATH": "ターゲットパス",
+	"VERSION": "バージョン"
 }
