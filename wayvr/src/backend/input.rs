@@ -125,10 +125,8 @@ impl InputState {
                             hand.interaction.mode = PointerMode::Left;
                         }
                     }
-                    PointerMode::Right => {
-                        if !right_click_orientation {
-                            hand.interaction.mode = PointerMode::Left;
-                        }
+                    PointerMode::Right if !right_click_orientation => {
+                        hand.interaction.mode = PointerMode::Left;
                     }
                     _ => {}
                 }

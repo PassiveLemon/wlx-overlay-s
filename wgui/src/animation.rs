@@ -49,6 +49,7 @@ pub struct CallbackData<'a> {
 	pub widget_id: WidgetID,
 	pub widget_boundary: Boundary,
 	pub pos: f32, // 0.0 (start of animation) - 1.0 (end of animation)
+	pub stop_me: &'a mut bool,
 }
 
 pub type AnimationCallback = Box<dyn Fn(&mut CallbackDataCommon, &mut CallbackData)>;
@@ -93,13 +94,16 @@ impl Animation {
 		}
 	}
 
-	fn call(&self, state: &LayoutState, alterables: &mut EventAlterables, pos: f32) {
+	/// @returns false if it wants to be stopped
+	#[must_use]
+	fn call(&self, state: &LayoutState, alterables: &mut EventAlterables, pos: f32) -> bool {
 		let Some(widget) = state.widgets.get(self.target_widget).cloned() else {
-			return; // failed
+			return false; // failed
 		};
 
 		let mut widget_state = widget.state();
 		let (data, obj) = widget_state.get_data_obj_mut();
+		let mut stop_me = false;
 
 		let data = &mut CallbackData {
 			widget_id: self.target_widget,
@@ -107,11 +111,14 @@ impl Animation {
 			obj,
 			data,
 			pos,
+			stop_me: &mut stop_me,
 		};
 
 		let common = &mut CallbackDataCommon { state, alterables };
 
 		(self.callback)(common, data);
+
+		!stop_me
 	}
 }
 
@@ -135,7 +142,7 @@ impl Animations {
 			anim.pos = pos;
 
 			if anim.last_tick {
-				anim.call(state, alterables, 1.0);
+				let _ = anim.call(state, alterables, 1.0);
 				alterables.needs_redraw = true;
 			} else {
 				anim.ticks_remaining -= 1;
@@ -148,7 +155,9 @@ impl Animations {
 	pub fn process(&mut self, state: &LayoutState, alterables: &mut EventAlterables, alpha: f32) {
 		for anim in &mut self.running_animations {
 			let pos = anim.pos_prev.lerp(anim.pos, alpha);
-			anim.call(state, alterables, pos);
+			if !anim.call(state, alterables, pos) {
+				anim.ticks_remaining = 0;
+			}
 		}
 	}
 

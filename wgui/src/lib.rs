@@ -41,8 +41,12 @@ pub mod sound;
 pub mod stack;
 pub mod task;
 pub mod theme;
+pub mod time;
 pub mod widget;
 pub mod windowing;
+
+#[cfg(feature = "video")]
+pub mod video_dec;
 
 // re-exported libs
 pub use cosmic_text;

@@ -30,6 +30,8 @@ pub struct TabWelcome<T> {
 	current_page: u8,
 	id_pips: WidgetID,
 	id_content: WidgetID,
+
+	state_tab: Option<ParserState>,
 }
 
 const PAGE_COUNT: u8 = 5; // 0-4 inclusive
@@ -94,6 +96,7 @@ impl<T> TabWelcome<T> {
 			id_pips,
 			id_content,
 			tasks,
+			state_tab: None,
 		})
 	}
 
@@ -120,7 +123,7 @@ impl<T> TabWelcome<T> {
 
 		let globals = layout.state.globals.clone();
 
-		let _ = wgui::parser::parse_from_assets(
+		self.state_tab = Some(wgui::parser::parse_from_assets(
 			&ParseDocumentParams {
 				globals,
 				path: AssetPath::BuiltIn(&format!("gui/tab/welcome_page_{}.xml", self.current_page)),
@@ -128,7 +131,7 @@ impl<T> TabWelcome<T> {
 			},
 			layout,
 			self.id_content,
-		)?;
+		)?);
 
 		Ok(())
 	}

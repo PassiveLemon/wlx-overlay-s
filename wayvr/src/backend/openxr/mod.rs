@@ -519,7 +519,7 @@ pub fn openxr_run(
         let watch = overlays.mut_by_id(watch_id).unwrap(); // want panic
 
         if let Some(state) = watch.config.active_state.as_mut() {
-            state.transform = watch_transform
+            state.transform = watch_transform;
         }
         if !app.session.config.enable_watch {
             watch.config.deactivate();

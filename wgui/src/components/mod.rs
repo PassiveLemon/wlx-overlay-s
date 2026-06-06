@@ -18,6 +18,9 @@ pub mod slider;
 pub mod tabs;
 pub mod tooltip;
 
+#[cfg(feature = "video")]
+pub mod video;
+
 pub struct RefreshData<'a> {
 	pub layout: &'a mut Layout,
 }

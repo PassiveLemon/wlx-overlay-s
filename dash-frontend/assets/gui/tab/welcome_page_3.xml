@@ -1,5 +1,19 @@
 <layout>
+  <include src_builtin="welcome_common.xml"/>
+    
   <elements>
-    <label text="Page 3" weight="bold" size="50"/>
+    <Video macro="video_overlay_component" src_builtin="video/onboarding_laser_colors.ivf">
+      <div macro="video_overlay_content">
+        <PageTitle icon="dashboard/click.svg" title="Laser Colors"/>
+        <div position="relative" flex_direction="row" gap="16" margin="16" align_self="end" justify_self="end" align_items="center">
+          <rectangle flex_direction="column" gap="8" padding="8" round="4" border_color="~color_accent" border="2" >
+            <label size="16" weight="bold" color="#00FFFF" text="— Regular Mode: Blue laser"/>
+            <label size="16" weight="bold" color="#FFAA00" text="— Right-click Mode: Orange laser" />
+            <label size="16" weight="bold" color="#FF88FF" text="— Middle-click Mode: Purple laser" />
+          </rectangle>
+          <label wrap="1" size="18" width="450" weight="bold" shadow="#000000" text="Much of the functionality in WayVR depends on what color of laser is used to interact with a UI element. You don't need to press these buttons, just touch them!"/>
+        </div>
+      </div>
+    </Video>
   </elements>
 </layout>

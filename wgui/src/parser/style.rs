@@ -233,34 +233,51 @@ pub fn parse_style(ctx: &ParserContext<'_>, attribs: &[AttribPair], tag_name: &s
 					ctx.print_invalid_attrib(tag_name, key, value);
 				}
 			},
+			"aspect_ratio" => {
+				if let Some(aspect) = ctx.parse_val(tag_name, key, value) {
+					style.aspect_ratio = Some(aspect);
+				}
+			}
 			"min_width" => {
 				if let Some(dim) = ctx.parse_size_unit(tag_name, key, value) {
 					style.min_size.width = dim;
+				} else if ParserContext::parse_auto(value) {
+					style.min_size.width = taffy::prelude::auto();
 				}
 			}
 			"min_height" => {
 				if let Some(dim) = ctx.parse_size_unit(tag_name, key, value) {
 					style.min_size.height = dim;
+				} else if ParserContext::parse_auto(value) {
+					style.min_size.height = taffy::prelude::auto();
 				}
 			}
 			"max_width" => {
 				if let Some(dim) = ctx.parse_size_unit(tag_name, key, value) {
 					style.max_size.width = dim;
+				} else if ParserContext::parse_auto(value) {
+					style.max_size.width = taffy::prelude::auto();
 				}
 			}
 			"max_height" => {
 				if let Some(dim) = ctx.parse_size_unit(tag_name, key, value) {
 					style.max_size.height = dim;
+				} else if ParserContext::parse_auto(value) {
+					style.max_size.height = taffy::prelude::auto();
 				}
 			}
 			"width" => {
 				if let Some(dim) = ctx.parse_size_unit(tag_name, key, value) {
 					style.size.width = dim;
+				} else if ParserContext::parse_auto(value) {
+					style.size.width = taffy::prelude::auto();
 				}
 			}
 			"height" => {
 				if let Some(dim) = ctx.parse_size_unit(tag_name, key, value) {
 					style.size.height = dim;
+				} else if ParserContext::parse_auto(value) {
+					style.size.height = taffy::prelude::auto();
 				}
 			}
 			"gap" => {

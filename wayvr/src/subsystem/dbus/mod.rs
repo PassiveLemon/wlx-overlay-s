@@ -45,7 +45,7 @@ impl DbusConnector {
         let proxy = connection.with_proxy(
             "org.freedesktop.DBus",
             "/org/freedesktop/DBus",
-            Duration::from_millis(5000),
+            Duration::from_secs(5),
         );
         let result: Result<(), dbus::Error> = proxy.method_call(
             "org.freedesktop.DBus.Monitoring",

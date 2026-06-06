@@ -11,6 +11,7 @@ repository = "https://github.com/wlx-team/wayvr"
 anyhow.workspace = true
 cosmic-text = "0.15.0"
 etagere = "0.2.15"
+flate2 = "1.1.5"
 glam.workspace = true
 image = { version = "0.25.9", default-features = false, features = [
   "gif",
@@ -26,6 +27,7 @@ parking_lot = "0.12.5"
 regex.workspace = true
 resvg = { version = "0.45.1", default-features = false }
 roxmltree = "0.21.1"
+rust-embed.workspace = true
 rustc-hash = "2.1.1"
 serde_json.workspace = true
 slotmap.workspace = true
@@ -33,5 +35,11 @@ smallvec = "1.15.1"
 taffy = "0.9.2"
 vulkano.workspace = true
 vulkano-shaders.workspace = true
-rust-embed.workspace = true
-flate2 = "1.1.5"
+
+# `video` wgui feature
+bytes = { workspace = true, optional = true }
+dav1d-sys = { git = "https://github.com/rust-av/dav1d-rs.git", rev = "03477a36c3de4f2aacbab81a8951150ffdb9c4c3", optional = true }
+
+[features]
+default = ["video"]
+video = ["dep:bytes", "dep:dav1d-sys"]

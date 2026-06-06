@@ -1,5 +1,15 @@
 <layout>
+  <include src_builtin="welcome_common.xml"/>
+  
   <elements>
-    <label text="Page 1"/>
+    <rectangle color="#103142" width="100%" height="100%" position="absolute"/>
+    <Video macro="video_overlay_component" src_builtin="video/onboarding_watch.ivf" aspect_ratio="1.0">
+      <div macro="video_overlay_content">
+        <PageTitle icon="dashboard/watch.svg" title="Watch"/>
+        <div position="relative" align_self="end" padding="16">
+          <TextDesc text="Look at your left wrist. That's your watch."/>
+        </div>
+      </div>
+    </Video>
   </elements>
 </layout>

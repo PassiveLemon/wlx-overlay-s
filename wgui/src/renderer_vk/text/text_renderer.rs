@@ -61,9 +61,7 @@ impl TextRenderer {
 
 		let resolution = viewport.resolution();
 		let mut glyphs_to_render = Vec::new();
-		let mut pending_glyph_uploads = Vec::new();
-		let mut missing_glyphs = HashSet::new();
-		let mut unavailable_glyphs = HashSet::new();
+		let mut glyphs_todo = GlyphsTodo::default();
 
 		for text_area in text_areas {
 			let bounds_min_x = text_area.bounds.left.max(0);
@@ -101,13 +99,13 @@ impl TextRenderer {
 					.unwrap_or(text_area.default_color);
 
 				if queue_missing_glyph_upload(
-					atlas,
-					font_system,
-					cache,
-					cache_key,
-					&mut missing_glyphs,
-					&mut unavailable_glyphs,
-					&mut pending_glyph_uploads,
+					&mut QueueMissingGlyphUploadParams {
+						atlas,
+						font_system,
+						cache,
+						cache_key,
+						glyphs_todo: &mut glyphs_todo,
+					},
 					|_cache, _font_system| -> Option<GetGlyphImageResult> {
 						if cached_width == 0 || cached_height == 0 {
 							return None;
@@ -180,13 +178,13 @@ impl TextRenderer {
 					let cache_key = GlyphonCacheKey::Text(physical_glyph.cache_key);
 
 					if queue_missing_glyph_upload(
-						atlas,
-						font_system,
-						cache,
-						cache_key,
-						&mut missing_glyphs,
-						&mut unavailable_glyphs,
-						&mut pending_glyph_uploads,
+						&mut QueueMissingGlyphUploadParams {
+							atlas,
+							font_system,
+							cache,
+							cache_key,
+							glyphs_todo: &mut glyphs_todo,
+						},
 						|cache, font_system| -> Option<GetGlyphImageResult> {
 							let image = cache.get_image_uncached(font_system, physical_glyph.cache_key)?;
 
@@ -229,7 +227,7 @@ impl TextRenderer {
 			}
 		}
 
-		upload_missing_glyphs(atlas, font_system, cache, pending_glyph_uploads)?;
+		upload_missing_glyphs(atlas, font_system, cache, glyphs_todo.pending_uploads)?;
 
 		for glyph in &glyphs_to_render {
 			if let Some(glyph_to_render) = prepare_glyph(&mut PrepareGlyphParams {
@@ -349,31 +347,43 @@ struct PrepareGlyphParams<'a> {
 	model_buffer: &'a mut ModelBuffer,
 }
 
-fn queue_missing_glyph_upload(
-	atlas: &mut TextAtlas,
-	font_system: &mut FontSystem,
-	cache: &mut SwashCache,
+#[derive(Default)]
+struct GlyphsTodo {
+	pending_uploads: Vec<PendingGlyphUpload>,
+	missing: HashSet<GlyphonCacheKey>,
+	unavailable: HashSet<GlyphonCacheKey>,
+}
+
+struct QueueMissingGlyphUploadParams<'a> {
+	atlas: &'a mut TextAtlas,
+	font_system: &'a mut FontSystem,
+	cache: &'a mut SwashCache,
 	cache_key: GlyphonCacheKey,
-	missing_glyphs: &mut HashSet<GlyphonCacheKey>,
-	unavailable_glyphs: &mut HashSet<GlyphonCacheKey>,
-	pending_glyph_uploads: &mut Vec<PendingGlyphUpload>,
+	glyphs_todo: &'a mut GlyphsTodo,
+}
+
+fn queue_missing_glyph_upload(
+	par: &mut QueueMissingGlyphUploadParams,
 	get_glyph_image: impl FnOnce(&mut SwashCache, &mut FontSystem) -> Option<GetGlyphImageResult>,
 ) -> bool {
-	if mark_glyph_in_use_if_cached(atlas, cache_key) {
+	if mark_glyph_in_use_if_cached(par.atlas, par.cache_key) {
 		return true;
 	}
 
-	if unavailable_glyphs.contains(&cache_key) {
+	if par.glyphs_todo.unavailable.contains(&par.cache_key) {
 		return false;
 	}
 
-	if missing_glyphs.insert(cache_key) {
-		let Some(image) = get_glyph_image(cache, font_system) else {
-			unavailable_glyphs.insert(cache_key);
+	if par.glyphs_todo.missing.insert(par.cache_key) {
+		let Some(image) = get_glyph_image(par.cache, par.font_system) else {
+			par.glyphs_todo.unavailable.insert(par.cache_key);
 			return false;
 		};
 
-		pending_glyph_uploads.push(PendingGlyphUpload { cache_key, image });
+		par.glyphs_todo.pending_uploads.push(PendingGlyphUpload {
+			cache_key: par.cache_key,
+			image,
+		});
 	}
 
 	true
@@ -422,6 +432,7 @@ fn upload_missing_glyphs(
 			for (upload_index, upload) in rasterized_uploads.iter().enumerate() {
 				let content_type = upload.image.content_type;
 
+				#[allow(clippy::never_loop)]
 				let allocation = loop {
 					if let Some(allocation) = {
 						let inner = atlas.inner_for_content_mut(content_type);

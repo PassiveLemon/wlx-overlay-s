@@ -43,8 +43,8 @@ vulkano.workspace = true
 vulkano-shaders.workspace = true
 xdg.workspace = true
 
-ash = "^0.38.0"  # must match vulkano
-bytes = { version = "1.11.1" }
+ash = "^0.38.0" # must match vulkano
+bytes = { workspace = true }
 chrono = { version = "0.4.42", features = ["unstable-locales"] }
 chrono-tz = "0.10.4"
 config = "0.15.19"
@@ -90,7 +90,7 @@ winit = { version = "0.30.12", optional = true }
 xcb = { version = "1.6.0", features = [
   "as-raw-xcb-connection",
 ], optional = true }
-xkbcommon = { version = "0.8.0" }  # 0.9.0 breaks keymap import on some distros
+xkbcommon = { version = "0.8.0" } # 0.9.0 breaks keymap import on some distros
 
 [build-dependencies]
 regex.workspace = true

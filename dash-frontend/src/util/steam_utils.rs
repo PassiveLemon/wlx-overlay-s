@@ -56,6 +56,8 @@ fn vdf_parse_libraryfolders<'a>(vdf_root: &'a Vdf<'a>) -> Option<Vec<AppEntry>> 
 	let mut res = Vec::<AppEntry>::new();
 
 	let mut num = 0;
+
+	#[allow(clippy::while_let_loop)]
 	loop {
 		let Some(library_folder) = get_obj_first(obj_libraryfolders, format!("{}", num).as_str()) else {
 			// no more libraries to find
@@ -293,7 +295,7 @@ impl SteamUtils {
 				games.sort_by(|a, b| b.name.cmp(&a.name));
 			}
 			GameSortMethod::PlayDateDesc => {
-				games.sort_by(|a, b| b.last_played.cmp(&a.last_played));
+				games.sort_by_key(|b| std::cmp::Reverse(b.last_played));
 			}
 		}
 

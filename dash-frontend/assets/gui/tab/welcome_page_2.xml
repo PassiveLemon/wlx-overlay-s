@@ -1,5 +1,14 @@
 <layout>
+  <include src_builtin="welcome_common.xml"/>
+  
   <elements>
-    <label text="Page 2" weight="bold" size="20"/>
+    <Video macro="video_overlay_component" src_builtin="video/onboarding_double_press.ivf">
+      <div macro="video_overlay_content">
+        <PageTitle icon="dashboard/panorama.svg" title="Working Set"/>
+        <div position="relative" align_self="end" padding="16">
+          <TextDesc text="Double-press B (on Index) or Y (on Meta) to toggle the visibility of your workspace. Try it now."/>
+        </div>
+      </div>
+    </Video>
   </elements>
 </layout>

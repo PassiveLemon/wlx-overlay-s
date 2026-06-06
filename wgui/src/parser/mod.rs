@@ -6,6 +6,10 @@ mod component_editbox;
 mod component_radio_group;
 mod component_slider;
 mod component_tabs;
+
+#[cfg(feature = "video")]
+mod component_video;
+
 mod helpers;
 mod style;
 mod widget_div;
@@ -582,6 +586,10 @@ impl ParserContext<'_> {
 		Some(val / 100.0)
 	}
 
+	pub fn parse_auto(value: &str) -> bool {
+		value.contains("auto")
+	}
+
 	fn parse_size_unit<T>(&self, tag_name: &str, key: &str, value: &str) -> Option<T>
 	where
 		T: taffy::prelude::FromPercent + taffy::prelude::FromLength,
@@ -1081,6 +1089,14 @@ fn parse_child<'a>(
 		}
 		"Button" => {
 			new_widget_id = Some(parse_component_button(
+				file, ctx, child_node, parent_id, &attribs, tag_name,
+			)?);
+		}
+		#[cfg(feature = "video")]
+		"Video" => {
+			use crate::parser::component_video::parse_component_video;
+
+			new_widget_id = Some(parse_component_video(
 				file, ctx, child_node, parent_id, &attribs, tag_name,
 			)?);
 		}

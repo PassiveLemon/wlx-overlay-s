@@ -114,7 +114,7 @@ impl WGfxExtras {
                     | MemoryTypeFilter::HOST_SEQUENTIAL_WRITE,
                 ..Default::default()
             },
-            vertices.into_iter(),
+            vertices,
         )?;
 
         let mut cmd_xfer = gfx.create_xfer_command_buffer(CommandBufferUsage::OneTimeSubmit)?;

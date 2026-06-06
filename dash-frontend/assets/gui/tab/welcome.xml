@@ -6,7 +6,7 @@
   <elements>
     <div flex_direction="column" flex_grow="1" gap="16" align_items="center" overflow_y="hidden">
       <!-- Content -->
-      <div id="content" flex_direction="column" flex_grow="1" align_items="center" justify_content="center" gap="16" overflow_y="scroll">
+      <div id="content" flex_direction="column" flex_grow="1" align_items="center" justify_content="center" gap="16" overflow_y="scroll" width="100%">
         <!-- filled-in at runtime -->
       </div>
       <!-- Page buttons -->
