@@ -449,18 +449,19 @@ impl<T> OverlayWindowManager<T> {
             app.session.config.sets.push(serialized);
         }
 
-        // global overlays; watch, toast
-        for oid in &[self.watch_id] {
-            let Some(o) = self.get_by_id(*oid) else {
-                break;
-            };
-            let Some(state) = o.config.active_state.clone() else {
-                break;
-            };
-            app.session
-                .config
-                .global_set
-                .insert(o.config.name.clone(), state.clone());
+        // global overlays
+        for o in self.overlays.values() {
+            if o.config.global {
+                if let Some(state) = &o.config.active_state {
+                    app.session.config.global_set.insert(o.config.name.clone(), state.clone());
+                }
+            }
+        }
+        for (name, state) in &self.global_set.hidden_overlays {
+            app.session.config.global_set.insert(name.clone(), state.clone());
+        }
+        for (name, state) in &self.global_set.inactive_overlays {
+            app.session.config.global_set.insert(name.clone(), state.clone());
         }
 
         // BackendAttrib
