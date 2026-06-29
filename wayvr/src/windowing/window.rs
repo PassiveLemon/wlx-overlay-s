@@ -222,20 +222,20 @@ impl OverlayWindowConfig {
             .saved_transform
             .unwrap_or(self.default_state.transform);
 
-        let (parent_transform, align_to_hmd) = match state.positioning {
-            Positioning::Floating | Positioning::FollowHead { .. } => (app.input_state.hmd, false),
-            Positioning::FollowHand {
-                hand, align_to_hmd, ..
-            } => (app.input_state.pointers[hand as usize].pose, align_to_hmd),
-            Positioning::Anchored => (app.anchor, false),
-            Positioning::Static => {
-                if hard_reset {
-                    (app.input_state.hmd, false)
-                } else {
-                    return;
-                }
+    let (parent_transform, align_to_hmd) = match state.positioning {
+        Positioning::Floating | Positioning::FollowHead { .. } => (app.input_state.hmd, false),
+        Positioning::FollowHand {
+            hand, align_to_hmd, ..
+        } => (app.input_state.pointers[hand as usize].pose, align_to_hmd),
+        Positioning::Anchored => (app.anchor, false),
+        Positioning::Static => {
+            if hard_reset {
+                (app.input_state.hmd, false)
+            } else {
+                (Affine3A::IDENTITY, false)
             }
-        };
+        }
+    };
 
         if hard_reset {
             state.saved_transform = None;
@@ -295,7 +295,7 @@ pub fn save_transform(state: &mut OverlayWindowState, app: &mut AppState) {
         Positioning::FollowHead { .. } => app.input_state.hmd,
         Positioning::FollowHand { hand, .. } => app.input_state.pointers[hand as usize].pose,
         Positioning::Anchored => snap_upright(app.anchor, Vec3A::Y),
-        Positioning::Static => return,
+        Positioning::Static => Affine3A::IDENTITY,
     };
 
     state.saved_transform = Some(parent_transform.inverse() * state.transform);
