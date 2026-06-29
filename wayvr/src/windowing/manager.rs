@@ -585,6 +585,19 @@ impl<T> OverlayWindowManager<T> {
     pub fn set_edit_mode(&mut self, enabled: bool, app: &mut AppState) -> anyhow::Result<()> {
         let changed = enabled != self.edit_mode;
         self.edit_mode = enabled;
+
+        if changed && let Some(watch) = self.mut_by_id(self.watch_id) {
+            watch
+                .config
+                .active_state
+                .iter_mut()
+                .for_each(|f| f.grabbable = enabled);
+            watch
+                .config
+                .backend
+                .notify(app, OverlayEventData::EditModeChanged(enabled))?;
+        }
+
         if !enabled {
             for o in self.overlays.values_mut() {
                 self.wrappers.unwrap_edit_mode(&mut o.config, app)?;
@@ -596,17 +609,6 @@ impl<T> OverlayWindowManager<T> {
                     log::error!("Could not save state: {e:?}");
                 }
             }
-        }
-        if changed && let Some(watch) = self.mut_by_id(self.watch_id) {
-            watch
-                .config
-                .active_state
-                .iter_mut()
-                .for_each(|f| f.grabbable = enabled);
-            watch
-                .config
-                .backend
-                .notify(app, OverlayEventData::EditModeChanged(enabled))?;
         }
         Ok(())
     }
