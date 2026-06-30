@@ -17,6 +17,15 @@ pub enum TabType {
 	Welcome,
 }
 
+impl TabType {
+	pub fn get_preferred_padding(&self) -> f32 {
+		match self {
+			TabType::Welcome => 0.0,
+			_ => 16.0,
+		}
+	}
+}
+
 pub trait Tab<T> {
 	#[allow(dead_code)]
 	fn get_type(&self) -> TabType;

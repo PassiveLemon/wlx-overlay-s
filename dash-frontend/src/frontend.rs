@@ -5,12 +5,14 @@ use glam::Vec2;
 use wgui::{
 	assets::{AssetPath, AssetProvider},
 	components::button::ComponentButton,
+	event::StyleSetRequest,
 	font_config::WguiFontConfig,
 	globals::WguiGlobals,
 	i18n::Translation,
-	layout::{Layout, LayoutParams, LayoutUpdateParams, LayoutUpdateResult, WidgetID},
+	layout::{Layout, LayoutParams, LayoutTask, LayoutUpdateParams, LayoutUpdateResult, WidgetID},
 	parser::{Fetchable, ParseDocumentParams, ParserState},
 	renderer_vk::text::custom_glyph::CustomGlyphData,
+	taffy::{self},
 	task::Tasks,
 	theme::WguiTheme,
 	widget::{label::WidgetLabel, rectangle::WidgetRectangle, sprite::WidgetSprite},
@@ -391,6 +393,12 @@ impl<T: 'static> Frontend<T> {
 		log::info!("Setting tab to {tab_type:?}");
 		let widget_content = self.state.fetch_widget(&self.layout.state, "content")?;
 		self.layout.remove_children(widget_content.id);
+
+		let padding = tab_type.get_preferred_padding();
+		self.layout.tasks.push(LayoutTask::SetWidgetStyle(
+			widget_content.id,
+			StyleSetRequest::Padding(taffy::Rect::length(padding)),
+		));
 
 		let (tab_translation, icon_path) = match tab_type {
 			TabType::Welcome => ("GETTING_STARTED", "dashboard/welcome.svg"),

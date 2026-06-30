@@ -9,5 +9,7 @@
     
     <label size="20" margin_top="16" text="Let us guide you through your first steps."/>
     <label size="20" text="Press &quot;Next&quot; button below to get started."/>
+
+    <div height="42"/> <!-- empty space -->
   </elements>
 </layout>

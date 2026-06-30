@@ -4,18 +4,20 @@
   </template>
   
   <elements>
-    <div flex_direction="column" flex_grow="1" gap="16" align_items="center" overflow_y="hidden">
+    <div position="relative" flex_grow="1">
       <!-- Content -->
-      <div id="content" flex_direction="column" flex_grow="1" align_items="center" justify_content="center" gap="16" overflow_y="scroll" width="100%">
+      <div position="absolute" id="content" flex_direction="column" flex_grow="1" align_items="center" justify_content="center" gap="16" width="100%" height="100%">
         <!-- filled-in at runtime -->
       </div>
       <!-- Page buttons -->
-      <div flex_direction="row" gap="8" align_items="center">
-        <Button id="btn_prev" width="32" height="32" round="100%" sprite_src_builtin="dashboard/arrow_left.svg" />
-        <div id="pips" gap="4" align_items="center">
-          <!-- filled-in at runtime -->
+      <div position="absolute" align_self="end" justify_self="end" width="100%" flex_direction="column" align_items="center" margin_bottom="8">
+        <div flex_direction="row" gap="8" align_items="center">
+          <Button id="btn_prev" width="32" height="32" round="100%" sprite_src_builtin="dashboard/arrow_left.svg" />
+          <div id="pips" gap="4" align_items="center">
+            <!-- filled-in at runtime -->
+          </div>
+          <Button id="btn_next" width="32" height="32" round="100%" sprite_src_builtin="dashboard/arrow_right.svg" />
         </div>
-        <Button id="btn_next" width="32" height="32" round="100%" sprite_src_builtin="dashboard/arrow_right.svg" />
       </div>
     </div>
   </elements>
