@@ -1,7 +1,7 @@
 <layout>
   <!-- icon, title -->
   <template name="PageTitle">
-    <div position="absolute" align_self="start" justify_self="center" width="100%" margin_top="8" gap="8" align_items="center" justify_content="center">
+    <div position="absolute" align_self="start" justify_self="center" width="100%" margin_top="16" gap="8" align_items="center" justify_content="center">
       <sprite width="48" height="48" src_builtin="${icon}" color="#FFFFFF"/>
       <label size="28" weight="bold" text="${title}" shadow="#000000" shadow_x="3" shadow_y="3" />
     </div>
