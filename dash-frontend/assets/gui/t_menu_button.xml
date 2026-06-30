@@ -1,16 +1,14 @@
 <layout>
   <include src="theme.xml" />
 
+  <macro name="home_button" round="8" color="#00000033" border_color="#FFFFFF77" hover_color="~color_accent" hover_border_color="#FFFFFF" />
+
   <template name="MenuButton">
     <Button
       id="${id}"
       width="120"
       height="82"
-      color="#00000033"
-      border_color="#FFFFFF77"
-      hover_color="~color_accent"
-      hover_border_color="#FFFFFF"
-      round="8">
+      macro="home_button">
       <div gap="8"
         align_items="center"
         justify_content="center"

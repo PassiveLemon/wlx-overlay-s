@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{marker::PhantomData, rc::Rc};
 
 use wgui::{
 	assets::AssetPath,
@@ -10,7 +10,7 @@ use wgui::{
 };
 
 use crate::{
-	frontend::Frontend,
+	frontend::{Frontend, FrontendTask, FrontendTasks},
 	tab::{Tab, TabType},
 };
 
@@ -30,11 +30,12 @@ pub struct TabWelcome<T> {
 	current_page: u8,
 	id_pips: WidgetID,
 	id_content: WidgetID,
+	frontend_tasks: FrontendTasks,
 
 	state_tab: Option<ParserState>,
 }
 
-const PAGE_COUNT: u8 = 5; // 0-4 inclusive
+const PAGE_COUNT: u8 = 6; // 0-5 inclusive
 
 impl<T> Tab<T> for TabWelcome<T> {
 	fn get_type(&self) -> TabType {
@@ -97,6 +98,7 @@ impl<T> TabWelcome<T> {
 			id_content,
 			tasks,
 			state_tab: None,
+			frontend_tasks: frontend.tasks.clone(),
 		})
 	}
 
@@ -123,7 +125,7 @@ impl<T> TabWelcome<T> {
 
 		let globals = layout.state.globals.clone();
 
-		self.state_tab = Some(wgui::parser::parse_from_assets(
+		let state = wgui::parser::parse_from_assets(
 			&ParseDocumentParams {
 				globals,
 				path: AssetPath::BuiltIn(&format!("gui/tab/welcome_page_{}.xml", self.current_page)),
@@ -131,7 +133,19 @@ impl<T> TabWelcome<T> {
 			},
 			layout,
 			self.id_content,
-		)?);
+		)?;
+
+		if let Ok(btn) = state.fetch_component_as::<ComponentButton>("btn_home_screen") {
+			btn.on_click({
+				let tasks = self.frontend_tasks.clone();
+				Rc::new(move |_, _| {
+					tasks.push(FrontendTask::SetTab(TabType::Home));
+					Ok(())
+				})
+			});
+		}
+
+		self.state_tab = Some(state);
 
 		Ok(())
 	}

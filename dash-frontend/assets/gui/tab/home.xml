@@ -18,6 +18,10 @@
         <MenuButton id="btn_monado" icon="dashboard/monado.svg" text="Monado" />
         <MenuButton id="btn_settings" icon="dashboard/settings.svg" translation="SETTINGS" />
       </div>
+
+      <Button id="btn_welcome_screen" macro="home_button" tooltip="APP_SETTINGS.SHOW_WELCOME_SCREEN">
+        <sprite src_builtin="dashboard/welcome.svg" width="32" height="32" margin="16"/>
+      </Button>
     </div>
   </elements>
 </layout>

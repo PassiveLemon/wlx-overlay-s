@@ -12,6 +12,10 @@
     <label wrap="1" text="${text}" size="20" width="500" shadow="#000000" weight="bold"/>
   </template>
 
+  <template name="TextDescBig">
+    <label text="${text}" size="24" shadow="#000000" weight="bold"/>
+  </template>
+
   <macro name="video_overlay_component" looping="1" width="100%" height="auto" max_height="100%" aspect_ratio="1.777777" position="relative"/>
 
   <macro name="video_overlay_content" new_pass="1" position="absolute" width="100%" height="100%" padding_bottom="32"/>
