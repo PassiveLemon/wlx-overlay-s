@@ -5,14 +5,14 @@
     <div flex_direction="row" align_items="center">
       <image src_builtin="dashboard/check_3d.png" width="256" height="256"/>
       <div flex_direction="column" gap="8" max_width="480">
-        <TextDescBig text="You're all set!"/>
-        <label size="16" wrap="1" text="These basics will allow you to start using WayVR with ease."/>
-        <label size="16" wrap="1" text="There are many other features worth customizing. For more information, check the documentation at"/>
+        <TextDescBig translation="WELCOME.ALL_SET"/>
+        <label size="16" wrap="1" translation="WELCOME.BASICS"/>
+        <label size="16" wrap="1" translation="WELCOME.FEATURES_DOCUMENTATION"/>
         <div flex_direction="row" align_items="center" gap="8">
           <sprite src_builtin="dashboard/globe.svg" width="24" height="24" color="~color_accent"/>
           <label size="20" weight="bold" text="wayvr.org" color="~color_accent"/>
         </div>
-        <Button margin_top="16" sprite_src_builtin="dashboard/home.svg" id="btn_home_screen" text="Go back to Home screen" min_height="32" align_self="baseline"/>
+        <Button margin_top="16" sprite_src_builtin="dashboard/home.svg" id="btn_home_screen" translation="WELCOME.GO_BACK_HOME" min_height="32" align_self="baseline"/>
       </div>
     </div>
   </elements>

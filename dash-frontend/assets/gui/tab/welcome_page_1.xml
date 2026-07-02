@@ -5,9 +5,9 @@
     <rectangle color="#103142" width="100%" height="100%" position="absolute"/>
     <Video macro="video_overlay_component" src_builtin="video/onboarding_watch.ivf" aspect_ratio="1.0">
       <div macro="video_overlay_content">
-        <PageTitle icon="dashboard/watch.svg" title="Watch"/>
+        <PageTitle icon="dashboard/watch.svg" translation="WELCOME.WATCH"/>
         <div position="relative" align_self="end" padding="16">
-          <TextDesc text="Look at your left wrist. That's your watch."/>
+          <TextDesc translation="WELCOME.LOOK_AT_LEFT_WRIST"/>
         </div>
       </div>
     </Video>

@@ -29,8 +29,8 @@ use wlx_common::{
 use crate::{
 	assets,
 	tab::{
-		apps::TabApps, games::TabGames, home::TabHome, monado::TabMonado, settings::TabSettings, welcome::TabWelcome, Tab,
-		TabType,
+		Tab, TabType, apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado,
+		settings::TabSettings, welcome::TabWelcome,
 	},
 	util::{
 		popup_manager::{MountPopupOnceParams, PopupManager, PopupManagerParams},
@@ -414,6 +414,7 @@ impl<T: 'static> Frontend<T> {
 			TabType::Games => ("GAMES", "dashboard/games.svg"),
 			TabType::Monado => ("MONADO_RUNTIME", "dashboard/monado.svg"),
 			TabType::Settings => ("SETTINGS", "dashboard/settings.svg"),
+			TabType::Donate => ("DONATE.SUPPORT_US", "dashboard/opencollective.svg"),
 		};
 
 		self.set_tab_title(tab_translation, icon_path)?;
@@ -425,6 +426,7 @@ impl<T: 'static> Frontend<T> {
 			TabType::Games => Box::new(TabGames::new(self, widget_content.id)?),
 			TabType::Monado => Box::new(TabMonado::new(self, widget_content.id)?),
 			TabType::Settings => Box::new(TabSettings::new(self, widget_content.id, data)?),
+			TabType::Donate => Box::new(TabDonate::new(self, widget_content.id, data)?),
 		};
 
 		self.current_tab = Some(tab);
