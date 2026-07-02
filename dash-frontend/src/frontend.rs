@@ -21,7 +21,7 @@ use wgui::{
 use wlx_common::{
 	async_executor::AsyncExecutor,
 	audio,
-	dash_interface::{BoxDashInterface, RecenterMode},
+	dash_interface::{BoxDashInterface, ConfigChangeKind, RecenterMode},
 	locale::WayVRLangProvider,
 	timestep::{self, Timestep},
 };
@@ -29,8 +29,8 @@ use wlx_common::{
 use crate::{
 	assets,
 	tab::{
-		Tab, TabType, apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado,
-		settings::TabSettings, welcome::TabWelcome,
+		apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado, settings::TabSettings,
+		welcome::TabWelcome, Tab, TabType,
 	},
 	util::{
 		popup_manager::{MountPopupOnceParams, PopupManager, PopupManagerParams},
@@ -550,6 +550,7 @@ impl<T: 'static> Frontend<T> {
 	fn action_tutorial_graduated(&mut self, data: &mut T) {
 		let config = self.interface.general_config(data);
 		config.tutorial_graduated = true;
+		self.interface.config_changed(data, ConfigChangeKind::Other);
 	}
 
 	fn action_open_url(&mut self, url: Rc<str>) {

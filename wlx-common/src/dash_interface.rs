@@ -81,6 +81,8 @@ pub trait DashInterface<T> {
 pub enum ConfigChangeKind {
 	OverlayConfig,
 	EnvironmentBlend,
+	/// Marks the config for saving but doesn't notify any components
+	Other,
 }
 
 pub type BoxDashInterface<T> = Box<dyn DashInterface<T>>;

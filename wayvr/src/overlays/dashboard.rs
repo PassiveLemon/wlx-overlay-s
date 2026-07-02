@@ -331,7 +331,7 @@ fn tutorial_spawn_effect(app: &mut AppState) -> anyhow::Result<()> {
                 realign(&mut transform, hmd, 1.0);
 
                 owc.active_state = Some(OverlayWindowState {
-                    saved_transform: Some(Affine3A::from_translation(vec3(0., 0., -0.9))),
+                    saved_transform: Some(Affine3A::from_translation(vec3(0., -0.1, -0.9))),
                     transform,
                     grabbable: true,
                     interactable: true,
@@ -542,6 +542,7 @@ impl DashInterface<AppState> for DashInterfaceLive {
                         .enqueue(TaskType::OpenXR(OpenXrTask::EnvironmentChanged));
                 }
             }
+            _ => {}
         }
     }
 
