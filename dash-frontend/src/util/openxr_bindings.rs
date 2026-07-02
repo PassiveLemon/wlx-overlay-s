@@ -91,7 +91,7 @@ pub struct ParsedOpenXrInputPath {
 	pub component: XrInputComponent,
 }
 
-impl<'a> TryFrom<&'a str> for ParsedOpenXrInputPath {
+impl TryFrom<&str> for ParsedOpenXrInputPath {
 	type Error = anyhow::Error;
 
 	fn try_from(path: &str) -> anyhow::Result<Self> {

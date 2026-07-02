@@ -8,10 +8,10 @@
         <TextDescBig translation="WELCOME.ALL_SET"/>
         <label size="16" wrap="1" translation="WELCOME.BASICS"/>
         <label size="16" wrap="1" translation="WELCOME.FEATURES_DOCUMENTATION"/>
-        <div flex_direction="row" align_items="center" gap="8">
-          <sprite src_builtin="dashboard/globe.svg" width="24" height="24" color="~color_accent"/>
-          <label size="20" weight="bold" text="wayvr.org" color="~color_accent"/>
-        </div>
+        <Button id="btn_wayvr_org" align_self="baseline" height="48">
+          <sprite src_builtin="dashboard/globe.svg" width="24" height="24" color="~color_accent" margin="8"/>
+          <label size="20" weight="bold" text="wayvr.org" margin_right="8" />
+        </Button>
         <Button margin_top="16" sprite_src_builtin="dashboard/home.svg" id="btn_home_screen" translation="WELCOME.GO_BACK_HOME" min_height="32" align_self="baseline"/>
       </div>
     </div>

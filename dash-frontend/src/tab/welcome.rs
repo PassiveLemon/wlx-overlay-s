@@ -145,6 +145,12 @@ impl<T> TabWelcome<T> {
 			});
 		}
 
+		if let Ok(btn) = state.fetch_component_as::<ComponentButton>("btn_wayvr_org") {
+			self
+				.frontend_tasks
+				.handle_button(&btn, FrontendTask::OpenURL(Rc::from("https://wayvr.org")));
+		}
+
 		self.state_tab = Some(state);
 
 		Ok(())

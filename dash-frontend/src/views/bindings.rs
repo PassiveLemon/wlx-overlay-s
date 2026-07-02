@@ -91,7 +91,7 @@ impl ViewTrait for View {
 				}
 				Task::UpdateThreshold(action_name, side, i, val) => {
 					let cur_profile = &mut self.profiles[self.cur_profile_idx];
-					let action_mut = get_action_mut(cur_profile, &*action_name);
+					let action_mut = get_action_mut(cur_profile, &action_name);
 
 					let threshold = if matches!(side, XrInputSide::Right) {
 						action_mut.threshold_right.get_or_insert(DEFAULT_BUTTON_THRESHOLDS)
@@ -124,10 +124,10 @@ impl ViewTrait for View {
 					*side_mut = None;
 				}
 				"subpath" => {
-					apply_subpath(side_mut, &side, &value, self.controller_profile);
+					apply_subpath(side_mut, side, value, self.controller_profile);
 				}
 				"comp" => {
-					apply_comp(side_mut, &side, &value);
+					apply_comp(side_mut, side, value);
 				}
 				"click" => match value {
 					"triple" => {
@@ -244,7 +244,7 @@ impl View {
 				&mut mp,
 				self.list_parent,
 				action.into(),
-				&self.controller_profile,
+				self.controller_profile,
 				current,
 			)?;
 		}
@@ -616,7 +616,7 @@ fn create_dropdown<B: 'static + BindingsDropdown>(
 					let title = item.translation();
 
 					context_menu::Cell {
-						action_name: Some(item.action_str(&*action, side)),
+						action_name: Some(item.action_str(&action, side)),
 						title,
 						tooltip: None,
 						attribs: vec![],
@@ -624,7 +624,7 @@ fn create_dropdown<B: 'static + BindingsDropdown>(
 				})
 				.collect::<Vec<_>>();
 
-			if let Some(action_str) = B::clear_str(&*action, side) {
+			if let Some(action_str) = B::clear_str(&action, side) {
 				cells.insert(
 					0,
 					context_menu::Cell {

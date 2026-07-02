@@ -114,6 +114,7 @@ pub enum FrontendTask {
 	RecenterPlayspace,
 	PushToast(Translation),
 	PlaySound(SoundType),
+	OpenURL(Rc<str>),
 	HideDashboard,
 }
 
@@ -367,6 +368,7 @@ impl<T: 'static> Frontend<T> {
 			FrontendTask::PushToast(content) => self.toast_manager.push(content),
 			FrontendTask::PlaySound(sound_type) => self.queue_play_sound(sound_type),
 			FrontendTask::HideDashboard => self.action_hide_dashboard(params.data),
+			FrontendTask::OpenURL(url) => self.action_open_url(url),
 		};
 		Ok(())
 	}
@@ -541,5 +543,15 @@ impl<T: 'static> Frontend<T> {
 
 	fn action_hide_dashboard(&mut self, data: &mut T) {
 		self.interface.toggle_dashboard(data);
+	}
+
+	fn action_open_url(&mut self, url: Rc<str>) {
+		let _ = std::process::Command::new("xdg-open").arg(url.as_ref()).spawn();
+		self
+			.tasks
+			.push(FrontendTask::PushToast(Translation::from_raw_text_string(format!(
+				"Opened URL: {}",
+				url
+			))));
 	}
 }

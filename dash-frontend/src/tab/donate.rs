@@ -4,13 +4,13 @@ use wgui::{
 	assets::AssetPath,
 	components::button::ComponentButton,
 	globals::WguiGlobals,
-	layout::{Layout, WidgetID},
-	parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
+	layout::WidgetID,
+	parser::{Fetchable, ParseDocumentParams, ParserState},
 	task::Tasks,
 };
 
 use crate::{
-	frontend::{Frontend, FrontendTask, FrontendTasks},
+	frontend::{Frontend, FrontendTask},
 	tab::{Tab, TabType},
 };
 
@@ -22,8 +22,8 @@ pub struct TabDonate<T> {
 	#[allow(dead_code)]
 	pub state: ParserState,
 	marker: PhantomData<T>,
+	#[allow(dead_code)]
 	tasks: Tasks<Task>,
-	frontend_tasks: FrontendTasks,
 }
 
 impl<T> Tab<T> for TabDonate<T> {
@@ -31,10 +31,10 @@ impl<T> Tab<T> for TabDonate<T> {
 		TabType::Donate
 	}
 
-	fn update(&mut self, frontend: &mut Frontend<T>, _time_ms: u32, _user_data: &mut T) -> anyhow::Result<()> {
-		for task in self.tasks.drain() {
-			match task {}
-		}
+	fn update(&mut self, _frontend: &mut Frontend<T>, _time_ms: u32, _user_data: &mut T) -> anyhow::Result<()> {
+		// for task in self.tasks.drain() {
+		// 	match task {}
+		// }
 
 		Ok(())
 	}
@@ -52,13 +52,17 @@ impl<T> TabDonate<T> {
 	pub fn new(frontend: &mut Frontend<T>, parent_id: WidgetID, _data: &mut T) -> anyhow::Result<Self> {
 		let state = wgui::parser::parse_from_assets(&doc_params(&frontend.globals), &mut frontend.layout, parent_id)?;
 
+		frontend.tasks.handle_button(
+			&state.fetch_component_as::<ComponentButton>("btn_donate")?,
+			FrontendTask::OpenURL(Rc::from("https://opencollective.com/wayvr-org")),
+		);
+
 		let tasks = Tasks::<Task>::new();
 
 		Ok(Self {
 			state,
 			marker: PhantomData,
 			tasks,
-			frontend_tasks: frontend.tasks.clone(),
 		})
 	}
 }
