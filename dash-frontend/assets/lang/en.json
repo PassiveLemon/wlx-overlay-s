@@ -167,6 +167,7 @@
 		"ENABLE_WATCH": "Enable watch",
 		"SETS_ON_WATCH": "Sets on watch",
 		"SHOW_WELCOME_SCREEN": "Show welcome screen",
+		"SHOW_WELCOME_SCREEN_HELP": "Show welcome screen on next start",
 		"SKYBOX": "Skybox",
 		"SKYMAP_ALREADY_DOWNLOADED": "This skymap is already downloaded. Select desired action.",
 		"SPACE_DRAG": "Space drag",
