@@ -139,9 +139,9 @@ impl CustomClickAction {
 
     pub fn state(&mut self, before: bool, state: &XrState) -> anyhow::Result<bool> {
         let threshold = if before {
-            self.threshold[1]
-        } else {
             self.threshold[0]
+        } else {
+            self.threshold[1]
         };
 
         Ok(self.single.check(&state.session, threshold)?
