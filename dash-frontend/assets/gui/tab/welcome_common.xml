@@ -13,7 +13,7 @@
   </template>
 
   <template name="TextDescBig">
-    <label translation="${translation}" size="24" shadow="#000000" weight="bold"/>
+    <label translation="${translation}" size="24" shadow="#000000" weight="bold" color="${color}"/>
   </template>
 
   <macro name="video_overlay_component" looping="1" width="100%" height="auto" max_height="100%" aspect_ratio="1.777777" position="relative"/>

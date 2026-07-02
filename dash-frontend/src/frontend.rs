@@ -116,6 +116,7 @@ pub enum FrontendTask {
 	PlaySound(SoundType),
 	OpenURL(Rc<str>),
 	HideDashboard,
+	MarkTutorialGraduated,
 }
 
 impl<T: 'static> Frontend<T> {
@@ -369,6 +370,7 @@ impl<T: 'static> Frontend<T> {
 			FrontendTask::PlaySound(sound_type) => self.queue_play_sound(sound_type),
 			FrontendTask::HideDashboard => self.action_hide_dashboard(params.data),
 			FrontendTask::OpenURL(url) => self.action_open_url(url),
+			FrontendTask::MarkTutorialGraduated => self.action_tutorial_graduated(params.data),
 		};
 		Ok(())
 	}
@@ -543,6 +545,11 @@ impl<T: 'static> Frontend<T> {
 
 	fn action_hide_dashboard(&mut self, data: &mut T) {
 		self.interface.toggle_dashboard(data);
+	}
+
+	fn action_tutorial_graduated(&mut self, data: &mut T) {
+		let config = self.interface.general_config(data);
+		config.tutorial_graduated = true;
 	}
 
 	fn action_open_url(&mut self, url: Rc<str>) {

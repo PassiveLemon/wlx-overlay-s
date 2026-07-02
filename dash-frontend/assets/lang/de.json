@@ -257,5 +257,37 @@
 	"APPLY": "Anwenden",
 	"RELOAD_FROM_DISK": "Von Festplatte neu laden",
 	"TARGET_PATH": "Zielpfad",
-	"VERSION": "Version"
+	"VERSION": "Version",
+	"DONATE": {
+		"SUPPORT_US": "Unterstütze uns",
+		"DESCRIPTION": "Wir sind ein kleines Team aus zwei Entwicklern, die WayVR in ihrer Freizeit bauen. Wenn Ihnen die Nutzung dieser Software Spaß macht, unterstützen Sie uns bitte – jede Spende hilft uns, weiterzumachen.",
+		"THANK_YOU": "Vielen Dank!",
+		"BUTTON_TOOLTIP": "Spenden über Open Collective",
+		"CURRENT_SUPPORTERS": "Aktuelle Unterstützer"
+	},
+	"WELCOME": {
+		"ALL_SET": "Du bist startklar!",
+		"BASICS": "Diese Grundlagen ermöglichen Ihnen einen einfachen Einstieg in die Nutzung von WayVR.",
+		"CENTER_MARKER": "Der Mittelpunkt-Marker bestimmt das Zentrum Ihres Sets.",
+		"DOUBLE_PRESS_TO_TOGGLE": "Drücken Sie zweimal B (auf Index) oder Y (auf Meta), um die Sichtbarkeit Ihres Arbeitsbereichs umzuschalten. Probieren Sie es jetzt aus.",
+		"FEATURES_DOCUMENTATION": "Es gibt viele weitere Funktionen, die es wert sind, angepasst zu werden. Weitere Informationen finden Sie in der Dokumentation unter",
+		"FINISH_TUTORIAL": "Tutorial beenden",
+		"GRAB_BOTH_HANDS": "Greifen Sie es mit beiden Händen, wenn Sie ein bestimmtes Overlay in Ihrem Set bewegen möchten.",
+		"GRAB_ONE_HAND": "Greife es mit einer Hand, um dein Set zu bewegen.",
+		"GREETING": "Hallo!",
+		"GUIDE_INTRO": "Lassen Sie sich durch Ihre ersten Schritte führen.",
+		"LASER_COLORS": "Laserfarben",
+		"LASER_FUNCTIONALITY": "Ein Großteil der Funktionalität in WayVR hängt davon ab, welche Laserfarbe verwendet wird, um mit einem UI-Element zu interagieren. Sie müssen diese Schaltflächen nicht drücken, berühren Sie sie einfach!",
+		"LAST_PAGE_INFO": "Dieses Tutorial wird nicht mehr angezeigt, sobald du die letzte Seite erreicht hast.",
+		"LOOK_AT_LEFT_WRIST": "Schau auf dein linkes Handgelenk. Das ist deine Watch.",
+		"MIDDLE_CLICK_MODE_PURPLE_LASER": "— Mittlere Maustaste-Modus: Lila Laser",
+		"MOVING_YOUR_SET": "Ihr Set wird verschoben",
+		"NEXT_BUTTON": "Drücke die Schaltfläche „Weiter“ unten, um zu beginnen.",
+		"REGULAR_MODE_BLUE_LASER": "— Regulärer Modus: Blauer Laser",
+		"REPOSITION_THIS_WINDOW_BY_GRABBING": "Positionieren Sie dieses Fenster neu, indem Sie die Greifaktion Ihres Controllers verwenden.",
+		"RIGHT_CLICK_MODE_ORANGE_LASER": "— Rechtsklick-Modus: Oranger Laser",
+		"THANKS_FOR_INSTALLING": "Vielen Dank für die Installation von WayVR!",
+		"WATCH": "Watch",
+		"WORKING_SET": "Arbeits-Set"
+	}
 }

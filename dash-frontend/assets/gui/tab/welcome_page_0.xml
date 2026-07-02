@@ -7,13 +7,19 @@
     <label weight="bold" size="32" translation="WELCOME.GREETING"/>
     <label weight="bold" size="20" translation="WELCOME.THANKS_FOR_INSTALLING"/>
     
-    <label size="20" margin_top="16" translation="WELCOME.GUIDE_INTRO"/>
-    <label size="20" translation="WELCOME.NEXT_BUTTON"/>
+    <label size="20" translation="WELCOME.GUIDE_INTRO"/>
 
-    <div gap="4" align_items="center">
+    <div gap="4" align_items="center" margin_top="16">
       <sprite min_width="16" min_height="16" src_builtin="dashboard/info.svg"/>
       <label wrap="1" size="14" translation="WELCOME.REPOSITION_THIS_WINDOW_BY_GRABBING"/>
     </div>
+
+    <div gap="4" align_items="center">
+      <sprite min_width="16" min_height="16" src_builtin="dashboard/info.svg"/>
+      <label wrap="1" size="14" translation="WELCOME.LAST_PAGE_INFO"/>
+    </div>
+
+    <label size="20" weight="bold" translation="WELCOME.NEXT_BUTTON"/>
 
     <div height="42"/> <!-- empty space -->
   </elements>

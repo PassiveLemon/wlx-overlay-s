@@ -140,6 +140,7 @@ impl<T> TabWelcome<T> {
 				let tasks = self.frontend_tasks.clone();
 				Rc::new(move |_, _| {
 					tasks.push(FrontendTask::SetTab(TabType::Home));
+					tasks.push(FrontendTask::MarkTutorialGraduated);
 					Ok(())
 				})
 			});
