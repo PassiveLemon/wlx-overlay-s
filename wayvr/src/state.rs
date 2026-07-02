@@ -92,7 +92,7 @@ impl AppState {
             .log_err("Could not initialize WayVR Server")
             .ok();
 
-        let (hid_provider, mut hid_error) = HidWrapper::new();
+        let (hid_provider, mut hid_error) = HidWrapper::new(session.config.input_emulation_method);
 
         #[cfg(feature = "osc")]
         let osc_sender = crate::subsystem::osc::OscSender::new(session.config.osc_out_port).ok();

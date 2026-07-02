@@ -40,6 +40,28 @@ pub enum CaptureMethod {
 	ScreenCopyCpu,
 }
 
+#[derive(Default, Clone, Copy, Serialize, Deserialize, AsRefStr, EnumString, EnumProperty, VariantArray)]
+pub enum InputEmulationMethod {
+	#[default]
+	#[strum(props(
+		Translation = "APP_SETTINGS.OPTION.UINPUT",
+		Tooltip = "APP_SETTINGS.OPTION.UINPUT_HELP"
+	))]
+	Uinput,
+
+	#[strum(props(
+		Translation = "APP_SETTINGS.OPTION.WL_VIRTUAL",
+		Tooltip = "APP_SETTINGS.OPTION.WL_VIRTUAL_HELP"
+	))]
+	WlVirtual,
+
+	#[strum(props(
+		Translation = "APP_SETTINGS.OPTION.NONE",
+		Tooltip = "APP_SETTINGS.OPTION.NONE_INPUT_HELP"
+	))]
+	None,
+}
+
 #[derive(Debug, Default, Clone, Copy, Serialize, Deserialize, AsRefStr, EnumString, EnumProperty, VariantArray)]
 pub enum AltModifier {
 	#[default]
@@ -291,6 +313,9 @@ pub struct GeneralConfig {
 
 	#[serde(default)]
 	pub capture_method: CaptureMethod,
+
+	#[serde(default)]
+	pub input_emulation_method: InputEmulationMethod,
 
 	#[serde(default = "def_true")]
 	pub allow_sliding: bool,

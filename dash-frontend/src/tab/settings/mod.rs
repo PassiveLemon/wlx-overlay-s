@@ -284,6 +284,7 @@ enum SettingType {
 	HandsfreePointer,
 	HideGrabHelp,
 	HideUsername,
+	InputEmulationMethod,
 	InvertScrollDirectionX,
 	InvertScrollDirectionY,
 	KeyboardMiddleClick,
@@ -392,6 +393,10 @@ impl SettingType {
 			Self::CaptureMethod => {
 				config.capture_method = wlx_common::config::CaptureMethod::from_str(value).expect("Invalid enum value!")
 			}
+			Self::InputEmulationMethod => {
+				config.input_emulation_method =
+					wlx_common::config::InputEmulationMethod::from_str(value).expect("Invalid enum value!")
+			}
 			Self::KeyboardMiddleClick => {
 				config.keyboard_middle_click_mode =
 					wlx_common::config::AltModifier::from_str(value).expect("Invalid enum value!")
@@ -409,6 +414,7 @@ impl SettingType {
 	fn get_enum_title(self, config: &mut GeneralConfig) -> Translation {
 		match self {
 			Self::CaptureMethod => Self::get_enum_title_inner(config.capture_method),
+			Self::InputEmulationMethod => Self::get_enum_title_inner(config.input_emulation_method),
 			Self::KeyboardMiddleClick => Self::get_enum_title_inner(config.keyboard_middle_click_mode),
 			Self::HandsfreePointer => Self::get_enum_title_inner(config.handsfree_pointer),
 			Self::Language => match &config.language {
@@ -454,6 +460,7 @@ impl SettingType {
 			Self::HandsfreePointer => Ok("APP_SETTINGS.HANDSFREE_POINTER"),
 			Self::HideGrabHelp => Ok("APP_SETTINGS.HIDE_GRAB_HELP"),
 			Self::HideUsername => Ok("APP_SETTINGS.HIDE_USERNAME"),
+			Self::InputEmulationMethod => Ok("APP_SETTINGS.INPUT_EMULATION_METHOD"),
 			Self::InvertScrollDirectionX => Ok("APP_SETTINGS.INVERT_SCROLL_DIRECTION_X"),
 			Self::InvertScrollDirectionY => Ok("APP_SETTINGS.INVERT_SCROLL_DIRECTION_Y"),
 			Self::KeyboardMiddleClick => Ok("APP_SETTINGS.KEYBOARD_MIDDLE_CLICK"),
@@ -500,6 +507,7 @@ impl SettingType {
 			Self::DoubleCursorFix => Some("APP_SETTINGS.DOUBLE_CURSOR_FIX_HELP"),
 			Self::GridOpacity => Some("APP_SETTINGS.GRID_OPACITY_HELP"),
 			Self::HandsfreePointer => Some("APP_SETTINGS.HANDSFREE_POINTER_HELP"),
+			Self::InputEmulationMethod => Some("APP_SETTINGS.INPUT_EMULATION_METHOD_HELP"),
 			Self::KeyboardMiddleClick => Some("APP_SETTINGS.KEYBOARD_MIDDLE_CLICK_HELP"),
 			Self::LeftHandedMouse => Some("APP_SETTINGS.LEFT_HANDED_MOUSE_HELP"),
 			Self::ScreenRenderDown => Some("APP_SETTINGS.SCREEN_RENDER_DOWN_HELP"),
@@ -527,6 +535,7 @@ impl SettingType {
 				| Self::DoubleCursorFix
 				| Self::Language
 				| Self::CaptureMethod
+				| Self::InputEmulationMethod
 		)
 	}
 

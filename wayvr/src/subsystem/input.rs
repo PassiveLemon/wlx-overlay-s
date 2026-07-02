@@ -1,3 +1,5 @@
+use wlx_common::config::InputEmulationMethod;
+
 use super::hid::{self, VirtualKey};
 
 use crate::subsystem::hid::provider::HidProvider;
@@ -17,9 +19,14 @@ pub struct HidWrapper {
 }
 
 impl HidWrapper {
-    pub fn new() -> (Self, Option<Toast>) {
-        let (provider, toast) = hid::provider::wl_virtual::initialize_wl_virtual()
-            .or_else(|_| hid::provider::uinput::initialize_uinput())
+    pub fn new(method: InputEmulationMethod) -> (Self, Option<Toast>) {
+        let maybe_provider = match method {
+            InputEmulationMethod::Uinput => hid::provider::uinput::initialize_uinput(),
+            InputEmulationMethod::WlVirtual => hid::provider::wl_virtual::initialize_wl_virtual(),
+            InputEmulationMethod::None => hid::provider::dummy::initialize_dummy(),
+        };
+
+        let (provider, toast) = maybe_provider
             .map(|provider| (provider, None))
             .unwrap_or_else(|toast| (Box::new(DummyProvider {}), Some(toast)));
 
