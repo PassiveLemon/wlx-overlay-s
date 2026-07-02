@@ -81,7 +81,6 @@ enum Task {
 	RestartSoftware,
 	SetTab(TabNameEnum),
 	SettingUpdated(SettingType),
-	ShowWelcomeScreen,
 	UpdateBool(SettingType, bool),
 	UpdateFloat(SettingType, f32),
 	UpdateInt(SettingType, i32),
@@ -149,9 +148,6 @@ impl<T> Tab<T> for TabSettings<T> {
 			match task {
 				Task::SetTab(tab) => {
 					self.set_tab(frontend, data, tab)?;
-				}
-				Task::ShowWelcomeScreen => {
-					self.frontend_tasks.push(FrontendTask::SetTab(TabType::Welcome));
 				}
 				Task::UpdateBool(setting, n) => {
 					self.tasks.push(Task::SettingUpdated(setting));

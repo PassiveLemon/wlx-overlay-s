@@ -50,13 +50,6 @@ impl State {
 			"dashboard/refresh.svg",
 			Task::RestartSoftware,
 		)?;
-		options_danger_button(
-			par.mp,
-			c,
-			"APP_SETTINGS.SHOW_WELCOME_SCREEN",
-			"dashboard/welcome.svg",
-			Task::ShowWelcomeScreen,
-		)?;
 		Ok(State {})
 	}
 }
