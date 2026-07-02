@@ -24,23 +24,24 @@ pub(super) struct PlayspaceMover {
     drag: Option<MoverData<Vec3A>>,
     rotate: Option<MoverData<Quat>>,
     gravity: SpaceGravity,
+    floor_y: f32,
 }
 
 impl PlayspaceMover {
     pub fn new(monado: &mut Monado) -> anyhow::Result<Self> {
         log::info!("Monado: using space offset API");
 
-        if matches!(
-            monado.get_reference_space_offset(ReferenceSpaceType::Stage),
-            Err(MndResult::ErrorInvalidVersion)
-        ) {
-            anyhow::bail!("Space offsets not supported.");
-        }
+        let pose = match monado.get_reference_space_offset(ReferenceSpaceType::Stage) {
+            Err(MndResult::ErrorInvalidVersion) => anyhow::bail!("Space offsets not supported."),
+            Err(e) => anyhow::bail!("Could not initialize space mover: {e:?}"),
+            Ok(pose) => pose,
+        };
 
         Ok(Self {
             drag: None,
             rotate: None,
             gravity: SpaceGravity::new(),
+            floor_y: pose.position.y,
         })
     }
 
@@ -264,7 +265,9 @@ impl PlayspaceMover {
         }
 
         self.gravity.reset();
-        apply_offset(Affine3A::IDENTITY, monado);
+        let mut offset = Affine3A::IDENTITY;
+        offset.translation.y = self.floor_y;
+        apply_offset(offset, monado);
     }
 
     pub fn fix_floor(&mut self, input: &InputState, monado: &mut Monado) {
@@ -289,6 +292,8 @@ impl PlayspaceMover {
         let delta = y1.min(y2) - 0.05;
 
         pose.position.y += delta;
+
+        self.floor_y = pose.position.y;
 
         let _ = monado
             .set_reference_space_offset(ReferenceSpaceType::Stage, pose)
