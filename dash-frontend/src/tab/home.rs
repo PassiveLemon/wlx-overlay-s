@@ -72,6 +72,7 @@ impl<T> TabHome<T> {
 		let btn_settings = state.fetch_component_as::<ComponentButton>("btn_settings")?;
 		let btn_welcome_screen = state.fetch_component_as::<ComponentButton>("btn_welcome_screen")?;
 		let btn_donate = state.fetch_component_as::<ComponentButton>("btn_donate")?;
+		let btn_website = state.fetch_component_as::<ComponentButton>("btn_website")?;
 
 		let tasks = &mut frontend.tasks;
 		tasks.handle_button(&btn_apps, FrontendTask::SetTab(TabType::Apps));
@@ -80,6 +81,7 @@ impl<T> TabHome<T> {
 		tasks.handle_button(&btn_settings, FrontendTask::SetTab(TabType::Settings));
 		tasks.handle_button(&btn_welcome_screen, FrontendTask::SetTab(TabType::Welcome));
 		tasks.handle_button(&btn_donate, FrontendTask::SetTab(TabType::Donate));
+		tasks.handle_button(&btn_website, FrontendTask::OpenURL("https://wayvr.org".into()));
 
 		Ok(Self {
 			state,
