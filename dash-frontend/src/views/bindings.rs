@@ -1,6 +1,5 @@
-use std::{collections::HashMap, rc::Rc};
-
 use glam::Vec2;
+use std::rc::Rc;
 use strum::EnumProperty;
 use wgui::{
 	assets::AssetPath,
@@ -12,7 +11,7 @@ use wgui::{
 	i18n::Translation,
 	layout::{Layout, WidgetID},
 	log::LogErr,
-	parser::{Fetchable, ParseDocumentParams, ParserState},
+	parser::{Fetchable, ParseDocumentParams, ParserState, TemplateParams},
 	task::Tasks,
 	widget::label::WidgetLabel,
 	windowing::context_menu::{self, TickResult},
@@ -358,14 +357,11 @@ fn input_controls_for_action(
 	let id = mp.idx.to_string();
 	mp.idx += 1;
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
-	params.insert(
-		Rc::from("translation"),
-		Rc::from(format!(
-			"APP_SETTINGS.BINDINGS.ACTION.{}",
-			action.as_ref().to_uppercase()
-		)),
+	let mut params = TemplateParams::new();
+	params.insert("id", &id);
+	params.insert_str(
+		"translation",
+		format!("APP_SETTINGS.BINDINGS.ACTION.{}", action.as_ref().to_uppercase()),
 	);
 
 	mp.parser_state
@@ -487,9 +483,9 @@ fn subpath_dropdown(
 	available: Rc<[XrInputSubpathKind]>,
 	current: Option<XrInputSubpathKind>,
 ) -> anyhow::Result<()> {
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("tooltip"), Rc::from("APP_SETTINGS.BINDINGS.SUBPATH"));
-	params.insert(Rc::from("min_width"), Rc::from("100"));
+	let mut params = TemplateParams::new();
+	params.insert("tooltip", "APP_SETTINGS.BINDINGS.SUBPATH");
+	params.insert("min_width", "100");
 
 	// left/right hand icon
 	wgui_simple::create_icon(
@@ -520,10 +516,10 @@ fn component_dropdown(
 		return Ok(false);
 	}
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("text"), Rc::from("・"));
-	params.insert(Rc::from("tooltip"), Rc::from("APP_SETTINGS.BINDINGS.COMPONENT"));
-	params.insert(Rc::from("min_width"), Rc::from("100"));
+	let mut params = TemplateParams::new();
+	params.insert("text", "・");
+	params.insert("tooltip", "APP_SETTINGS.BINDINGS.COMPONENT");
+	params.insert("min_width", "100");
 
 	let current_text = current
 		.map(|c| c.translation())
@@ -535,10 +531,10 @@ fn component_dropdown(
 }
 
 fn clicks_dropdown(mp: &mut MacroParams, parent: WidgetID, action: Rc<str>, current: ClickType) -> anyhow::Result<()> {
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("text"), Rc::from("・"));
-	params.insert(Rc::from("tooltip"), Rc::from("APP_SETTINGS.BINDINGS.CLICK.TYPE"));
-	params.insert(Rc::from("min_width"), Rc::from("100"));
+	let mut params = TemplateParams::new();
+	params.insert("text", "・");
+	params.insert("tooltip", "APP_SETTINGS.BINDINGS.CLICK.TYPE");
+	params.insert("min_width", "100");
 
 	let current_text = current.translation();
 	let available = [ClickType::Any, ClickType::Double, ClickType::Triple].into();
@@ -559,14 +555,14 @@ fn threshold_slider(
 
 	let current = current.unwrap_or(DEFAULT_BUTTON_THRESHOLDS);
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
-	params.insert(Rc::from("tooltip"), Rc::from("APP_SETTINGS.BINDINGS.THRESHOLD"));
-	params.insert(Rc::from("value"), Rc::from(format!("{:.2}", current[0])));
-	params.insert(Rc::from("value2"), Rc::from(format!("{:.2}", current[1])));
-	params.insert(Rc::from("min"), Rc::from("0.0"));
-	params.insert(Rc::from("max"), Rc::from("1.0"));
-	params.insert(Rc::from("step"), Rc::from("0.1"));
+	let mut params = TemplateParams::new();
+	params.insert("id", &id);
+	params.insert("tooltip", "APP_SETTINGS.BINDINGS.THRESHOLD");
+	params.insert_str("value", format!("{:.2}", current[0]));
+	params.insert_str("value2", format!("{:.2}", current[1]));
+	params.insert("min", "0.0");
+	params.insert("max", "1.0");
+	params.insert("step", "0.1");
 
 	mp.parser_state
 		.instantiate_template(mp.doc_params, "ThresholdSlider", mp.layout, parent, params)?;
@@ -589,7 +585,7 @@ fn threshold_slider(
 fn create_dropdown<B: 'static + BindingsDropdown>(
 	mp: &mut MacroParams,
 	parent: WidgetID,
-	mut params: HashMap<Rc<str>, Rc<str>>,
+	mut params: TemplateParams,
 	action: Rc<str>,
 	side: XrInputSide,
 	current_text: Translation,
@@ -597,7 +593,7 @@ fn create_dropdown<B: 'static + BindingsDropdown>(
 ) -> anyhow::Result<()> {
 	let id = mp.idx.to_string();
 	mp.idx += 1;
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
+	params.insert("id", &id);
 
 	mp.parser_state
 		.instantiate_template(mp.doc_params, "DropdownButton", mp.layout, parent, params)?;

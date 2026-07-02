@@ -127,6 +127,10 @@ impl TemplateParams {
 	pub fn insert_rc(&mut self, key: &str, value: Rc<str>) -> Option<Rc<str>> {
 		self.0.insert(Rc::from(key), value)
 	}
+
+	pub fn insert_str(&mut self, key: &str, value: String) -> Option<Rc<str>> {
+		self.0.insert(Rc::from(key), value.into())
+	}
 }
 
 impl ParserData {

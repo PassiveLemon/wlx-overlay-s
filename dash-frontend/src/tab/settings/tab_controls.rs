@@ -1,5 +1,5 @@
-use std::{collections::HashMap, rc::Rc};
-
+use std::rc::Rc;
+use wgui::parser::TemplateParams;
 use wgui::{
 	components::button::ComponentButton, globals::WguiGlobals, layout::WidgetID, parser::Fetchable, task::Tasks,
 };
@@ -56,10 +56,10 @@ fn create_input_profiles_button(
 	let id = mp.idx.to_string();
 	mp.idx += 1;
 
-	let mut params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-	params.insert(Rc::from("id"), Rc::from(id.as_ref()));
-	params.insert(Rc::from("translation"), Rc::from("APP_SETTINGS.INPUT_PROFILES"));
-	params.insert(Rc::from("icon"), Rc::from("dashboard/controller.svg"));
+	let mut params = TemplateParams::new();
+	params.insert("id", &id);
+	params.insert("translation", "APP_SETTINGS.INPUT_PROFILES");
+	params.insert("icon", "dashboard/controller.svg");
 
 	mp.parser_state
 		.instantiate_template(mp.doc_params, "ButtonText", mp.layout, parent, params)?;

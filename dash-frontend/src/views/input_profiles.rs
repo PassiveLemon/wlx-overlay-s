@@ -1,12 +1,11 @@
-use std::{collections::HashMap, rc::Rc};
-
+use std::rc::Rc;
 use wgui::{
 	assets::AssetPath,
 	components::button::ComponentButton,
 	globals::WguiGlobals,
 	i18n::Translation,
 	layout::{Layout, WidgetID},
-	parser::{Fetchable, ParseDocumentParams},
+	parser::{Fetchable, ParseDocumentParams, TemplateParams},
 	task::Tasks,
 };
 use wlx_common::{openxr_bindings_schema::XrControllerProfile, openxr_controller_profiles::OPENXR_INPUT_PROFILES};
@@ -73,9 +72,9 @@ impl View {
 		for (idx, profile) in OPENXR_INPUT_PROFILES.iter().enumerate() {
 			let id = format!("profile_btn_{idx}");
 
-			let mut cell_params: HashMap<Rc<str>, Rc<str>> = HashMap::new();
-			cell_params.insert(Rc::from("id"), Rc::from(id.clone()));
-			cell_params.insert(Rc::from("text"), Rc::from(profile.display_name));
+			let mut cell_params = TemplateParams::new();
+			cell_params.insert("id", &id);
+			cell_params.insert("text", profile.display_name);
 
 			parser_state.instantiate_template(
 				doc_params,
