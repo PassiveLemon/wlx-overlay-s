@@ -2,6 +2,8 @@ use glam::{Affine3A, Vec3A};
 use slotmap::new_key_type;
 use std::sync::Arc;
 
+use crate::windowing::window::scalar_scale;
+
 pub mod backend;
 pub mod manager;
 pub mod set;
@@ -28,7 +30,7 @@ pub const Z_ORDER_DASHBOARD: u32 = Z_ORDER_DEFAULT;
 
 pub fn snap_upright(transform: Affine3A, up_dir: Vec3A) -> Affine3A {
     if transform.x_axis.dot(up_dir).abs() < 0.2 {
-        let scale = transform.x_axis.length();
+        let scale = scalar_scale(&transform);
         let col_z = transform.z_axis.normalize();
         let col_y = up_dir;
         let col_x = col_y.cross(col_z);

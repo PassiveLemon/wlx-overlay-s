@@ -20,7 +20,7 @@ use crate::subsystem::hid::WheelDelta;
 use crate::subsystem::input::KeyboardFocus;
 use crate::windowing::backend::OverlayEventData;
 use crate::windowing::manager::OverlayWindowManager;
-use crate::windowing::window::{self, OverlayWindowData, realign};
+use crate::windowing::window::{self, OverlayWindowData, realign, scalar_scale, window_scale};
 use crate::windowing::{OverlayID, OverlaySelector};
 
 use super::task::TaskType;
@@ -825,7 +825,8 @@ where
             } else {
                 app.anchor.translation =
                     pointer.pose.transform_point3a(grab_data.offset.translation);
-                realign(&mut app.anchor, &app.input_state.hmd);
+                let scale = scalar_scale(&app.anchor);
+                realign(&mut app.anchor, &app.input_state.hmd, scale);
             }
         } else {
             // single grab resize
@@ -846,9 +847,10 @@ where
             if pointer.now.click_modifier_right {
                 overlay_state.transform = pointer.pose * grab_data.offset;
             } else {
+                let scale = window_scale(overlay_state);
                 overlay_state.transform.translation =
                     pointer.pose.transform_point3a(grab_data.offset.translation);
-                realign(&mut overlay_state.transform, &app.input_state.hmd);
+                realign(&mut overlay_state.transform, &app.input_state.hmd, scale);
             }
             overlay.config.pause_movement = true;
             overlay.config.dirty = true;

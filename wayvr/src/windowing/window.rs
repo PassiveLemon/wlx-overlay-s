@@ -146,6 +146,7 @@ impl OverlayWindowConfig {
         let cur_transform = state
             .saved_transform
             .unwrap_or(self.default_state.transform);
+        let scale = scalar_scale(&cur_transform);
 
         let (parent_transform, lerp, align_to_hmd) = match state.positioning {
             Positioning::FollowHead { lerp } => (app.input_state.hmd, lerp, false),
@@ -167,8 +168,6 @@ impl OverlayWindowConfig {
         state.transform = match lerp {
             1.0 => target_transform,
             lerp => {
-                let scale = target_transform.matrix3.x_axis.length();
-
                 let rot_from = Quat::from_mat3a(&state.transform.matrix3.div_scalar(scale));
                 let rot_to = Quat::from_mat3a(&target_transform.matrix3.div_scalar(scale));
 
@@ -187,7 +186,7 @@ impl OverlayWindowConfig {
         };
 
         if align_to_hmd {
-            realign(&mut state.transform, &app.input_state.hmd);
+            realign(&mut state.transform, &app.input_state.hmd, scale);
         }
 
         self.dirty = true;
@@ -244,13 +243,14 @@ impl OverlayWindowConfig {
         state.transform = parent_transform * cur_transform;
 
         if align_to_hmd || (state.grabbable && hard_reset) {
-            realign(&mut state.transform, &app.input_state.hmd);
+            let scale = scalar_scale(&cur_transform);
+            realign(&mut state.transform, &app.input_state.hmd, scale);
         }
         self.dirty = true;
     }
 }
 
-pub fn realign(transform: &mut Affine3A, hmd: &Affine3A) {
+pub fn realign(transform: &mut Affine3A, hmd: &Affine3A, scale: f32) {
     let to_hmd = hmd.translation - transform.translation;
     let up_dir: Vec3A;
 
@@ -277,8 +277,6 @@ pub fn realign(transform: &mut Affine3A, hmd: &Affine3A) {
         }
     }
 
-    let scale = transform.x_axis.length();
-
     let col_z = (transform.translation - hmd.translation).normalize();
     let col_y = up_dir;
     let col_x = col_y.cross(col_z);
@@ -287,6 +285,22 @@ pub fn realign(transform: &mut Affine3A, hmd: &Affine3A) {
 
     let rot = Mat3A::from_quat(Quat::from_axis_angle(Vec3::Y, PI));
     transform.matrix3 = Mat3A::from_cols(col_x, col_y, col_z).mul_scalar(scale) * rot;
+}
+
+pub fn window_scale(state: &OverlayWindowState) -> f32 {
+    state
+        .saved_transform
+        .as_ref()
+        .map(scalar_scale)
+        .unwrap_or_else(|| scalar_scale(&state.transform))
+}
+
+pub fn scalar_scale(a: &Affine3A) -> f32 {
+    let det = a.matrix3.determinant();
+    (a.matrix3.x_axis.length() * det.signum()
+        + a.matrix3.y_axis.length()
+        + a.matrix3.z_axis.length())
+        / 3.0
 }
 
 pub fn save_transform(state: &mut OverlayWindowState, app: &mut AppState) {
