@@ -10,7 +10,7 @@ use wlx_common::{
     astr_containers::AStrMap,
     config::{
         AltModifier, CaptureMethod, ChromaKeyParams, GeneralConfig, HandsfreePointer,
-        SerializedWindowSet, SerializedWindowStates,
+        InputEmulationMethod, SerializedWindowSet, SerializedWindowStates,
     },
     config_io,
     locale::Language,
@@ -182,6 +182,8 @@ pub struct AutoSettings {
     pub handsfree_pointer: HandsfreePointer,
     pub language: Option<Language>,
     pub chroma_key_params: ChromaKeyParams,
+    pub input_emulation_method: InputEmulationMethod,
+    pub tutorial_graduated: bool,
 }
 
 fn get_settings_path() -> PathBuf {
@@ -242,6 +244,8 @@ pub fn save_settings(config: &GeneralConfig) -> anyhow::Result<()> {
         handsfree_pointer: config.handsfree_pointer,
         language: config.language,
         chroma_key_params: config.chroma_key_params.clone(),
+        input_emulation_method: config.input_emulation_method,
+        tutorial_graduated: config.tutorial_graduated,
     };
 
     let json = serde_json::to_string_pretty(&conf).unwrap(); // want panic

@@ -427,4 +427,7 @@ pub struct GeneralConfig {
 
 	#[serde(default)]
 	pub chroma_key_params: ChromaKeyParams,
+
+	#[serde(default)]
+	pub tutorial_graduated: bool,
 }

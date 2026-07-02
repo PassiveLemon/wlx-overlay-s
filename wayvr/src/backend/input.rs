@@ -743,6 +743,20 @@ fn start_grab(
         grab_anchor,
     });
 
+    app.tasks.enqueue(TaskType::Overlay(OverlayTask::Modify(
+        OverlaySelector::Id(id),
+        Box::new({
+            let pos = state.positioning;
+            let name = name.clone();
+            move |app, o| {
+                let _ = o
+                    .backend
+                    .notify(app, OverlayEventData::OverlayGrabbed { name, pos, editing })
+                    .inspect_err(|e| log::warn!("Error during Notify OverlayGrabbed: {e:?}"));
+            }
+        }),
+    )));
+
     // Show anchor
     app.tasks.enqueue(TaskType::Overlay(OverlayTask::Modify(
         OverlaySelector::Name(ANCHOR_NAME.clone()),

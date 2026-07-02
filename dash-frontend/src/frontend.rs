@@ -29,8 +29,8 @@ use wlx_common::{
 use crate::{
 	assets,
 	tab::{
-		Tab, TabType, apps::TabApps, games::TabGames, home::TabHome, monado::TabMonado, settings::TabSettings,
-		welcome::TabWelcome,
+		apps::TabApps, games::TabGames, home::TabHome, monado::TabMonado, settings::TabSettings, welcome::TabWelcome, Tab,
+		TabType,
 	},
 	util::{
 		popup_manager::{MountPopupOnceParams, PopupManager, PopupManagerParams},
@@ -91,6 +91,7 @@ pub struct FrontendUpdateResult {
 pub struct InitParams<'a, T> {
 	pub interface: BoxDashInterface<T>,
 	pub lang_provider: &'a WayVRLangProvider,
+	pub show_welcome: bool,
 	pub has_monado: bool,
 	pub theme: Rc<WguiTheme>,
 }
@@ -156,7 +157,13 @@ impl<T: 'static> Frontend<T> {
 		let toast_manager = ToastManager::new();
 
 		let tasks = FrontendTasks::new();
-		tasks.push(FrontendTask::SetTab(TabType::Home));
+
+		let init_tab = if params.show_welcome {
+			TabType::Welcome
+		} else {
+			TabType::Home
+		};
+		tasks.push(FrontendTask::SetTab(init_tab));
 
 		let id_label_time = state.get_widget_id("label_time")?;
 		let id_rect_content = state.get_widget_id("rect_content")?;
