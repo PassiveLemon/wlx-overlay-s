@@ -212,7 +212,7 @@ impl View {
 		let action_names = [
 			"click",
 			"grab",
-			"alt_click",
+			"scroll",
 			"show_hide",
 			"toggle_dashboard",
 			"space_drag",
@@ -220,8 +220,8 @@ impl View {
 			"space_reset",
 			"click_modifier_right",
 			"click_modifier_middle",
+			"alt_click",
 			"move_mouse",
-			"scroll",
 		];
 
 		let mut mp = MacroParams {

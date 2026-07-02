@@ -83,7 +83,7 @@
 				"CLICK_MODIFIER_RIGHT": "Right-click modifier",
 				"CLICK_MODIFIER_MIDDLE": "Middle-click modifier",
 				"MOVE_MOUSE": "Move mouse (if off by default)",
-				"SCROLL": "Scroll"
+				"SCROLL": "Scroll*"
 			},
 			"LEFT": "Left",
 			"RIGHT": "Right",
