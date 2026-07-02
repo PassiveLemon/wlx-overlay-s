@@ -261,9 +261,9 @@
 	"DONATE": {
 		"SUPPORT_US": "私たちを支援する",
 		"DESCRIPTION": "私たちは、空き時間にWayVRを開発している2人の開発者からなる小さなチームです。もしこのソフトウェアを気に入っていただけたなら、ぜひ支援をご検討ください。皆様からの寄付は、開発を継続していくための大きな助けとなります。",
-		"THANK_YOU": "ありがとうございます！",
 		"BUTTON_TOOLTIP": "Open Collectiveで寄付する",
-		"CURRENT_SUPPORTERS": "現在のサポーター"
+		"CURRENT_SUPPORTERS": "現在のサポーター",
+		"THANK_YOU_WAYVR": "WayVRチーム一同より、感謝を込めて！"
 	},
 	"WELCOME": {
 		"ALL_SET": "準備完了です！",

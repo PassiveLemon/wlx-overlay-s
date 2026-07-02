@@ -261,9 +261,9 @@
 	"DONATE": {
 		"SUPPORT_US": "Unterstütze uns",
 		"DESCRIPTION": "Wir sind ein kleines Team aus zwei Entwicklern, die WayVR in ihrer Freizeit bauen. Wenn Ihnen die Nutzung dieser Software Spaß macht, unterstützen Sie uns bitte – jede Spende hilft uns, weiterzumachen.",
-		"THANK_YOU": "Vielen Dank!",
 		"BUTTON_TOOLTIP": "Spenden über Open Collective",
-		"CURRENT_SUPPORTERS": "Aktuelle Unterstützer"
+		"CURRENT_SUPPORTERS": "Aktuelle Unterstützer",
+		"THANK_YOU_WAYVR": "Vielen Dank vom WayVR-Team!"
 	},
 	"WELCOME": {
 		"ALL_SET": "Du bist startklar!",

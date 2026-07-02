@@ -28,7 +28,7 @@
         <label text="opencollective.com/wayvr-org" color="~color-accent"/>
       </div>
 
-      <label weight="bold" size="24" translation="DONATE.THANK_YOU"/>
+      <label weight="bold" size="24" translation="DONATE.THANK_YOU_WAYVR"/>
 
       <div gap="32" margin_top="16">
         <Avatar icon="dashboard/avatars/galister.png" nickname="galister"/>

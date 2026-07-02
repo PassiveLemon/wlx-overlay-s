@@ -223,7 +223,7 @@
 	"DONATE": {
 		"SUPPORT_US": "Support us",
 		"DESCRIPTION": "We're a small team of 2 developers building WayVR in our free time. If you enjoy using this software, please consider supporting us - every donation helps us keep going.",
-		"THANK_YOU": "Thank you!",
+		"THANK_YOU_WAYVR": "Thank you from the WayVR Team!",
 		"BUTTON_TOOLTIP": "Donate via Open Collective",
 		"CURRENT_SUPPORTERS": "Current Supporters"
 	},
