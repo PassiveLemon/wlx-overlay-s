@@ -1,6 +1,7 @@
 use crate::frontend::Frontend;
 
 pub mod apps;
+pub mod donate;
 pub mod games;
 pub mod home;
 pub mod monado;
@@ -15,12 +16,13 @@ pub enum TabType {
 	Monado,
 	Settings,
 	Welcome,
+	Donate,
 }
 
 impl TabType {
 	pub fn get_preferred_padding(&self) -> f32 {
 		match self {
-			TabType::Welcome => 0.0,
+			TabType::Welcome | TabType::Donate => 0.0,
 			_ => 16.0,
 		}
 	}

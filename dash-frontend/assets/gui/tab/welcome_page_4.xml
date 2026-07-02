@@ -5,13 +5,13 @@
     <rectangle color="#0A2939" width="100%" height="100%" position="absolute"/>
     <Video macro="video_overlay_component" src_builtin="video/onboarding_center_marker.ivf" aspect_ratio="1.33333">
       <div macro="video_overlay_content">
-        <PageTitle icon="dashboard/panorama.svg" title="Moving your set"/>
+        <PageTitle icon="dashboard/panorama.svg" translation="WELCOME.MOVING_YOUR_SET"/>
         <div position="relative" align_self="end" padding="16" flex_direction="column" gap="4">
-          <label shadow="#000000" size="14" weight="bold" wrap="1" color="#aaffcc" text="— Grab it with one hand to move your set."/>
-          <label shadow="#000000" size="14" weight="bold" wrap="1" color="#ccaaff" text="— Grab it with both hands if you want to move a specific overlay in your set."/>
+          <label shadow="#000000" size="14" weight="bold" wrap="1" color="#aaffcc" translation="WELCOME.GRAB_ONE_HAND"/>
+          <label shadow="#000000" size="14" weight="bold" wrap="1" color="#ccaaff" translation="WELCOME.GRAB_BOTH_HANDS"/>
           <div align_items="center" gap="8">
             <sprite src_builtin="dashboard/info.svg" width="24" height="24" color="#ffff00"/>
-            <label shadow="#000000" size="16" weight="bold" wrap="1" color="#ffff00" text="Center marker determines the center or your set."/>
+            <label shadow="#000000" size="16" weight="bold" wrap="1" color="#ffff00" translation="WELCOME.CENTER_MARKER"/>
           </div>
         </div>
       </div>

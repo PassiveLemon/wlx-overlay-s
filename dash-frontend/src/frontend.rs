@@ -21,7 +21,7 @@ use wgui::{
 use wlx_common::{
 	async_executor::AsyncExecutor,
 	audio,
-	dash_interface::{BoxDashInterface, RecenterMode},
+	dash_interface::{BoxDashInterface, ConfigChangeKind, RecenterMode},
 	locale::WayVRLangProvider,
 	timestep::{self, Timestep},
 };
@@ -29,8 +29,8 @@ use wlx_common::{
 use crate::{
 	assets,
 	tab::{
-		Tab, TabType, apps::TabApps, games::TabGames, home::TabHome, monado::TabMonado, settings::TabSettings,
-		welcome::TabWelcome,
+		Tab, TabType, apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado,
+		settings::TabSettings, welcome::TabWelcome,
 	},
 	util::{
 		popup_manager::{MountPopupOnceParams, PopupManager, PopupManagerParams},
@@ -91,6 +91,7 @@ pub struct FrontendUpdateResult {
 pub struct InitParams<'a, T> {
 	pub interface: BoxDashInterface<T>,
 	pub lang_provider: &'a WayVRLangProvider,
+	pub show_welcome: bool,
 	pub has_monado: bool,
 	pub theme: Rc<WguiTheme>,
 }
@@ -113,7 +114,9 @@ pub enum FrontendTask {
 	RecenterPlayspace,
 	PushToast(Translation),
 	PlaySound(SoundType),
+	OpenURL(Rc<str>),
 	HideDashboard,
+	MarkTutorialGraduated,
 }
 
 impl<T: 'static> Frontend<T> {
@@ -156,7 +159,13 @@ impl<T: 'static> Frontend<T> {
 		let toast_manager = ToastManager::new();
 
 		let tasks = FrontendTasks::new();
-		tasks.push(FrontendTask::SetTab(TabType::Home));
+
+		let init_tab = if params.show_welcome {
+			TabType::Welcome
+		} else {
+			TabType::Home
+		};
+		tasks.push(FrontendTask::SetTab(init_tab));
 
 		let id_label_time = state.get_widget_id("label_time")?;
 		let id_rect_content = state.get_widget_id("rect_content")?;
@@ -360,6 +369,8 @@ impl<T: 'static> Frontend<T> {
 			FrontendTask::PushToast(content) => self.toast_manager.push(content),
 			FrontendTask::PlaySound(sound_type) => self.queue_play_sound(sound_type),
 			FrontendTask::HideDashboard => self.action_hide_dashboard(params.data),
+			FrontendTask::OpenURL(url) => self.action_open_url(url),
+			FrontendTask::MarkTutorialGraduated => self.action_tutorial_graduated(params.data),
 		};
 		Ok(())
 	}
@@ -407,6 +418,7 @@ impl<T: 'static> Frontend<T> {
 			TabType::Games => ("GAMES", "dashboard/games.svg"),
 			TabType::Monado => ("MONADO_RUNTIME", "dashboard/monado.svg"),
 			TabType::Settings => ("SETTINGS", "dashboard/settings.svg"),
+			TabType::Donate => ("DONATE.SUPPORT_US", "dashboard/opencollective.svg"),
 		};
 
 		self.set_tab_title(tab_translation, icon_path)?;
@@ -418,6 +430,7 @@ impl<T: 'static> Frontend<T> {
 			TabType::Games => Box::new(TabGames::new(self, widget_content.id)?),
 			TabType::Monado => Box::new(TabMonado::new(self, widget_content.id)?),
 			TabType::Settings => Box::new(TabSettings::new(self, widget_content.id, data)?),
+			TabType::Donate => Box::new(TabDonate::new(self, widget_content.id, data)?),
 		};
 
 		self.current_tab = Some(tab);
@@ -532,5 +545,21 @@ impl<T: 'static> Frontend<T> {
 
 	fn action_hide_dashboard(&mut self, data: &mut T) {
 		self.interface.toggle_dashboard(data);
+	}
+
+	fn action_tutorial_graduated(&mut self, data: &mut T) {
+		let config = self.interface.general_config(data);
+		config.tutorial_graduated = true;
+		self.interface.config_changed(data, ConfigChangeKind::Other);
+	}
+
+	fn action_open_url(&mut self, url: Rc<str>) {
+		let _ = std::process::Command::new("xdg-open").arg(url.as_ref()).spawn();
+		self
+			.tasks
+			.push(FrontendTask::PushToast(Translation::from_raw_text_string(format!(
+				"Opened URL: {}",
+				url
+			))));
 	}
 }

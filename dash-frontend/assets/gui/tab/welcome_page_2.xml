@@ -4,9 +4,9 @@
   <elements>
     <Video macro="video_overlay_component" src_builtin="video/onboarding_double_press.ivf">
       <div macro="video_overlay_content">
-        <PageTitle icon="dashboard/panorama.svg" title="Working Set"/>
+        <PageTitle icon="dashboard/panorama.svg" translation="WELCOME.WORKING_SET"/>
         <div position="relative" align_self="end" padding="16">
-          <TextDesc text="Double-press B (on Index) or Y (on Meta) to toggle the visibility of your workspace. Try it now."/>
+          <TextDesc translation="WELCOME.DOUBLE_PRESS_TO_TOGGLE"/>
         </div>
       </div>
     </Video>

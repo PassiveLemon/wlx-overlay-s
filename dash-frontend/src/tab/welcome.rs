@@ -140,9 +140,16 @@ impl<T> TabWelcome<T> {
 				let tasks = self.frontend_tasks.clone();
 				Rc::new(move |_, _| {
 					tasks.push(FrontendTask::SetTab(TabType::Home));
+					tasks.push(FrontendTask::MarkTutorialGraduated);
 					Ok(())
 				})
 			});
+		}
+
+		if let Ok(btn) = state.fetch_component_as::<ComponentButton>("btn_wayvr_org") {
+			self
+				.frontend_tasks
+				.handle_button(&btn, FrontendTask::OpenURL(Rc::from("https://wayvr.org")));
 		}
 
 		self.state_tab = Some(state);

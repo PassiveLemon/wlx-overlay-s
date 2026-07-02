@@ -257,5 +257,37 @@
 	"APPLY": "適用",
 	"RELOAD_FROM_DISK": "ディスクからリロード",
 	"TARGET_PATH": "ターゲットパス",
-	"VERSION": "バージョン"
+	"VERSION": "バージョン",
+	"DONATE": {
+		"SUPPORT_US": "私たちを支援する",
+		"DESCRIPTION": "私たちは、空き時間にWayVRを開発している2人の開発者からなる小さなチームです。もしこのソフトウェアを気に入っていただけたなら、ぜひ支援をご検討ください。皆様からの寄付は、開発を継続していくための大きな助けとなります。",
+		"BUTTON_TOOLTIP": "Open Collectiveで寄付する",
+		"CURRENT_SUPPORTERS": "現在のサポーター",
+		"THANK_YOU_WAYVR": "WayVRチーム一同より、感謝を込めて！"
+	},
+	"WELCOME": {
+		"ALL_SET": "準備完了です！",
+		"BASICS": "これらの基本操作を学ぶことで、WayVRを簡単に使い始めることができます。",
+		"CENTER_MARKER": "センターマーカーは、セットの中心を決定します。",
+		"DOUBLE_PRESS_TO_TOGGLE": "Bボタン (Index) または Yボタン (Meta) をダブルプレスして、ワークスペースの表示/非表示を切り替えます。今すぐ試してみてください。",
+		"FEATURES_DOCUMENTATION": "他にもカスタマイズする価値のある機能がたくさんあります。詳細については、以下のドキュメントを確認してください。",
+		"FINISH_TUTORIAL": "チュートリアルを終了する",
+		"GRAB_BOTH_HANDS": "セット内の特定のオーバーレイを移動させたい場合は、両手で掴んでください。",
+		"GRAB_ONE_HAND": "片手で掴んでセットを移動させます。",
+		"GREETING": "こんにちは！",
+		"GUIDE_INTRO": "最初の手順をご案内します。",
+		"LASER_COLORS": "レーザーの色",
+		"LASER_FUNCTIONALITY": "WayVRの機能の多くは、UI要素を操作する際に使用されるレーザーの色に依存しています。これらのボタンは押す必要はなく、ただ触れるだけで操作できます！",
+		"LAST_PAGE_INFO": "最後のページに到達すると、このチュートリアルは表示されなくなります。",
+		"LOOK_AT_LEFT_WRIST": "左手首を見てください。それがあなたのWatchです。",
+		"MIDDLE_CLICK_MODE_PURPLE_LASER": "— ミドルクリックモード：紫色のレーザー",
+		"MOVING_YOUR_SET": "セットを移動中",
+		"NEXT_BUTTON": "「次へ」ボタンを押して開始してください。",
+		"REGULAR_MODE_BLUE_LASER": "— 通常モード: ブルーレーザー",
+		"REPOSITION_THIS_WINDOW_BY_GRABBING": "コントローラーのグリップアクションを使用して、このウィンドウの位置を再設定します。",
+		"RIGHT_CLICK_MODE_ORANGE_LASER": "— 右クリックモード：オレンジ色のレーザー",
+		"THANKS_FOR_INSTALLING": "WayVRをインストールしていただきありがとうございます！",
+		"WATCH": "Watch",
+		"WORKING_SET": "ワーキングセット"
+	}
 }

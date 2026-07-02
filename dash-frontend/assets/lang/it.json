@@ -257,5 +257,37 @@
 	"APPLY": "Applica",
 	"RELOAD_FROM_DISK": "Ricarica da disco",
 	"TARGET_PATH": "Percorso di destinazione",
-	"VERSION": "Versione"
+	"VERSION": "Versione",
+	"DONATE": {
+		"SUPPORT_US": "Sostienici",
+		"DESCRIPTION": "Siamo un piccolo team di 2 sviluppatori che crea WayVR nel tempo libero. Se ti piace usare questo software, considera di supportarci: ogni donazione ci aiuta a continuare.",
+		"BUTTON_TOOLTIP": "Dona tramite Open Collective",
+		"CURRENT_SUPPORTERS": "Sostenitori attuali",
+		"THANK_YOU_WAYVR": "Grazie dal team WayVR!"
+	},
+	"WELCOME": {
+		"ALL_SET": "Sei pronto!",
+		"BASICS": "Queste nozioni di base ti permetteranno di iniziare a usare WayVR con facilità.",
+		"CENTER_MARKER": "Il marker centrale determina il centro del tuo set.",
+		"DOUBLE_PRESS_TO_TOGGLE": "Premi due volte B (su Index) o Y (su Meta) per attivare/disattivare la visibilità del tuo workspace. Provalo subito.",
+		"FEATURES_DOCUMENTATION": "Ci sono molte altre funzioni che vale la pena personalizzare. Per ulteriori informazioni, consulta la documentazione all'indirizzo",
+		"FINISH_TUTORIAL": "Termina tutorial",
+		"GRAB_BOTH_HANDS": "Afferralo con entrambe le mani se vuoi spostare un overlay specifico nel tuo set.",
+		"GRAB_ONE_HAND": "Afferralo con una mano per muovere il tuo set.",
+		"GREETING": "Ciao!",
+		"GUIDE_INTRO": "Lascia che ti guidiamo nei tuoi primi passi.",
+		"LASER_COLORS": "Colori Laser",
+		"LASER_FUNCTIONALITY": "Gran parte delle funzionalità in WayVR dipende dal colore del laser utilizzato per interagire con un elemento dell'interfaccia utente. Non è necessario premere questi pulsanti, basta toccarli!",
+		"LAST_PAGE_INFO": "Questo tutorial smetterà di apparire una volta raggiunta l'ultima pagina.",
+		"LOOK_AT_LEFT_WRIST": "Guarda il tuo polso sinistro. È il tuo watch.",
+		"MIDDLE_CLICK_MODE_PURPLE_LASER": "— Modalità click centrale: Laser viola",
+		"MOVING_YOUR_SET": "Spostamento del tuo set",
+		"NEXT_BUTTON": "Premi il pulsante \"Avanti\" qui sotto per iniziare.",
+		"REGULAR_MODE_BLUE_LASER": "— Modalità Standard: Laser blu",
+		"REPOSITION_THIS_WINDOW_BY_GRABBING": "Riposiziona questa finestra usando l'azione grip del tuo controller.",
+		"RIGHT_CLICK_MODE_ORANGE_LASER": "— Modalità tasto destro: Laser arancione",
+		"THANKS_FOR_INSTALLING": "Grazie per aver installato WayVR!",
+		"WATCH": "Watch",
+		"WORKING_SET": "Set di lavoro"
+	}
 }

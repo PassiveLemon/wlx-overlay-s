@@ -257,5 +257,37 @@
 	"APPLY": "应用",
 	"RELOAD_FROM_DISK": "从磁盘重新加载",
 	"TARGET_PATH": "目标路径",
-	"VERSION": "版本"
+	"VERSION": "版本",
+	"DONATE": {
+		"SUPPORT_US": "支持我们",
+		"DESCRIPTION": "我们是一个由 2 名开发者组成的精简团队，在业余时间开发 WayVR。如果您喜欢这款软件，请考虑支持我们 —— 每一次捐赠都能帮助我们继续开发下去。",
+		"BUTTON_TOOLTIP": "通过 Open Collective 捐赠",
+		"CURRENT_SUPPORTERS": "当前支持者",
+		"THANK_YOU_WAYVR": "WayVR 团队向您表示感谢！"
+	},
+	"WELCOME": {
+		"ALL_SET": "你已准备就绪！",
+		"BASICS": "这些基础知识将帮助您轻松开始使用 WayVR。",
+		"CENTER_MARKER": "中心标记确定了您 Set 的中心位置。",
+		"DOUBLE_PRESS_TO_TOGGLE": "双击 B（Index 控制器）或 Y（Meta 控制器）来切换工作区显示。立即尝试一下。",
+		"FEATURES_DOCUMENTATION": "还有许多其他值得自定义的功能。欲了解更多信息，请查看文档：",
+		"FINISH_TUTORIAL": "完成教程",
+		"GRAB_BOTH_HANDS": "如果你想移动 Set 中的特定叠加层，请用双手抓取。",
+		"GRAB_ONE_HAND": "用一只手抓取即可移动你的 Set。",
+		"GREETING": "你好！",
+		"GUIDE_INTRO": "让我们引导你完成初步设置。",
+		"LASER_COLORS": "激光颜色",
+		"LASER_FUNCTIONALITY": "WayVR 中的许多功能都取决于使用何种颜色的激光来与 UI 元素进行交互。您不需要按下这些按钮，只需触摸它们即可！",
+		"LAST_PAGE_INFO": "一旦你到达最后一页，此教程将不再显示。",
+		"LOOK_AT_LEFT_WRIST": "看向你的左手腕。那就是你的手表。",
+		"MIDDLE_CLICK_MODE_PURPLE_LASER": "— 中键模式：紫色激光",
+		"MOVING_YOUR_SET": "正在移动您的 Set",
+		"NEXT_BUTTON": "按下下方的“下一步”按钮以开始。",
+		"REGULAR_MODE_BLUE_LASER": "— 普通模式：蓝色激光",
+		"REPOSITION_THIS_WINDOW_BY_GRABBING": "使用控制器的抓取操作重新定位此窗口。",
+		"RIGHT_CLICK_MODE_ORANGE_LASER": "— 右键模式：橙色激光",
+		"THANKS_FOR_INSTALLING": "感谢安装 WayVR！",
+		"WATCH": "Watch",
+		"WORKING_SET": "工作集"
+	}
 }

@@ -1,7 +1,11 @@
-use std::sync::atomic::Ordering;
+use std::{
+    ops::Add,
+    sync::{Arc, atomic::Ordering},
+    time::{Duration, Instant},
+};
 
 use dash_frontend::frontend::{self, FrontendTask, FrontendUpdateParams};
-use glam::{Affine2, Affine3A, Vec2, vec2, vec3};
+use glam::{Affine2, Affine3A, Quat, Vec2, vec2, vec3};
 use wayvr_ipc::{
     packet_client::WvrProcessLaunchParams,
     packet_server::{WvrProcess, WvrProcessHandle, WvrWindow, WvrWindowHandle},
@@ -49,7 +53,7 @@ use crate::{
             FrameMeta, OverlayBackend, OverlayEventData, RenderResources, ShouldRender,
             ui_transform,
         },
-        window::{OverlayCategory, OverlayWindowConfig},
+        window::{OverlayCategory, OverlayWindowConfig, realign},
     },
 };
 
@@ -65,6 +69,7 @@ pub struct DashFrontend {
     timestep: Timestep,
     has_focus: [bool; 2],
     context: WguiContext,
+    tutorial: bool,
 }
 
 const GUI_SCALE: f32 = 2.0;
@@ -81,9 +86,12 @@ impl DashFrontend {
             }
         }
 
+        let tutorial = !app.session.config.tutorial_graduated;
+
         let frontend = frontend::Frontend::new(frontend::InitParams {
             interface: Box::new(interface),
             lang_provider: &WayVRLangProvider::from_config(&app.session.config),
+            show_welcome: tutorial,
             has_monado: matches!(app.xr_backend, XrBackend::OpenXR),
             theme: app.wgui_theme.clone(),
         })?;
@@ -100,6 +108,7 @@ impl DashFrontend {
             timestep: Timestep::new(60.0),
             has_focus: [false, false],
             context,
+            tutorial,
         })
     }
 
@@ -197,7 +206,26 @@ impl OverlayBackend for DashFrontend {
         })
     }
 
-    fn notify(&mut self, _app: &mut AppState, _data: OverlayEventData) -> anyhow::Result<()> {
+    fn notify(&mut self, app: &mut AppState, data: OverlayEventData) -> anyhow::Result<()> {
+        if !self.tutorial {
+            return Ok(());
+        }
+
+        // if we're grabbed, stop following the hmd
+        if let OverlayEventData::OverlayGrabbed { name, .. } = data {
+            if &*name == DASH_NAME {
+                self.tutorial = false;
+                app.tasks.enqueue(TaskType::Overlay(OverlayTask::Modify(
+                    OverlaySelector::Name(name),
+                    Box::new(|_app, owc| {
+                        if let Some(active_state) = owc.active_state.as_mut() {
+                            active_state.positioning = Positioning::Floating;
+                        }
+                    }),
+                )));
+            }
+        }
+
         Ok(())
     }
 
@@ -290,7 +318,56 @@ impl OverlayBackend for DashFrontend {
     }
 }
 
+fn tutorial_spawn_effect(app: &mut AppState) -> anyhow::Result<()> {
+    let dash_name: Arc<str> = DASH_NAME.into();
+
+    app.tasks.enqueue_at(
+        TaskType::Overlay(OverlayTask::Modify(
+            OverlaySelector::Name(dash_name.clone()),
+            Box::new(|app, owc| {
+                let hmd = &app.input_state.hmd;
+                let pos = hmd.translation + hmd.z_axis * -2.0;
+                let mut transform = Affine3A::from_rotation_translation(Quat::IDENTITY, pos.into());
+                realign(&mut transform, hmd, 1.0);
+
+                owc.active_state = Some(OverlayWindowState {
+                    saved_transform: Some(Affine3A::from_translation(vec3(0., -0.1, -0.9))),
+                    transform,
+                    grabbable: true,
+                    interactable: true,
+                    positioning: Positioning::FollowHead { lerp: 0.01 },
+                    curvature: Some(0.15),
+                    alpha: 0.1,
+                    ..Default::default()
+                });
+            }),
+        )),
+        Instant::now().add(Duration::from_millis(500)),
+    );
+
+    // hacky fade in over time
+    for i in 0..46 {
+        app.tasks.enqueue_at(
+            TaskType::Overlay(OverlayTask::Modify(
+                OverlaySelector::Name(dash_name.clone()),
+                Box::new(|_app, owc| {
+                    if let Some(active_state) = owc.active_state.as_mut() {
+                        active_state.alpha = (active_state.alpha + 0.025).min(1.0);
+                    }
+                }),
+            )),
+            Instant::now().add(Duration::from_millis(500 + 40 * i)),
+        );
+    }
+
+    Ok(())
+}
+
 pub fn create_dash_frontend(app: &mut AppState) -> anyhow::Result<OverlayWindowConfig> {
+    if !app.session.config.tutorial_graduated {
+        tutorial_spawn_effect(app)?;
+    }
+
     Ok(OverlayWindowConfig {
         name: DASH_NAME.into(),
         default_state: OverlayWindowState {
@@ -465,6 +542,7 @@ impl DashInterface<AppState> for DashInterfaceLive {
                         .enqueue(TaskType::OpenXR(OpenXrTask::EnvironmentChanged));
                 }
             }
+            _ => {}
         }
     }
 
