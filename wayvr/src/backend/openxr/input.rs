@@ -656,7 +656,7 @@ fn suggest_bindings(instance: &xr::Instance, hands: &mut [&mut OpenXrHandSource;
     let profiles = load_xr_input_profiles();
 
     for profile in profiles {
-        log::warn!("Loading profile {}", &profile.profile);
+        log::debug!("Loading profile {}", &profile.profile);
 
         let Ok(profile_path) = instance.string_to_path(&profile.profile) else {
             log::warn!("Profile not supported: {}", profile.profile);
@@ -720,8 +720,7 @@ fn suggest_bindings(instance: &xr::Instance, hands: &mut [&mut OpenXrHandSource;
                 .suggest_interaction_profile_bindings(profile_path, &bindings)
                 .is_err()
             {
-                log::error!("Bad bindings for {}", &profile.profile[22..]);
-                log::error!("Verify config: ~/.config/wayvr/openxr_actions.json5");
+                log::warn!("Could not apply bindings for {}", &profile.profile[22..]);
             } else {
                 log::debug!(
                     "Bindings for {} bound successfully.",

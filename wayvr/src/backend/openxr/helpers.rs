@@ -41,6 +41,11 @@ pub(super) fn init_xr() -> Result<(xr::Instance, xr::SystemId), anyhow::Error> {
     } else {
         log::warn!("Missing EXT_dpad_binding extension.");
     }
+    if available_extensions.ext_samsung_odyssey_controller {
+        enabled_extensions.ext_samsung_odyssey_controller = true;
+    } else {
+        log::warn!("Missing XR_EXT_samsung_odyssey_controller extension.");
+    }
     if available_extensions.ext_hp_mixed_reality_controller {
         enabled_extensions.ext_hp_mixed_reality_controller = true;
     } else {

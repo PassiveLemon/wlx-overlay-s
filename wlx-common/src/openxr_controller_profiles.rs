@@ -61,6 +61,10 @@ const VALVE_INDEX_USER_PATHS: &[XrInputSubpath] = &[
 			XrInputComponent::Touch,
 			XrInputComponent::X,
 			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
 		],
 	},
 	XrInputSubpath {
@@ -70,6 +74,10 @@ const VALVE_INDEX_USER_PATHS: &[XrInputSubpath] = &[
 			XrInputComponent::Touch,
 			XrInputComponent::X,
 			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
 		],
 	},
 	XrInputSubpath {
@@ -154,6 +162,10 @@ static VALVE_FRAME_CONTROLLER_VALVE_RIGHT_USER_PATHS: &[XrInputSubpath] = &[
 			XrInputComponent::Touch,
 			XrInputComponent::X,
 			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
 		],
 	},
 	XrInputSubpath {
@@ -222,6 +234,10 @@ static VALVE_FRAME_CONTROLLER_VALVE_LEFT_USER_PATHS: &[XrInputSubpath] = &[
 			XrInputComponent::Touch,
 			XrInputComponent::X,
 			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
 		],
 	},
 	XrInputSubpath {
@@ -282,6 +298,10 @@ const OCULUS_TOUCH_LEFT_USER_PATHS: &[XrInputSubpath] = &[
 			XrInputComponent::Touch,
 			XrInputComponent::X,
 			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
 		],
 	},
 	XrInputSubpath {
@@ -330,6 +350,10 @@ const OCULUS_TOUCH_RIGHT_USER_PATHS: &[XrInputSubpath] = &[
 			XrInputComponent::Touch,
 			XrInputComponent::X,
 			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
 		],
 	},
 	XrInputSubpath {
@@ -389,7 +413,15 @@ const HP_MIXED_REALITY_LEFT_USER_PATHS: &[XrInputSubpath] = &[
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Thumbstick,
-		components: &[XrInputComponent::Click, XrInputComponent::X, XrInputComponent::Y],
+		components: &[
+			XrInputComponent::Click,
+			XrInputComponent::X,
+			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
+		],
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Grip,
@@ -428,7 +460,15 @@ const HP_MIXED_REALITY_RIGHT_USER_PATHS: &[XrInputSubpath] = &[
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Thumbstick,
-		components: &[XrInputComponent::Click, XrInputComponent::X, XrInputComponent::Y],
+		components: &[
+			XrInputComponent::Click,
+			XrInputComponent::X,
+			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
+		],
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Grip,
@@ -446,7 +486,7 @@ const HP_MIXED_REALITY_RIGHT_USER_PATHS: &[XrInputSubpath] = &[
 
 pub const SAMSUNG_ODYSSEY_CONTROLLER_PROFILE: XrControllerProfile = XrControllerProfile {
 	display_name: "Samsung Odyssey Controller",
-	extension: None,
+	extension: Some("XR_EXT_samsung_odyssey_controller"),
 	profile_id: "/interaction_profiles/samsung/odyssey_controller",
 	user_paths: &[
 		XrControllerUserPath {
@@ -475,7 +515,15 @@ const SAMSUNG_ODYSSEY_USER_PATHS: &[XrInputSubpath] = &[
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Thumbstick,
-		components: &[XrInputComponent::Click, XrInputComponent::X, XrInputComponent::Y],
+		components: &[
+			XrInputComponent::Click,
+			XrInputComponent::X,
+			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
+		],
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Trackpad,
@@ -484,6 +532,10 @@ const SAMSUNG_ODYSSEY_USER_PATHS: &[XrInputSubpath] = &[
 			XrInputComponent::Touch,
 			XrInputComponent::X,
 			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
 		],
 	},
 	XrInputSubpath {
@@ -540,6 +592,10 @@ const HTC_VIVE_USER_PATHS: &[XrInputSubpath] = &[
 			XrInputComponent::Touch,
 			XrInputComponent::X,
 			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
 		],
 	},
 	XrInputSubpath {
@@ -587,7 +643,15 @@ const MICROSOFT_MOTION_CONTROLLER_USER_PATHS: &[XrInputSubpath] = &[
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Thumbstick,
-		components: &[XrInputComponent::Click, XrInputComponent::X, XrInputComponent::Y],
+		components: &[
+			XrInputComponent::Click,
+			XrInputComponent::X,
+			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
+		],
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Trackpad,
@@ -596,6 +660,10 @@ const MICROSOFT_MOTION_CONTROLLER_USER_PATHS: &[XrInputSubpath] = &[
 			XrInputComponent::Touch,
 			XrInputComponent::X,
 			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
 		],
 	},
 	XrInputSubpath {
@@ -639,7 +707,15 @@ const KHR_GENERIC_CONTROLLER_USER_PATHS: &[XrInputSubpath] = &[
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Thumbstick,
-		components: &[XrInputComponent::Click, XrInputComponent::X, XrInputComponent::Y],
+		components: &[
+			XrInputComponent::Click,
+			XrInputComponent::X,
+			XrInputComponent::Y,
+			XrInputComponent::DpadUp,
+			XrInputComponent::DpadDown,
+			XrInputComponent::DpadLeft,
+			XrInputComponent::DpadRight,
+		],
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Squeeze,

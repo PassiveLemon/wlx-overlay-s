@@ -106,6 +106,16 @@ pub enum XrInputComponent {
 	#[strum(props(Translation = "APP_SETTINGS.BINDINGS.COMP.Y_AXIS"))]
 	Y,
 
+	// thumbstick/trackpad d-pad bindings via EXT_dpad_binding
+	#[strum(props(Translation = "APP_SETTINGS.BINDINGS.TYPE.DPAD_UP"))]
+	DpadUp,
+	#[strum(props(Translation = "APP_SETTINGS.BINDINGS.TYPE.DPAD_DOWN"))]
+	DpadDown,
+	#[strum(props(Translation = "APP_SETTINGS.BINDINGS.TYPE.DPAD_LEFT"))]
+	DpadLeft,
+	#[strum(props(Translation = "APP_SETTINGS.BINDINGS.TYPE.DPAD_RIGHT"))]
+	DpadRight,
+
 	// below are hidden
 	Pose,
 }
