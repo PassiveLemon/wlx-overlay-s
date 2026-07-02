@@ -16,6 +16,8 @@ Glossary:
 - Set: A list of virtual overlays you can interact with
 - Watch: An overlay anchored to your left hand in which you can display a dashboard, see your current date and time or toggle your sets.
 - Skymap: An equirectangular skybox
+- Force: in bindings: button force press value between 0.0 and 1.0
+
 End of glossary.
 
 You will be given the input in the code blocks which needs to be translated to {TARGET_LANG} language. Write only the result in codeblocks, do not explain. Keep any newlines and other important formatting-required identifiers as-is, in the same state.

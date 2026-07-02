@@ -6,6 +6,8 @@
 # regularly updating the missing translation strings anyway.
 #
 # Base language: English (en.json)
+# 
+# This tool expects llama.cpp server being present (llama-server) at port 8080.
 
 set -e
 cd "$(dirname "$0")"
