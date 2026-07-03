@@ -139,7 +139,9 @@ impl State {
 
 		let c = options_category(par.mp, par.id_parent, "APP_SETTINGS.FEATURES", "dashboard/options.svg")?;
 
-		whisper_models_dropdown(par.mp, c)?;
+		if par.feats.whisper {
+			whisper_models_dropdown(par.mp, c)?;
+		}
 
 		options_checkbox(par.mp, c, SettingType::NotificationsEnabled)?;
 		options_checkbox(par.mp, c, SettingType::NotificationsSoundEnabled)?;

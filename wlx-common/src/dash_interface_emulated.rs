@@ -240,6 +240,7 @@ impl DashInterface<()> for DashInterfaceEmulated {
 		dash_interface::InterfaceFeats {
 			openxr: true,
 			monado: true,
+			whisper: true,
 		}
 	}
 
