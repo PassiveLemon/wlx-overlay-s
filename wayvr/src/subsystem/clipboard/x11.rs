@@ -12,12 +12,12 @@ use xcb::{Xid, x};
 
 use crate::{RUNNING, subsystem::clipboard::ClipboardProvider};
 
-pub struct X11ClipboardProvider {
+pub struct Provider {
     tx: Sender<Command>,
     worker: Option<JoinHandle<()>>,
 }
 
-impl X11ClipboardProvider {
+impl Provider {
     pub fn new() -> Result<Self, Box<dyn Error + Send + Sync + 'static>> {
         let (conn, screen_num) = xcb::Connection::connect(None)?;
         let runtime = ClipboardRuntime::new(conn, screen_num)?;
@@ -35,7 +35,7 @@ impl X11ClipboardProvider {
     }
 }
 
-impl ClipboardProvider for X11ClipboardProvider {
+impl ClipboardProvider for Provider {
     fn set_clipboard_utf8(&mut self, content: &str) {
         let (ack_tx, ack_rx) = mpsc::channel();
 
@@ -50,7 +50,7 @@ impl ClipboardProvider for X11ClipboardProvider {
     }
 }
 
-impl Drop for X11ClipboardProvider {
+impl Drop for Provider {
     fn drop(&mut self) {
         let _ = self.tx.send(Command::Shutdown);
 
