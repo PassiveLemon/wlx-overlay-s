@@ -59,7 +59,7 @@ impl OverlayList {
                             );
                             ("Mirror", panels_root)
                         }
-                        OverlayCategory::Panel => {
+                        OverlayCategory::Panel | OverlayCategory::BuiltInPanel => {
                             let icon: Rc<str> = if let Some(icon) = meta.icon.as_ref() {
                                 icon.to_string().into()
                             } else {

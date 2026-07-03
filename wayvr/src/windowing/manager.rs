@@ -136,6 +136,13 @@ where
         let grab_help = OverlayWindowData::from_config(create_grab_help(app)?);
         me.add(grab_help, app);
 
+        #[cfg(feature = "whisper")]
+        {
+            use crate::overlays::whisper::create_whisper;
+            let whisper = OverlayWindowData::from_config(create_whisper(app, headless, wayland)?);
+            me.add(whisper, app);
+        }
+
         let custom_panels = app.session.config.custom_panels.clone();
         for name in custom_panels {
             let Some(panel) = create_custom(app, name) else {

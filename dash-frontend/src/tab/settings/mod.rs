@@ -112,6 +112,7 @@ trait SettingsTab {
 		&mut self,
 		_action: Rc<str>,
 		_config: &mut GeneralConfig,
+		_change_kind: &mut Option<ConfigChangeKind>,
 		_layout: &mut Layout,
 		_state: &mut ParserState,
 	) -> anyhow::Result<()> {
@@ -250,7 +251,11 @@ impl<T> Tab<T> for TabSettings<T> {
 				&& let Some(tab) = self.current_tab.as_mut()
 			{
 				let config = frontend.interface.general_config(data);
-				tab.context_menu_custom(name, config, &mut frontend.layout, &mut self.state)?;
+				let mut change_kind : Option<ConfigChangeKind> = None;
+				tab.context_menu_custom(name, config, &mut change_kind, &mut frontend.layout, &mut self.state)?;
+				if let Some(change_kind) = change_kind {
+					frontend.interface.config_changed(data, change_kind);
+				}
 			} else if let (Some(setting), Some(id), Some(value), Some(text), Some(translated)) = {
 				let mut s = name.splitn(5, ';');
 				(s.next(), s.next(), s.next(), s.next(), s.next())

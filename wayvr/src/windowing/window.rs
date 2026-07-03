@@ -57,7 +57,10 @@ pub enum OverlayCategory {
     Internal,
     Keyboard,
     Dashboard,
+    /// User-provided custom panels
     Panel,
+    /// Same as Panel but does not support Modify and Reload
+    BuiltInPanel,
     Screen,
     Mirror,
     WayVR,

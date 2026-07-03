@@ -93,6 +93,7 @@ xcb = { version = "1.6.0", features = [
 ], optional = true }
 xkbcommon = { version = "0.8.0" } # 0.9.0 breaks keymap import on some distros
 whisper-rs = { version = "0.16.0", features = ["vulkan"], optional = true }
+smithay-clipboard = "0.7.3"
 
 [build-dependencies]
 regex.workspace = true

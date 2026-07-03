@@ -227,6 +227,7 @@ impl WvrServerState {
             display_handle: dh,
             compositor,
             xdg_shell,
+            seat,
             seat_state,
             shm,
             data_device,
@@ -624,6 +625,10 @@ impl WvrServerState {
             }
         }
         self.cur_modifiers = modifiers;
+    }
+
+    pub fn set_clipboard(&mut self, content: &str) {
+        self.manager.state.set_clipboard_text(content);
     }
 
     pub fn add_external_process(&mut self, pid: u32) -> process::ProcessHandle {

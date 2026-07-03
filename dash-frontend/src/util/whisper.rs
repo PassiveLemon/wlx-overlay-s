@@ -6,7 +6,6 @@ pub struct WhisperModel {
 	pub file_name: &'static str,
 	pub display_name: &'static str,
 	pub url: &'static str,
-	pub hash: &'static str,
 }
 
 pub const WHISPER_MODELS: &[WhisperModel] = &[
@@ -14,31 +13,26 @@ pub const WHISPER_MODELS: &[WhisperModel] = &[
 		file_name: "ggml-base-q8_0.bin",
 		display_name: "Base Q8 (78MiB)",
 		url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base-q8_0.bin",
-		hash: "7bb89bb49ed6955013b166f1b6a6c04584a20fbe",
 	},
 	WhisperModel {
 		file_name: "ggml-small-q8_0.bin",
 		display_name: "Small Q8 (252MiB)",
 		url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q8_0.bin",
-		hash: "bcad8a2083f4e53d648d586b7dbc0cd673d8afad",
 	},
 	WhisperModel {
 		file_name: "ggml-large-v3-turbo-q5_0.bin",
 		display_name: "Turbo Q5 (574MiB)",
 		url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin",
-		hash: "e050f7970618a659205450ad97eb95a18d69c9ee",
 	},
 	WhisperModel {
 		file_name: "ggml-large-v3-turbo-q8_0.bin",
 		display_name: "Turbo Q8 (874MiB)",
 		url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q8_0.bin",
-		hash: "01bf15bedffe9f39d65c1b6ff9b687ea91f59e0e",
 	},
 	WhisperModel {
 		file_name: "ggml-large-v3-turbo.bin",
 		display_name: "Turbo (1.5GiB)",
 		url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin",
-		hash: "4af2b29d7ec73d781377bfd1758ca957a807e941",
 	},
 ];
 
