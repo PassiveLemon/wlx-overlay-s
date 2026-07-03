@@ -193,6 +193,12 @@
 		"USE_SKYBOX_HELP": "Show a skybox if there's no scene app or passthrough",
 		"WATCH_VIEW_ANGLE": "Watch view angles",
 		"WATCH_VIEW_ANGLE_HELP": "Control how the watch fades away",
+		"WHISPER": {
+			"NEED_TO_DOWNLOAD_MODEL": "The selected model needs to be downloaded.\nDownload it right now?",
+			"REMOVE_UNUSED_MODELS": "You are turning off the speech-to-text feature.\nWould you like to remove downloaded Whisper models to free up space?"
+		},
+		"WHISPER_MODEL": "Speech-to-text model",
+		"WHISPER_MODEL_HELP": "Whisper model to use.\nLarger models produce more accurate\nresults, but consume more VRAM.",
 		"GRID_OPACITY": "Floor grid opacity",
 		"GRID_OPACITY_HELP": "Opacity of the floor grid when the skybox is enabled",
 		"XWAYLAND_BY_DEFAULT": "Run apps in Compatibility mode by default",
@@ -227,6 +233,7 @@
 		"BUTTON_TOOLTIP": "Donate via Open Collective",
 		"CURRENT_SUPPORTERS": "Current Supporters"
 	},
+	"DOWNLOAD": "Download",
 	"DOWNLOADER": "Downloader",
 	"WELCOME": {
 		"ALL_SET": "You're all set!",

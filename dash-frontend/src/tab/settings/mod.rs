@@ -28,7 +28,7 @@ use wlx_common::{
 
 use crate::{
 	frontend::{Frontend, FrontendTask, FrontendTasks},
-	tab::{Tab, TabType, settings::macros::MacroParams},
+	tab::{settings::macros::MacroParams, Tab, TabType},
 	views::ViewUpdateParams,
 };
 
@@ -105,6 +105,16 @@ trait SettingsTab {
 	}
 
 	fn setting_updated(&mut self, _sup: &mut SettingUpdatedParams) -> anyhow::Result<()> {
+		Ok(())
+	}
+
+	fn context_menu_custom(
+		&mut self,
+		_action: Rc<str>,
+		_config: &mut GeneralConfig,
+		_layout: &mut Layout,
+		_state: &mut ParserState,
+	) -> anyhow::Result<()> {
 		Ok(())
 	}
 }
@@ -235,27 +245,32 @@ impl<T> Tab<T> for TabSettings<T> {
 		}
 
 		// Dropdown handling
-		if let TickResult::Action(name) = self.context_menu.tick(&mut frontend.layout, &mut self.state)?
-			&& let (Some(setting), Some(id), Some(value), Some(text), Some(translated)) = {
+		if let TickResult::Action(name) = self.context_menu.tick(&mut frontend.layout, &mut self.state)? {
+			if name.starts_with(';') && let Some(tab) = self.current_tab.as_mut() {
+				let config = frontend.interface.general_config(data);
+				tab.context_menu_custom(name, config,  &mut frontend.layout, &mut self.state)?;
+				
+			} else if let (Some(setting), Some(id), Some(value), Some(text), Some(translated)) = {
 				let mut s = name.splitn(5, ';');
 				(s.next(), s.next(), s.next(), s.next(), s.next())
 			} {
-			let mut common = frontend.layout.common();
-			let mut label = self
-				.state
-				.fetch_widget_as::<WidgetLabel>(common.state, &format!("{id}_value"))?;
+				let mut common = frontend.layout.common();
+				let mut label = self
+					.state
+					.fetch_widget_as::<WidgetLabel>(common.state, &format!("{id}_value"))?;
 
-			let translation = Translation {
-				text: text.into(),
-				translated: translated == "1",
-			};
+				let translation = Translation {
+					text: text.into(),
+					translated: translated == "1",
+				};
 
-			label.set_text(&mut common, translation);
+				label.set_text(&mut common, translation);
 
-			let setting = SettingType::from_str(setting).expect("Invalid Enum string");
-			let config = frontend.interface.general_config(data);
-			setting.set_enum(config, value);
-			changed = Some(ConfigChangeKind::OverlayConfig);
+				let setting = SettingType::from_str(setting).expect("Invalid Enum string");
+				let config = frontend.interface.general_config(data);
+				setting.set_enum(config, value);
+				changed = Some(ConfigChangeKind::OverlayConfig);
+			}
 		}
 
 		// Notify overlays of the change
