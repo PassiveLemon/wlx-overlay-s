@@ -122,6 +122,7 @@
 		"MODEL_NOT_DOWNLOADED": "Speech-to-text not set up!",
 		"DOWNLOAD_GUIDANCE": "Set up speech-to-text under settings, features!",
 		"INITIAL_TEXT": "Press and hold the mic button to start transcribing...",
-		"INIT_ERROR": "Error while starting Whisper engine"
+		"INIT_ERROR": "Error while starting Whisper engine",
+		"ENTER_KEY": "Enter key"
 	}
 }

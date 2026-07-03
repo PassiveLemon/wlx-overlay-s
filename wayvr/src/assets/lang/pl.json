@@ -122,6 +122,7 @@
 		"MODEL_NOT_DOWNLOADED": "Zamiana mowy na tekst nie została skonfigurowana!",
 		"DOWNLOAD_GUIDANCE": "Skonfiguruj funkcję zamiany mowy na tekst w ustawieniach, w sekcji funkcje!",
 		"INITIAL_TEXT": "Naciśnij i przytrzymaj przycisk mikrofonu, aby rozpocząć transkrypcję...",
-		"INIT_ERROR": "Błąd podczas uruchamiania silnika Whisper"
+		"INIT_ERROR": "Błąd podczas uruchamiania silnika Whisper",
+		"ENTER_KEY": "Klawisz Enter"
 	}
 }

@@ -124,6 +124,7 @@
 		"MODEL_NOT_DOWNLOADED": "Spracherkennung nicht eingerichtet!",
 		"DOWNLOAD_GUIDANCE": "Richten Sie die Spracherkennung unter Einstellungen -> Features ein!",
 		"INITIAL_TEXT": "Halten Sie die Mikrofontaste gedrückt, um mit der Transkription zu beginnen...",
-		"INIT_ERROR": "Fehler beim Starten der Whisper-Engine"
+		"INIT_ERROR": "Fehler beim Starten der Whisper-Engine",
+		"ENTER_KEY": "Enter-Taste"
 	}
 }
