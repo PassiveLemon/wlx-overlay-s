@@ -64,7 +64,7 @@ struct Args {
     #[arg(long)]
     openxr: bool,
 
-    /// Show the working set of overlay on startup
+    /// Show the working set of overlay on startup. Also skips tutorial.
     #[arg(long)]
     show: bool,
 
