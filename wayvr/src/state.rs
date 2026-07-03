@@ -215,6 +215,7 @@ impl AppState {
         self.notifications.run_dbus(&mut self.dbus);
         self.notifications.run_udp();
 
+        #[cfg(feature = "openxr")]
         if matches!(self.xr_backend, XrBackend::OpenXR) {
             use crate::backend::openxr::monado_state::MonadoState;
 
@@ -242,6 +243,7 @@ impl AppState {
         #[cfg(feature = "whisper")]
         {
             if self.whisper_sst.as_ref().is_some_and(|x| x.should_unload()) {
+                log::info!("Unloading Whisper model due to timeout");
                 self.whisper_sst = None;
             }
         }
