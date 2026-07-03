@@ -5,21 +5,24 @@
   <macro name="bg_rect" width="100%" color="~color_bg" round="10" border="2" border_color="~color_accent" />
 
   <elements>
-    <div flex_direction="column" interactable="0" width="600" height="200">
+    <div flex_direction="column" width="600" >
       <rectangle macro="bg_rect" padding="10" align_items="center" justify_content="space_between">
         <div gap="10">
           <Button macro="button_style" _press="::WhisperTranscribeStart" _release="::WhisperTranscribeStop" tooltip="WHISPER.TRANSCRIBE">
             <sprite width="38" height="38" color="~color_text" src="icons/mic.svg"  />
           </Button>
           <Button macro="button_style" _press="::WhisperPaste" tooltip="WHISPER.PASTE">
+            <sprite width="38" height="38" color="~color_text" src_builtin="icons/paste.svg" />
+          </Button>
+          <Button macro="button_style" _press="::WhisperPasteAndGo" tooltip="WHISPER.PASTE_AND_GO">
             <sprite width="38" height="38" color="~color_text" src_builtin="icons/paste-go.svg" />
+          </Button>
+          <Button macro="button_style" _press="::WhisperSendOSC" tooltip="WHISPER.SEND_OSC" id="btn_osc_send">
+            <sprite width="38" height="38" color="~color_text" src_builtin="icons/chat.svg" />
           </Button>
         </div>
         <div gap="10">
-          <Button macro="button_style" _press="::WhisperUnload" tooltip="WHISPER.UNLOAD">
-            <sprite width="38" height="38" color="~color_text" src_builtin="watch/settings.svg" />
-          </Button>
-          <Button macro="button_style" _press="::OverlayToggle whisper">
+          <Button macro="button_style" _press="::WhisperUnloadAndClose" tooltip="WHISPER.UNLOAD_AND_CLOSE">
             <sprite width="38" height="38" color="~color_text" src_builtin="edit/close.svg" />
           </Button>
         </div>
@@ -27,7 +30,7 @@
       <div width="100%" height="13" interactable="0" />
       <rectangle macro="bg_rect" flex_direction="column" padding="10">
         <div>
-          <label id="transcription" wrap="1" size="20" padding_left="16" padding_right="16" text="Press and hold the microphone button to start transcribing..." />
+          <label id="transcription" wrap="1" size="20" padding_left="16" padding_right="16" translation="WHISPER.INITIAL_TEXT" />
         </div>
       </rectangle>
     </div>

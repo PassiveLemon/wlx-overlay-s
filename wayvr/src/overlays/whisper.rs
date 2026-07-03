@@ -16,6 +16,7 @@ use wlx_common::{
 };
 
 use crate::{
+    backend::task::{OverlayTask, TaskType, ToggleMode},
     gui::{
         panel::{
             GuiPanel, NewGuiPanelParams, OnCustomAttribFunc,
@@ -31,16 +32,43 @@ use crate::{
         input::KeyboardFocus,
         whisper_stt::WhisperStt,
     },
-    windowing::window::{OverlayCategory, OverlayWindowConfig},
+    windowing::{
+        OverlaySelector,
+        window::{OverlayCategory, OverlayWindowConfig},
+    },
 };
 
-pub const WHISPER_NAME: &str = "Speech-to-Text";
+pub const WHISPER_NAME: &str = "whisper";
 
 #[derive(Default)]
 struct WhisperState {
     whisper_sst: Option<WhisperStt>,
     clipboard_provider: Option<Box<dyn ClipboardProvider>>,
     last_transcription: Option<Rc<str>>,
+}
+
+impl WhisperState {
+    fn set_clipboard_text(&mut self, app: &mut AppState) -> bool {
+        let Some(text) = self.last_transcription.as_ref() else {
+            return false;
+        };
+
+        match app.hid_provider.keyboard_focus {
+            KeyboardFocus::WayVR => {
+                if let Some(wvr) = app.wvr_server.as_mut() {
+                    wvr.set_clipboard(text);
+                    return true;
+                }
+            }
+            KeyboardFocus::PhysicalScreen => {
+                if let Some(clip) = self.clipboard_provider.as_mut() {
+                    clip.set_clipboard_utf8(text);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
 
 pub fn create_whisper(
@@ -93,30 +121,47 @@ pub fn create_whisper(
                             return Ok(EventResult::Pass);
                         }
 
-                        if let Some(whisper) = state.whisper_sst.as_mut() {
-                            let _ = whisper
-                                .ptt_start()
-                                .log_err("Could not start Whisper transcription");
+                        let whisper = match state.whisper_sst.as_mut() {
+                            Some(x) => x,
+                            None => {
+                                let model_path = data_dir::get_path("whisper")
+                                    .join(app.session.config.whisper_model.as_ref());
+                                if model_path.is_file() {
+                                    state.whisper_sst = match WhisperStt::new(model_path)
+                                        .log_err("Error while starting Whisper engine")
+                                    {
+                                        Ok(x) => Some(x),
+                                        Err(e) => {
+                                            Toast::new(
+                                                ToastTopic::System,
+                                                "WHISPER.INIT_ERROR".into(),
+                                                e.to_string(),
+                                            )
+                                            .with_timeout(5.)
+                                            .with_sound(true)
+                                            .submit(app);
+                                            return Ok(EventResult::Consumed);
+                                        }
+                                    }
+                                } else {
+                                    Toast::new(
+                                        ToastTopic::System,
+                                        "WHISPER.MODEL_NOT_DOWNLOADED".into(),
+                                        "WHISPER.DOWNLOAD_GUIDANCE".into(),
+                                    )
+                                    .with_timeout(5.)
+                                    .with_sound(true)
+                                    .submit(app);
+                                    return Ok(EventResult::Consumed);
+                                }
 
-                            return Ok(EventResult::Consumed);
-                        }
+                                state.whisper_sst.as_mut().unwrap()
+                            }
+                        };
 
-                        let model_path = data_dir::get_path("whisper")
-                            .join(app.session.config.whisper_model.as_ref());
-                        if model_path.is_file() {
-                            state.whisper_sst = WhisperStt::new(model_path)
-                                .log_err("Could not create STT provider")
-                                .ok();
-                        } else {
-                            Toast::new(
-                                ToastTopic::System,
-                                "WHISPER.MODEL_NOT_DOWNLOADED".into(),
-                                "WHISPER.DOWNLOAD_GUIDANCE".into(),
-                            )
-                            .with_timeout(5.)
-                            .with_sound(true)
-                            .submit(app);
-                        }
+                        let _ = whisper
+                            .ptt_start()
+                            .log_err("Could not start Whisper transcription");
 
                         Ok(EventResult::Consumed)
                     }),
@@ -137,29 +182,17 @@ pub fn create_whisper(
                             return Ok(EventResult::Pass);
                         }
 
-                        let Some(transcription) = state.last_transcription.as_ref() else {
-                            return Ok(EventResult::Consumed);
-                        };
+                        state.set_clipboard_text(app);
 
-                        let mut success = false;
-
-                        match app.hid_provider.keyboard_focus {
-                            KeyboardFocus::WayVR => {
-                                if let Some(wvr) = app.wvr_server.as_mut() {
-                                    wvr.set_clipboard(transcription.as_ref());
-                                    success = true;
-                                }
-                            }
-                            KeyboardFocus::PhysicalScreen => {
-                                if let Some(clip) = state.clipboard_provider.as_mut() {
-                                    clip.set_clipboard_utf8(transcription.as_ref());
-                                    success = true;
-                                }
-                            }
+                        Ok(EventResult::Consumed)
+                    }),
+                    "::WhisperPasteAndGo" => Box::new(move |_common, data, app, state| {
+                        if !test_button(data) || !test_duration(&button, app) {
+                            return Ok(EventResult::Pass);
                         }
 
-                        // send ctrl-v
-                        if success {
+                        if state.set_clipboard_text(app) {
+                            // send ctrl-v
                             app.hid_provider.send_key_routed(
                                 app.wvr_server.as_mut(),
                                 VirtualKey::RCtrl,
@@ -179,12 +212,38 @@ pub fn create_whisper(
 
                         Ok(EventResult::Consumed)
                     }),
-                    "::WhisperUnload" => Box::new(move |_common, data, app, state| {
+                    #[cfg(feature = "osc")]
+                    "::WhisperSendOSC" => Box::new(move |_common, data, app, state| {
+                        if !test_button(data) || !test_duration(&button, app) {
+                            return Ok(EventResult::Pass);
+                        }
+
+                        if let Some(text) = state.last_transcription.as_ref()
+                            && let Some(osc) = app.osc_sender.as_mut()
+                        {
+                            use rosc::OscType;
+
+                            let _ = osc
+                                .send_message(
+                                    "/chatbox/input".into(),
+                                    vec![OscType::String(text.to_string()), OscType::Bool(true)],
+                                )
+                                .log_err("Could not send OSC message");
+                        }
+
+                        Ok(EventResult::Consumed)
+                    }),
+                    "::WhisperUnloadAndClose" => Box::new(move |_common, data, app, state| {
                         if !test_button(data) || !test_duration(&button, app) {
                             return Ok(EventResult::Pass);
                         }
 
                         state.whisper_sst = None;
+                        app.tasks
+                            .enqueue(TaskType::Overlay(OverlayTask::ToggleOverlay(
+                                OverlaySelector::Name(WHISPER_NAME.into()),
+                                ToggleMode::EnsureOff,
+                            )));
 
                         Ok(EventResult::Consumed)
                     }),
@@ -208,6 +267,22 @@ pub fn create_whisper(
         BackendAttribValue::Icon("icons/mic.svg".into()),
     );
 
+    #[cfg(not(feature = "osc"))]
+    {
+        use wgui::event::{CallbackDataCommon, StyleSetRequest};
+        let osc_button = panel
+            .parser_state
+            .fetch_component_as::<ComponentButton>("btn_osc_send")?;
+        let common = CallbackDataCommon {
+            state: &panel.layout.state,
+            alterables: &mut panel.layout.alterables,
+        };
+        common.alterables.set_style(
+            osc_button.get_rect(),
+            StyleSetRequest::Display(wgui::taffy::Display::None),
+        );
+    }
+
     let label = panel.parser_state.get_widget_id("transcription")?;
 
     panel
@@ -221,11 +296,9 @@ pub fn create_whisper(
             {
                 let text: Rc<str> = text.into();
                 state.last_transcription = Some(text.clone());
-
                 let label = data.obj.get_as_mut::<WidgetLabel>().unwrap();
                 label.set_text(common, Translation::from_raw_text_rc(text));
             }
-
             Ok(EventResult::Pass)
         });
 
