@@ -47,6 +47,7 @@ pub enum RecenterMode {
 pub struct InterfaceFeats {
 	pub openxr: bool,
 	pub monado: bool,
+	pub whisper: bool,
 }
 
 pub trait DashInterface<T> {

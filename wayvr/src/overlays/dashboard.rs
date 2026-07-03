@@ -563,6 +563,10 @@ impl DashInterface<AppState> for DashInterfaceLive {
             monado: data.monado_state.is_some(),
             #[cfg(not(feature = "openxr"))]
             monado: false,
+            #[cfg(feature = "whisper")]
+            whisper: true,
+            #[cfg(not(feature = "whisper"))]
+            whisper: false,
         }
     }
 
