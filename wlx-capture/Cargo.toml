@@ -32,10 +32,7 @@ drm-fourcc = "2.2.0"
 idmap = { workspace = true }
 libc = "0.2.178"
 log = { workspace = true }
-pipewire = { git = "https://gitlab.freedesktop.org/pipewire/pipewire-rs.git", rev = "670b0aabf04263ece5dc1e752e5d64aeae3056e8", features = [
-  "v0_3_33", "v0_3_65",
-], optional = true }
-#pipewire = { version = "0.8.0", features = ["v0_3_33"], optional = true }
+pipewire = { workspace = true, optional = true }
 rxscreen = { version = "0.1.7", features = [
   "shm",
   "xrandr",

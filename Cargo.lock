@@ -690,6 +690,8 @@ dependencies = [
  "cexpr",
  "clang-sys",
  "itertools 0.13.0",
+ "log",
+ "prettyplease",
  "proc-macro2",
  "quote",
  "regex",
@@ -1998,6 +2000,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "fs_extra"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42703706b716c37f96a77aea830392ad231f44c9e9a67872fa5548707e11b11c"
+
+[[package]]
 name = "futures"
 version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3015,8 +3023,9 @@ dependencies = [
 
 [[package]]
 name = "libspa"
-version = "0.9.2"
-source = "git+https://gitlab.freedesktop.org/pipewire/pipewire-rs.git?rev=670b0aabf04263ece5dc1e752e5d64aeae3056e8#670b0aabf04263ece5dc1e752e5d64aeae3056e8"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2909f3be29d674e7f10604aff18d1bbe1bb03c4cd61c8a8ba19c0b1d162f7d4e"
 dependencies = [
  "bitflags 2.12.1",
  "cc",
@@ -3030,8 +3039,9 @@ dependencies = [
 
 [[package]]
 name = "libspa-sys"
-version = "0.9.2"
-source = "git+https://gitlab.freedesktop.org/pipewire/pipewire-rs.git?rev=670b0aabf04263ece5dc1e752e5d64aeae3056e8#670b0aabf04263ece5dc1e752e5d64aeae3056e8"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69ad52764fca54818486f3cf75afec844d1f1a1568c24dcee25d41b1ab007dda"
 dependencies = [
  "bindgen",
  "cc",
@@ -4111,8 +4121,9 @@ dependencies = [
 
 [[package]]
 name = "pipewire"
-version = "0.9.2"
-source = "git+https://gitlab.freedesktop.org/pipewire/pipewire-rs.git?rev=670b0aabf04263ece5dc1e752e5d64aeae3056e8#670b0aabf04263ece5dc1e752e5d64aeae3056e8"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8585aba8a52ad74ccc633b8e293c1dc4277976bd5d510b925533f34fd6685f38"
 dependencies = [
  "bitflags 2.12.1",
  "libc",
@@ -4124,8 +4135,9 @@ dependencies = [
 
 [[package]]
 name = "pipewire-sys"
-version = "0.9.2"
-source = "git+https://gitlab.freedesktop.org/pipewire/pipewire-rs.git?rev=670b0aabf04263ece5dc1e752e5d64aeae3056e8#670b0aabf04263ece5dc1e752e5d64aeae3056e8"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f2089f245b548723e60325773c27f586b7a2372c79ea941b246cd0d654706adc"
 dependencies = [
  "bindgen",
  "libspa-sys",
@@ -6571,6 +6583,7 @@ dependencies = [
  "mint",
  "openxr",
  "ovr_overlay",
+ "pipewire",
  "prost",
  "pure-rust-locales",
  "regex",
@@ -6597,6 +6610,7 @@ dependencies = [
  "wayland-protocols-misc",
  "wayvr-ipc",
  "wgui",
+ "whisper-rs",
  "winit",
  "wlx-capture",
  "wlx-common",
@@ -6688,6 +6702,29 @@ dependencies = [
  "taffy",
  "vulkano",
  "vulkano-shaders",
+]
+
+[[package]]
+name = "whisper-rs"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2088172d00f936c348d6a72f488dc2660ab3f507263a195df308a3c2383229f6"
+dependencies = [
+ "libc",
+ "whisper-rs-sys",
+]
+
+[[package]]
+name = "whisper-rs-sys"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6986c0fe081241d391f09b9a071fbcbb59720c3563628c3c829057cf69f2a56f"
+dependencies = [
+ "bindgen",
+ "cfg-if",
+ "cmake",
+ "fs_extra",
+ "semver",
 ]
 
 [[package]]

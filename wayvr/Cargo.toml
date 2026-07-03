@@ -32,6 +32,7 @@ glam = { workspace = true, features = ["mint", "serde"] }
 idmap = { workspace = true, features = ["serde"] }
 idmap-derive.workspace = true
 log.workspace = true
+pipewire = { workspace = true, optional = true }
 regex.workspace = true
 rust-embed.workspace = true
 serde = { workspace = true, features = ["rc"] }
@@ -91,12 +92,13 @@ xcb = { version = "1.6.0", features = [
   "as-raw-xcb-connection",
 ], optional = true }
 xkbcommon = { version = "0.8.0" } # 0.9.0 breaks keymap import on some distros
+whisper-rs = { version = "0.16.0", features = ["vulkan"], optional = true }
 
 [build-dependencies]
 regex.workspace = true
 
 [features]
-default = ["openvr", "openxr", "osc", "wayland", "x11"]
+default = ["openvr", "openxr", "osc", "wayland", "whisper", "x11"]
 as-raw-xcb-connection = []
 feat-monado-metrics = []
 openvr = ["dep:json", "dep:ovr_overlay"]
@@ -105,5 +107,6 @@ osc = ["dep:rosc"]
 pipewire = ["wlx-capture/pipewire"]
 uidev = ["dep:winit"]
 wayland = ["pipewire", "wlx-capture/wlr", "xkbcommon/wayland"]
+whisper = ["dep:pipewire", "dep:whisper-rs"]
 x11 = ["dep:xcb", "wlx-capture/xshm", "xkbcommon/x11"]
 xcb = ["dep:xcb"]
