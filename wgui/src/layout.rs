@@ -187,7 +187,7 @@ pub struct Layout {
 	pub content_root_node: taffy::NodeId,
 
 	pub prev_size: Vec2,
-	pub content_size: Vec2,
+	pub content_size: Vec2, // cached value
 
 	pub needs_redraw: bool,
 	pub haptics_triggered: bool,
@@ -720,9 +720,10 @@ impl Layout {
 	pub fn tick(&mut self) -> anyhow::Result<()> {
 		let mut alterables = EventAlterables::default();
 		self.animations.tick(&self.state, &mut alterables);
-		self.process_pending_components();
 		self.process_pending_widget_ticks(&mut alterables);
 		self.process_alterables(alterables)?;
+		self.try_recompute_layout(self.content_size /* cached value */)?;
+		self.process_pending_components();
 		Ok(())
 	}
 
