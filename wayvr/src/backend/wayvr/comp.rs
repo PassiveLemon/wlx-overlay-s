@@ -153,6 +153,7 @@ impl compositor::CompositorHandler for Application {
                                 })
                             {
                                 let sbwi = SurfaceBufWithImage {
+                                    buffer: Some(buffer.clone()),
                                     image,
                                     transform: wl_transform_to_frame_transform(
                                         attrs.buffer_transform,
@@ -173,6 +174,7 @@ impl compositor::CompositorHandler for Application {
                                     })
                                 {
                                     let sbwi = SurfaceBufWithImage {
+                                        buffer: None,
                                         image,
                                         transform: wl_transform_to_frame_transform(
                                             attrs.buffer_transform,
@@ -183,6 +185,7 @@ impl compositor::CompositorHandler for Application {
                                     sbwi.apply_to_surface(states);
                                 }
                             });
+                            buffer.release();
                         }
                         Some(BufferType::SinglePixel) => {
                             let spb = get_single_pixel_buffer(&buffer).unwrap(); // always Ok
@@ -192,6 +195,7 @@ impl compositor::CompositorHandler for Application {
                                 })
                             {
                                 let sbwi = SurfaceBufWithImage {
+                                    buffer: None,
                                     image,
                                     transform: wl_transform_to_frame_transform(
                                         // does this even matter
@@ -202,11 +206,11 @@ impl compositor::CompositorHandler for Application {
                                 };
                                 sbwi.apply_to_surface(states);
                             }
+                            buffer.release();
                         }
                         Some(other) => log::warn!("Unsupported wl_buffer format: {other:?}"),
                         None => { /* don't draw anything */ }
                     }
-                    buffer.release();
                 }
                 Some(BufferAssignment::Removed) | None => {}
             }

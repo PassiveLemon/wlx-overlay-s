@@ -16,7 +16,7 @@ use smithay::{
     output::{Mode, Output},
     reexports::{
         wayland_protocols_misc::server_decoration::server::org_kde_kwin_server_decoration_manager as kde_decoration,
-        wayland_server::{self, backend::ClientId},
+        wayland_server::{self, backend::ClientId, protocol::wl_buffer},
     },
     utils::{Logical, Size},
     wayland::{
@@ -721,6 +721,7 @@ struct SurfaceBufWithImageContainer {
 #[derive(Clone)]
 #[allow(dead_code)]
 pub struct SurfaceBufWithImage {
+    pub buffer: Option<wl_buffer::WlBuffer>,
     pub image: Arc<ImageView>,
     pub transform: Transform,
     pub scale: i32,
