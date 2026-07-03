@@ -1,5 +1,3 @@
-// whisper_stt.rs
-
 use std::{
     fmt,
     path::{Path, PathBuf},
@@ -8,14 +6,11 @@ use std::{
     time::{Duration, Instant},
 };
 
-use pipewire as pw;
-use pw::{properties::properties, spa};
-use spa::{
-    param::format::{MediaSubtype, MediaType},
-    param::format_utils,
-    pod::Pod,
-};
 use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
+use wlx_common::audio::rodio::{
+    Source,
+    microphone::{MicrophoneBuilder, available_inputs},
+};
 
 const WHISPER_SAMPLE_RATE: usize = 16_000;
 const MAX_DURATION: Duration = Duration::from_secs(30);
@@ -34,8 +29,8 @@ pub struct WhisperSttConfig {
     /// ignore extremely short accidental taps
     pub min_audio_ms: u64,
 
-    /// mic object name from `pw-dump`, None for the default
-    pub pipewire_target_object: Option<String>,
+    /// force a specific recording device; see `rodio::microphone::available_inputs()`
+    pub rodio_input_device_name: Option<String>,
 
     pub use_gpu: bool,
     pub gpu_device: i32,
@@ -55,7 +50,7 @@ impl WhisperSttConfig {
             n_threads,
             partial_decode_interval_ms: 700,
             min_audio_ms: 250,
-            pipewire_target_object: None,
+            rodio_input_device_name: None,
             use_gpu: true,
             gpu_device: 0,
             flash_attn: false,
@@ -67,7 +62,7 @@ impl WhisperSttConfig {
 pub enum WhisperSttError {
     ModelLoad(String),
     Whisper(String),
-    PipeWire(String),
+    Rodio(String),
     CaptureInit(String),
     ThreadSpawn(String),
     CaptureThreadPanicked,
@@ -80,7 +75,7 @@ impl fmt::Display for WhisperSttError {
         match self {
             Self::ModelLoad(e) => write!(f, "failed to load whisper model: {e}"),
             Self::Whisper(e) => write!(f, "whisper error: {e}"),
-            Self::PipeWire(e) => write!(f, "pipewire error: {e}"),
+            Self::Rodio(e) => write!(f, "rodio error: {e}"),
             Self::CaptureInit(e) => write!(f, "failed to initialize capture: {e}"),
             Self::ThreadSpawn(e) => write!(f, "failed to spawn thread: {e}"),
             Self::CaptureThreadPanicked => write!(f, "capture thread panicked"),
@@ -95,7 +90,7 @@ impl std::error::Error for WhisperSttError {}
 struct StopCapture;
 
 struct CaptureSession {
-    stop_tx: pw::channel::Sender<StopCapture>,
+    stop_tx: mpsc::Sender<StopCapture>,
     capture_thread: Option<JoinHandle<()>>,
     recognizer_thread: Option<JoinHandle<()>>,
     deadline: Instant,
@@ -141,7 +136,7 @@ impl WhisperStt {
         })
     }
 
-    /// starts a fresh pw capture stream and a transcription worker
+    /// starts a fresh capture stream and a transcription worker
     pub fn ptt_start(&mut self) -> Result<(), WhisperSttError> {
         self.reap_finished_recognizers();
 
@@ -151,7 +146,7 @@ impl WhisperStt {
 
         let (audio_tx, audio_rx) = mpsc::channel::<Vec<f32>>();
         let (ready_tx, ready_rx) = mpsc::channel::<Result<(), String>>();
-        let (stop_tx, stop_rx) = pw::channel::channel::<StopCapture>();
+        let (stop_tx, stop_rx) = mpsc::channel::<StopCapture>();
 
         let recognizer_thread = spawn_recognizer_thread(
             Arc::clone(&self.ctx),
@@ -160,12 +155,12 @@ impl WhisperStt {
             self.completed_tx.clone(),
         )?;
 
-        let target_object = self.config.pipewire_target_object.clone();
+        let input_device_name = self.config.rodio_input_device_name.clone();
 
         let capture_thread = thread::Builder::new()
-            .name("whisper-stt-pipewire-capture".to_string())
+            .name("whisper-stt-rodio-capture".to_string())
             .spawn(move || {
-                pipewire_capture_thread(audio_tx, stop_rx, target_object, ready_tx);
+                rodio_capture_thread(audio_tx, stop_rx, input_device_name, ready_tx);
             })
             .map_err(|e| WhisperSttError::ThreadSpawn(e.to_string()))?;
 
@@ -265,7 +260,7 @@ impl WhisperStt {
             }
         }
 
-        return None;
+        None
     }
 
     pub fn take_error(&mut self) -> Option<String> {
@@ -347,8 +342,8 @@ fn recognizer_thread(
                     last_decoded_len = audio.len();
                 }
                 Err(_) => {
-                    // Do not fail the session on a speculative decode.
-                    // The final decode after PTT end gets reported.
+                    // do not fail the session on a speculative decode
+                    // the final decode after PTT end gets reported
                 }
             }
         }
@@ -410,15 +405,15 @@ fn transcribe_audio(
     Ok(normalize_transcript(text))
 }
 
-fn pipewire_capture_thread(
+fn rodio_capture_thread(
     audio_tx: mpsc::Sender<Vec<f32>>,
-    stop_rx: pw::channel::Receiver<StopCapture>,
-    target_object: Option<String>,
+    stop_rx: mpsc::Receiver<StopCapture>,
+    input_device_name: Option<String>,
     ready_tx: mpsc::Sender<Result<(), String>>,
 ) {
     let mut ready_tx = Some(ready_tx);
 
-    let result = run_pipewire_capture(audio_tx, stop_rx, target_object, &mut ready_tx);
+    let result = run_rodio_capture(audio_tx, stop_rx, input_device_name, &mut ready_tx);
 
     if let Err(e) = result {
         if let Some(ready_tx) = ready_tx.take() {
@@ -427,161 +422,103 @@ fn pipewire_capture_thread(
     }
 }
 
-fn run_pipewire_capture(
+fn run_rodio_capture(
     audio_tx: mpsc::Sender<Vec<f32>>,
-    stop_rx: pw::channel::Receiver<StopCapture>,
-    target_object: Option<String>,
+    stop_rx: mpsc::Receiver<StopCapture>,
+    input_device_name: Option<String>,
     ready_tx: &mut Option<mpsc::Sender<Result<(), String>>>,
 ) -> Result<(), WhisperSttError> {
-    pw::init();
+    let builder = MicrophoneBuilder::new();
 
-    let mainloop = pw::main_loop::MainLoopRc::new(None)
-        .map_err(|e| WhisperSttError::PipeWire(e.to_string()))?;
+    let builder = if let Some(input_device_name) = input_device_name {
+        let inputs = available_inputs().map_err(|e| WhisperSttError::Rodio(e.to_string()))?;
+        let input_device_name_lower = input_device_name.to_lowercase();
 
-    let context = pw::context::ContextRc::new(&mainloop, None)
-        .map_err(|e| WhisperSttError::PipeWire(e.to_string()))?;
+        let input = inputs
+            .into_iter()
+            .find(|input| {
+                input
+                    .to_string()
+                    .to_lowercase()
+                    .contains(&input_device_name_lower)
+            })
+            .ok_or_else(|| {
+                WhisperSttError::Rodio(format!(
+                    "no rodio input device matched {input_device_name:?}"
+                ))
+            })?;
 
-    let core = context
-        .connect_rc(None)
-        .map_err(|e| WhisperSttError::PipeWire(e.to_string()))?;
-
-    let _stop_receiver = stop_rx.attach(mainloop.loop_(), {
-        let mainloop = mainloop.clone();
-        move |_| {
-            mainloop.quit();
-        }
-    });
-
-    let mut props = properties! {
-        *pw::keys::MEDIA_TYPE => "Audio",
-        *pw::keys::MEDIA_CATEGORY => "Capture",
-        *pw::keys::MEDIA_ROLE => "Communication",
-        *pw::keys::APP_NAME => "WhisperStt",
+        builder
+            .device(input)
+            .map_err(|e| WhisperSttError::Rodio(e.to_string()))?
+    } else {
+        builder
+            .default_device()
+            .map_err(|e| WhisperSttError::Rodio(e.to_string()))?
     };
 
-    if let Some(target_object) = target_object {
-        props.insert(*pw::keys::TARGET_OBJECT, target_object);
-    }
+    let builder = builder
+        .default_config()
+        .map_err(|e| WhisperSttError::Rodio(e.to_string()))?
+        .prefer_channel_counts([
+            1.try_into().expect("not zero"),
+            2.try_into().expect("not zero"),
+        ])
+        .prefer_sample_rates([
+            16_000.try_into().expect("not zero"),
+            32_000.try_into().expect("not zero"),
+            48_000.try_into().expect("not zero"),
+        ])
+        .prefer_buffer_sizes(512..);
 
-    let stream = pw::stream::StreamBox::new(&core, "WhisperStt microphone capture", props)
-        .map_err(|e| WhisperSttError::PipeWire(e.to_string()))?;
+    let mut mic = builder
+        .open_stream()
+        .map_err(|e| WhisperSttError::Rodio(e.to_string()))?;
 
-    let user_data = AudioCaptureUserData::default();
-    let audio_tx_for_callback = audio_tx.clone();
-
-    let _listener = stream
-        .add_local_listener_with_user_data(user_data)
-        .param_changed(|_, user_data, id, param| {
-            let Some(param) = param else {
-                return;
-            };
-
-            if id != pw::spa::param::ParamType::Format.as_raw() {
-                return;
-            }
-
-            let Ok((media_type, media_subtype)) = format_utils::parse_format(param) else {
-                return;
-            };
-
-            if media_type != MediaType::Audio || media_subtype != MediaSubtype::Raw {
-                return;
-            }
-
-            let _ = user_data.format.parse(param);
-        })
-        .process(move |stream, user_data| {
-            let Some(mut buffer) = stream.dequeue_buffer() else {
-                return;
-            };
-
-            let datas = buffer.datas_mut();
-            if datas.is_empty() {
-                return;
-            }
-
-            let data = &mut datas[0];
-
-            let chunk = data.chunk();
-
-            let offset = chunk.offset() as usize;
-            let size = chunk.size() as usize;
-
-            let Some(bytes) = data.data() else {
-                return;
-            };
-
-            if offset >= bytes.len() {
-                return;
-            }
-
-            let end = offset.saturating_add(size).min(bytes.len());
-            let bytes = &bytes[offset..end];
-
-            let channels = (user_data.format.channels() as usize).max(1);
-            let input_rate = {
-                let rate = user_data.format.rate() as usize;
-                if rate == 0 { 48_000 } else { rate }
-            };
-
-            let resampled = user_data
-                .resampler
-                .push_interleaved_f32le_mono_16k(bytes, channels, input_rate);
-
-            if !resampled.is_empty() {
-                let _ = audio_tx_for_callback.send(resampled);
-            }
-        })
-        .register()
-        .map_err(|e| WhisperSttError::PipeWire(e.to_string()))?;
-
-    let mut audio_info = spa::param::audio::AudioInfoRaw::new();
-    audio_info.set_format(spa::param::audio::AudioFormat::F32LE);
-
-    let obj = pw::spa::pod::Object {
-        type_: pw::spa::utils::SpaTypes::ObjectParamFormat.as_raw(),
-        id: pw::spa::param::ParamType::EnumFormat.as_raw(),
-        properties: audio_info.into(),
-    };
-
-    let values: Vec<u8> = pw::spa::pod::serialize::PodSerializer::serialize(
-        std::io::Cursor::new(Vec::new()),
-        &pw::spa::pod::Value::Object(obj),
-    )
-    .map_err(|e| WhisperSttError::PipeWire(e.to_string()))?
-    .0
-    .into_inner();
-
-    let pod = Pod::from_bytes(&values).ok_or_else(|| {
-        WhisperSttError::PipeWire("failed to parse serialized PipeWire pod".to_string())
-    })?;
-
-    let mut params = [pod];
-
-    stream
-        .connect(
-            spa::utils::Direction::Input,
-            None,
-            pw::stream::StreamFlags::AUTOCONNECT
-                | pw::stream::StreamFlags::MAP_BUFFERS
-                | pw::stream::StreamFlags::RT_PROCESS,
-            &mut params,
-        )
-        .map_err(|e| WhisperSttError::PipeWire(e.to_string()))?;
+    let channels = mic.channels().get() as usize;
+    let input_rate = mic.sample_rate().get() as usize;
 
     if let Some(ready_tx) = ready_tx.take() {
         let _ = ready_tx.send(Ok(()));
     }
 
-    mainloop.run();
+    let mut resampler = StreamingResampler::default();
+    let mut interleaved = Vec::new();
+
+    // ~20 ms of input frames; whisper still receives 16 kHz mono chunks
+    let chunk_input_samples = ((input_rate / 50).max(1)) * channels.max(1);
+
+    'capture: loop {
+        if stop_rx.try_recv().is_ok() {
+            break;
+        }
+
+        interleaved.clear();
+
+        while interleaved.len() < chunk_input_samples {
+            if stop_rx.try_recv().is_ok() {
+                break 'capture;
+            }
+
+            let Some(sample) = mic.next() else {
+                return Err(WhisperSttError::Rodio(
+                    "microphone stream ended unexpectedly".to_string(),
+                ));
+            };
+
+            // Rodio's default sample type is f32. This cast also keeps the code
+            // compiling if the crate is built with rodio's `64bit` feature.
+            interleaved.push(sample as f32);
+        }
+
+        let resampled = resampler.push_interleaved_mono_16k(&interleaved, channels, input_rate);
+
+        if !resampled.is_empty() && audio_tx.send(resampled).is_err() {
+            break;
+        }
+    }
 
     Ok(())
-}
-
-#[derive(Default)]
-struct AudioCaptureUserData {
-    format: spa::param::audio::AudioInfoRaw,
-    resampler: StreamingResampler,
 }
 
 #[derive(Default)]
@@ -592,9 +529,9 @@ struct StreamingResampler {
 }
 
 impl StreamingResampler {
-    fn push_interleaved_f32le_mono_16k(
+    fn push_interleaved_mono_16k(
         &mut self,
-        bytes: &[u8],
+        samples: &[f32],
         channels: usize,
         input_rate: usize,
     ) -> Vec<f32> {
@@ -608,12 +545,7 @@ impl StreamingResampler {
             self.input_rate = input_rate;
         }
 
-        let frame_bytes = channels * std::mem::size_of::<f32>();
-        if frame_bytes == 0 {
-            return Vec::new();
-        }
-
-        let frames = bytes.len() / frame_bytes;
+        let frames = samples.len() / channels;
         if frames == 0 {
             return Vec::new();
         }
@@ -621,20 +553,11 @@ impl StreamingResampler {
         let mut mono = Vec::with_capacity(frames);
 
         for frame in 0..frames {
-            let frame_start = frame * frame_bytes;
+            let frame_start = frame * channels;
             let mut sum = 0.0f32;
 
             for ch in 0..channels {
-                let sample_start = frame_start + ch * 4;
-
-                let sample = f32::from_le_bytes([
-                    bytes[sample_start],
-                    bytes[sample_start + 1],
-                    bytes[sample_start + 2],
-                    bytes[sample_start + 3],
-                ]);
-
-                sum += sample;
+                sum += samples[frame_start + ch];
             }
 
             mono.push(sum / channels as f32);
