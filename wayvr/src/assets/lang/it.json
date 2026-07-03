@@ -122,6 +122,7 @@
 		"MODEL_NOT_DOWNLOADED": "Speech-to-text non configurato!",
 		"DOWNLOAD_GUIDANCE": "Configura il riconoscimento vocale in impostazioni, funzionalità!",
 		"INITIAL_TEXT": "Tieni premuto il tasto del microfono per iniziare la trascrizione...",
-		"INIT_ERROR": "Errore durante l'avvio del motore Whisper"
+		"INIT_ERROR": "Errore durante l'avvio del motore Whisper",
+		"ENTER_KEY": "Tasto Invio"
 	}
 }

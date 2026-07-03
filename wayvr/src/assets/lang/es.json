@@ -124,6 +124,7 @@
 		"MODEL_NOT_DOWNLOADED": "¡El dictado por voz no está configurado!",
 		"DOWNLOAD_GUIDANCE": "¡Configura la conversión de voz a texto en ajustes, características!",
 		"INITIAL_TEXT": "Mantén presionado el botón del micrófono para comenzar a transcribir...",
-		"INIT_ERROR": "Error al iniciar el motor de Whisper"
+		"INIT_ERROR": "Error al iniciar el motor de Whisper",
+		"ENTER_KEY": "Tecla Enter"
 	}
 }

@@ -122,6 +122,7 @@
 		"MODEL_NOT_DOWNLOADED": "语音转文本未设置！",
 		"DOWNLOAD_GUIDANCE": "请在“设置”中的“功能”选项下配置语音转文本！",
 		"INITIAL_TEXT": "按住麦克风按钮开始转录...",
-		"INIT_ERROR": "启动 Whisper 引擎时出错"
+		"INIT_ERROR": "启动 Whisper 引擎时出错",
+		"ENTER_KEY": "回车键"
 	}
 }
