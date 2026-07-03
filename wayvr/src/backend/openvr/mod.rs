@@ -32,7 +32,6 @@ use crate::{
     graphics::{GpuFutures, init_openvr_graphics},
     overlays::toast::Toast,
     state::AppState,
-    subsystem::notifications::NotificationManager,
     windowing::{
         backend::{RenderResources, RenderTarget, ShouldRender},
         manager::OverlayWindowManager,
@@ -113,12 +112,11 @@ pub fn openvr_run(
         log::info!("IPD: {:.0} mm", app.input_state.ipd);
     }
 
+    app.late_init();
+
     let _ = install_manifest(&mut app_mgr);
 
     let mut overlays = OverlayWindowManager::<OpenVrOverlayData>::new(&mut app, headless)?;
-    let mut notifications = NotificationManager::new();
-    notifications.run_dbus(&mut app.dbus);
-    notifications.run_udp();
 
     let mut playspace = playspace::PlayspaceMover::new();
     playspace.playspace_changed(&mut compositor_mgr, &mut chaperone_mgr);
@@ -216,9 +214,7 @@ pub fn openvr_run(
             next_device_update = Instant::now() + Duration::from_secs(30);
         }
 
-        app.dbus.tick();
-        notifications.submit_pending(&mut app);
-
+        app.tick();
         app.tasks.retrieve_due(&mut due_tasks);
 
         while let Some(task) = due_tasks.pop_front() {

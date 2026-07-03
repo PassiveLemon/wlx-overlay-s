@@ -14,6 +14,7 @@ use wlx_common::audio::rodio::{
 
 const WHISPER_SAMPLE_RATE: usize = 16_000;
 const MAX_DURATION: Duration = Duration::from_secs(30);
+const UNLOAD_AFTER: Duration = Duration::from_mins(5);
 
 #[derive(Clone, Debug)]
 pub struct WhisperSttConfig {
@@ -107,6 +108,7 @@ pub struct WhisperStt {
     completed_tx: mpsc::Sender<Result<String, String>>,
 
     last_error: Option<String>,
+    unload_at: Instant,
 }
 
 impl WhisperStt {
@@ -133,11 +135,13 @@ impl WhisperStt {
             completed_rx,
             completed_tx,
             last_error: None,
+            unload_at: Instant::now() + UNLOAD_AFTER,
         })
     }
 
     /// starts a fresh capture stream and a transcription worker
     pub fn ptt_start(&mut self) -> Result<(), WhisperSttError> {
+        self.unload_at = Instant::now() + UNLOAD_AFTER;
         self.reap_finished_recognizers();
 
         if self.active.is_some() {
@@ -237,6 +241,7 @@ impl WhisperStt {
     /// stops the pw stream & finalizes recognition asynchronously
     /// poll `take_transcription()` from your main loop to receive transcription
     pub fn ptt_end(&mut self) -> Result<(), WhisperSttError> {
+        self.unload_at = Instant::now() + UNLOAD_AFTER;
         self.stop_active_capture()
     }
 
@@ -246,6 +251,7 @@ impl WhisperStt {
         let latest = self.drain_completed_transcriptions();
 
         if latest.is_some() {
+            self.unload_at = Instant::now() + UNLOAD_AFTER;
             return latest;
         }
 
@@ -263,12 +269,8 @@ impl WhisperStt {
         None
     }
 
-    pub fn take_error(&mut self) -> Option<String> {
-        self.last_error.take()
-    }
-
-    pub fn is_recording(&self) -> bool {
-        self.active.is_some()
+    pub fn should_unload(&self) -> bool {
+        self.unload_at < Instant::now()
     }
 
     fn reap_finished_recognizers(&mut self) {

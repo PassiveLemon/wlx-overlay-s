@@ -24,7 +24,6 @@ use crate::{
     graphics::{GpuFutures, init_openxr_graphics},
     overlays::{toast::Toast, watch::WATCH_NAME},
     state::AppState,
-    subsystem::notifications::NotificationManager,
     windowing::{
         backend::{RenderResources, RenderTarget, ShouldRender},
         manager::OverlayWindowManager,
@@ -87,13 +86,9 @@ pub fn openxr_run(
     let mut lines = LinePool::new(&app)?;
     let mut current_lines = Vec::with_capacity(2);
 
-    let mut notifications = NotificationManager::new();
-    notifications.run_dbus(&mut app.dbus);
-    notifications.run_udp();
-
     let mut delete_queue = vec![];
 
-    app.monado_state_init();
+    app.late_init();
 
     let mut playspace_mover = app.monado_state.as_mut().and_then(|m| {
         playspace::PlayspaceMover::new(&mut m.ipc)
@@ -476,9 +471,7 @@ pub fn openxr_run(
         )?;
         // End layer submit
 
-        app.dbus.tick();
-        notifications.submit_pending(&mut app);
-
+        app.tick();
         app.tasks.retrieve_due(&mut due_tasks);
         while let Some(task) = due_tasks.pop_front() {
             match task {

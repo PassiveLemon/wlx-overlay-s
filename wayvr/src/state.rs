@@ -22,9 +22,12 @@ use wlx_common::{
 use crate::backend;
 use crate::backend::wayvr::WvrServerState;
 
+use crate::subsystem::notifications::NotificationManager;
 #[cfg(feature = "osc")]
 use crate::subsystem::osc::OscSender;
 
+#[cfg(feature = "whisper")]
+use crate::subsystem::whisper_stt::WhisperStt;
 use crate::{
     backend::{XrBackend, input::InputState, task::TaskContainer},
     config::load_general_config,
@@ -44,6 +47,8 @@ pub struct AppState {
 
     pub audio_system: audio::AudioSystem,
     pub audio_sample_player: audio::SamplePlayer,
+
+    pub notifications: NotificationManager,
 
     pub wgui_shared: WSharedContext,
 
@@ -68,6 +73,9 @@ pub struct AppState {
     pub osc_sender: Option<OscSender>,
 
     pub wvr_server: Option<WvrServerState>,
+
+    #[cfg(feature = "whisper")]
+    pub whisper_sst: Option<WhisperStt>,
 
     #[cfg(feature = "openxr")]
     pub monado_state: Option<backend::openxr::monado_state::MonadoState>,
@@ -182,11 +190,14 @@ impl AppState {
             ipc_server,
             wayvr_signals: wvr_signals,
             desktop_finder,
+            notifications: NotificationManager::new(),
 
             #[cfg(feature = "osc")]
             osc_sender,
 
             wvr_server,
+            #[cfg(feature = "whisper")]
+            whisper_sst: None,
 
             #[cfg(feature = "openxr")]
             monado_state: None,
@@ -200,19 +211,38 @@ impl AppState {
         Ok(app_state)
     }
 
-    #[cfg(feature = "openxr")]
-    pub fn monado_state_init(&mut self) {
-        use crate::backend::openxr::monado_state::MonadoState;
+    pub fn late_init(&mut self) {
+        self.notifications.run_dbus(&mut self.dbus);
+        self.notifications.run_udp();
 
-        log::debug!("Connecting to Monado IPC");
-        self.monado_state = None; // stop connection first
+        if matches!(self.xr_backend, XrBackend::OpenXR) {
+            use crate::backend::openxr::monado_state::MonadoState;
 
-        match MonadoState::new() {
-            Ok(m) => {
-                self.monado_state = Some(m);
+            log::debug!("Connecting to Monado IPC");
+            self.monado_state = None; // stop connection first
+
+            match MonadoState::new() {
+                Ok(m) => {
+                    self.monado_state = Some(m);
+                }
+                Err(e) => {
+                    log::error!("Will not use libmonado: {e:?}");
+                }
             }
-            Err(e) => {
-                log::error!("Will not use libmonado: {e:?}");
+        }
+    }
+
+    pub fn tick(&mut self) {
+        self.dbus.tick();
+
+        for toast in self.notifications.drain_pending(&self.session) {
+            toast.submit(self);
+        }
+
+        #[cfg(feature = "whisper")]
+        {
+            if self.whisper_sst.as_ref().is_some_and(|x| x.should_unload()) {
+                self.whisper_sst = None;
             }
         }
     }

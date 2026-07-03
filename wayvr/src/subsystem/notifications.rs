@@ -11,7 +11,7 @@ use std::{
 };
 use wlx_common::overlays::ToastTopic;
 
-use crate::{overlays::toast::Toast, state::AppState, subsystem::dbus::DbusConnector};
+use crate::{overlays::toast::Toast, state::AppSession, subsystem::dbus::DbusConnector};
 
 pub struct NotificationManager {
     rx_toast: mpsc::Receiver<Toast>,
@@ -29,14 +29,14 @@ impl NotificationManager {
         }
     }
 
-    pub fn submit_pending(&self, app: &mut AppState) {
-        if app.session.config.notifications_enabled {
-            self.rx_toast.try_iter().for_each(|toast| {
-                toast.submit(app);
-            });
+    pub fn drain_pending(&self, session: &AppSession) -> Vec<Toast> {
+        if session.config.notifications_enabled {
+            self.rx_toast.try_iter().collect()
         } else {
             // consume without submitting
-            self.rx_toast.try_iter().last();
+            for _ in self.rx_toast.try_iter() {}
+
+            Vec::new()
         }
     }
 
