@@ -430,4 +430,7 @@ pub struct GeneralConfig {
 
 	#[serde(default)]
 	pub tutorial_graduated: bool,
+
+	#[serde(default = "def_empty")]
+	pub whisper_model: Arc<str>,
 }

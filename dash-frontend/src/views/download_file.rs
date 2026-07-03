@@ -220,7 +220,7 @@ impl View {
 
 		tasks.push(Task::SetStatusText(String::from("Writing to file...")));
 
-		// create skymaps directory if it doesn't exist yet
+		// create parent directory if it doesn't exist yet
 		if let Some(parent) = target_path.parent() {
 			handle_async_result(
 				"Directory creation failed",

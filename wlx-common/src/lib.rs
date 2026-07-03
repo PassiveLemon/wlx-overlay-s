@@ -5,6 +5,7 @@ pub mod cache_dir;
 pub mod common;
 pub mod config;
 pub mod config_io;
+pub mod data_dir;
 pub mod dash_interface;
 pub mod dash_interface_emulated;
 pub mod desktop_finder;
