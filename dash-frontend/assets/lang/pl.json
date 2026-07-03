@@ -171,7 +171,13 @@
 		"SPACE_GRAVITY_FLOOR_HEIGHT": "Wysokość podłogi",
 		"SPACE_GRAVITY_FLOOR_HEIGHT_HELP": "Pozycja Y, w której znajduje się podłoga. Grawitacja przestaje działać po osiągnięciu tej wysokości.",
 		"SAVE": "Zapisz",
-		"CANCEL": "Anuluj"
+		"CANCEL": "Anuluj",
+		"WHISPER": {
+			"NEED_TO_DOWNLOAD_MODEL": "Wybrany model musi zostać pobrany.\nPobrać go teraz?",
+			"REMOVE_UNUSED_MODELS": "Wyłączasz funkcję zamiany mowy na tekst.\nCzy chcesz usunąć pobrane modele Whisper, aby zwolnić miejsce?"
+		},
+		"WHISPER_MODEL": "Model mowy na tekst",
+		"WHISPER_MODEL_HELP": "Model Whisper do wykorzystania.\nWiększe modele dają dokładniejsze\nwyniki, ale zużywają więcej pamięci VRAM."
 	},
 	"APPLICATION_LAUNCHER": "Uruchamiacz aplikacji",
 	"APPLICATIONS": "Aplikacje",
@@ -289,5 +295,6 @@
 		"THANKS_FOR_INSTALLING": "Dziękujemy za zainstalowanie WayVR!",
 		"WATCH": "Watch",
 		"WORKING_SET": "Aktywny zestaw"
-	}
+	},
+	"DOWNLOAD": "Pobierz"
 }

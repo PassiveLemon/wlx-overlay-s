@@ -116,11 +116,11 @@
 	"WHISPER": {
 		"TRANSCRIBE": "ボタンを長押ししてテキストを文字起こしする",
 		"PASTE": "文字起こしをクリップボードにコピー",
-		"PASTE_AND_GO": "文字起こしをコピーし、フォーカスされているアプリにCtrl-Vを送信する",
-		"SEND_OSC": "文字起こしをOSCチャットボックスに送信する",
+		"PASTE_AND_GO": "コピーしてフォーカスされているアプリにCtrl-Vを送信",
+		"SEND_OSC": "文字起こしをOSCチャットボックスに送信",
 		"UNLOAD_AND_CLOSE": "モデルをアンロードして閉じる",
-		"MODEL_NOT_DOWNLOADED": "音声認識が設定されていません！",
-		"DOWNLOAD_GUIDANCE": "設定の「機能」から音声入力（speech-to-text）をセットアップしてください！",
+		"MODEL_NOT_DOWNLOADED": "文字起こしが設定されていません！",
+		"DOWNLOAD_GUIDANCE": "機能設定の中に文字起こしを設定してください！",
 		"INITIAL_TEXT": "マイクボタンを押し続けて文字起こしを開始してください...",
 		"INIT_ERROR": "Whisperエンジンの起動中にエラーが発生しました"
 	}
