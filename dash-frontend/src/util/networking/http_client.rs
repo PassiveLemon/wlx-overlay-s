@@ -42,8 +42,6 @@ pub struct GetParams<'a> {
 }
 
 pub async fn get(params: GetParams<'_>) -> anyhow::Result<HttpClientResponse> {
-	log::info!("fetching URL \"{}\"", params.url);
-
 	let url: hyper::Uri = params.url.try_into()?;
 	let req = Request::builder()
 		.header(
@@ -53,7 +51,74 @@ pub async fn get(params: GetParams<'_>) -> anyhow::Result<HttpClientResponse> {
 		.uri(url)
 		.body(Empty::new())?;
 
-	let resp = fetch(params.executor, req).await?;
+	let resp = fetch_and_follow_redirects(params.executor, req, params.on_progress, &params.url).await?;
+
+	Ok(resp)
+}
+
+async fn fetch_and_follow_redirects(
+	executor: &AsyncExecutor,
+	req: hyper::Request<Empty<&'static [u8]>>,
+	mut on_progress: Option<ProgressFunc>,
+	initial_url: &str,
+) -> anyhow::Result<HttpClientResponse> {
+	log::info!("fetching URL \"{}\"", initial_url);
+
+	let resp = fetch(executor, req.clone()).await?;
+	let status = resp.status();
+
+	if status.is_redirection() {
+		let next_req = follow_single_redirect(&req, &resp).await?;
+
+		let max_redirects = 10;
+		let mut current_req = next_req;
+		let mut redirects = 0;
+		loop {
+			let resp = fetch(executor, current_req.clone()).await?;
+			let resp_status = resp.status();
+
+			if resp_status.is_success() {
+				let (parts, body) = resp.into_parts();
+
+				let mut bytes_downloaded: u64 = 0;
+				let mut file_size: u64 = 1;
+
+				if let Some(val) = parts.headers.get("Content-Length")
+					&& let Ok(str) = val.to_str()
+					&& let Ok(s) = str.parse()
+				{
+					file_size = s;
+				}
+
+				let data = BodyStream::new(body)
+					.try_fold(Vec::new(), |mut body, chunk| {
+						if let Some(chunk) = chunk.data_ref() {
+							bytes_downloaded += chunk.len() as u64;
+							body.extend_from_slice(chunk);
+
+							if let Some(on_progress) = &mut on_progress {
+								on_progress(ProgressFuncData {
+									bytes_downloaded,
+									file_size,
+								})
+							}
+						}
+						Ok(body)
+					})
+					.await?;
+
+				return Ok(HttpClientResponse { data });
+			} else if resp_status.is_redirection() {
+				redirects += 1;
+				if redirects >= max_redirects {
+					anyhow::bail!("too many redirects");
+				}
+				current_req = follow_single_redirect(&current_req, &resp).await?;
+			} else {
+				anyhow::bail!("non-200 HTTP response: {}", resp_status.as_str());
+			}
+		}
+	}
 
 	if !resp.status().is_success() {
 		// non-200 HTTP response
@@ -73,8 +138,6 @@ pub async fn get(params: GetParams<'_>) -> anyhow::Result<HttpClientResponse> {
 		file_size = s;
 	}
 
-	let mut on_progress = params.on_progress;
-
 	let data = BodyStream::new(body)
 		.try_fold(Vec::new(), |mut body, chunk| {
 			if let Some(chunk) = chunk.data_ref() {
@@ -93,6 +156,48 @@ pub async fn get(params: GetParams<'_>) -> anyhow::Result<HttpClientResponse> {
 		.await?;
 
 	Ok(HttpClientResponse { data })
+}
+
+fn uri_try_from_str(s: &str) -> anyhow::Result<hyper::http::uri::PathAndQuery> {
+	use std::convert::TryInto;
+	let uri: hyper::Uri = s.try_into().context("invalid URI")?;
+	uri.path_and_query()
+		.ok_or_else(|| anyhow::anyhow!("URI has no path and query component"))
+		.cloned()
+}
+
+async fn follow_single_redirect(
+	req: &hyper::Request<Empty<&'static [u8]>>,
+	resp: &hyper::Response<hyper::body::Incoming>,
+) -> anyhow::Result<hyper::Request<Empty<&'static [u8]>>> {
+	let location = resp
+		.headers()
+		.get(hyper::header::LOCATION)
+		.ok_or_else(|| anyhow::anyhow!("redirect response has no Location header"))?;
+
+	let location_str = location.to_str().context("invalid redirect location header")?;
+
+	// resolve relative urls against the original url.
+	let original_uri = req.uri().clone();
+	let next_url: hyper::Uri = if location_str.starts_with("http://") || location_str.starts_with("https://") {
+		hyper::Uri::try_from(location_str).context("invalid redirect location")?
+	} else {
+		let mut parts = original_uri.into_parts();
+		parts.path_and_query = uri_try_from_str(location_str).context("invalid redirect location")?.into();
+		hyper::Uri::from_parts(parts).context("failed to construct redirect URI")?
+	};
+
+	log::info!("redirecting to \"{}\"", next_url);
+
+	let next_req = Request::builder()
+		.header(
+			hyper::header::HOST,
+			next_url.authority().context("invalid authority")?.as_str(),
+		)
+		.uri(next_url)
+		.body(Empty::new())?;
+
+	Ok(next_req)
 }
 
 pub async fn get_simple(executor: &AsyncExecutor, url: &str) -> anyhow::Result<HttpClientResponse> {
