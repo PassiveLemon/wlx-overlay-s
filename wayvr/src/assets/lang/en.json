@@ -115,9 +115,13 @@
 	},
 	"WHISPER": {
 		"TRANSCRIBE": "Press and hold to transcribe text",
-		"PASTE": "Paste transcription to focused overlay",
-		"UNLOAD": "Unload model from VRAM",
+		"PASTE": "Copy transcription to clipboard",
+		"PASTE_AND_GO": "Copy transcription and send Ctrl-V to focused app",
+		"SEND_OSC": "Send transcription to OSC chatbox",
+		"UNLOAD_AND_CLOSE": "Unload model and close",
 		"MODEL_NOT_DOWNLOADED": "Speech-to-text not set up!",
-		"DOWNLOAD_GUIDANCE": "Set up speech-to-text under settings, features!"
+		"DOWNLOAD_GUIDANCE": "Set up speech-to-text under settings, features!",
+		"INITIAL_TEXT": "Press and hold the mic button to start transcribing...",
+		"INIT_ERROR": "Error while starting Whisper engine"
 	}
 }
