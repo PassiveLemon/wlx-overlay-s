@@ -161,7 +161,8 @@ async fn fetch_and_follow_redirects(
 fn uri_try_from_str(s: &str) -> anyhow::Result<hyper::http::uri::PathAndQuery> {
 	use std::convert::TryInto;
 	let uri: hyper::Uri = s.try_into().context("invalid URI")?;
-	uri.path_and_query()
+	uri
+		.path_and_query()
 		.ok_or_else(|| anyhow::anyhow!("URI has no path and query component"))
 		.cloned()
 }
@@ -183,7 +184,9 @@ async fn follow_single_redirect(
 		hyper::Uri::try_from(location_str).context("invalid redirect location")?
 	} else {
 		let mut parts = original_uri.into_parts();
-		parts.path_and_query = uri_try_from_str(location_str).context("invalid redirect location")?.into();
+		parts.path_and_query = uri_try_from_str(location_str)
+			.context("invalid redirect location")?
+			.into();
 		hyper::Uri::from_parts(parts).context("failed to construct redirect URI")?
 	};
 
