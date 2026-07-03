@@ -251,7 +251,7 @@ impl<T> Tab<T> for TabSettings<T> {
 				&& let Some(tab) = self.current_tab.as_mut()
 			{
 				let config = frontend.interface.general_config(data);
-				let mut change_kind : Option<ConfigChangeKind> = None;
+				let mut change_kind: Option<ConfigChangeKind> = None;
 				tab.context_menu_custom(name, config, &mut change_kind, &mut frontend.layout, &mut self.state)?;
 				if let Some(change_kind) = change_kind {
 					frontend.interface.config_changed(data, change_kind);
