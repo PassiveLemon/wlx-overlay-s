@@ -861,7 +861,7 @@ where
             if pointer.now.click_modifier_right {
                 overlay_state.transform = pointer.pose * grab_data.offset;
             } else {
-                let scale = window_scale(overlay_state);
+                let scale = scalar_scale(&overlay_state.transform);
                 overlay_state.transform.translation =
                     pointer.pose.transform_point3a(grab_data.offset.translation);
                 realign(&mut overlay_state.transform, &app.input_state.hmd, scale);
