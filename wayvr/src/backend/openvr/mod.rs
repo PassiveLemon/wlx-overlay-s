@@ -98,6 +98,7 @@ pub fn openvr_run(
     app.session.no_autostart = no_autostart;
 
     if show_by_default {
+        app.session.config.tutorial_graduated = true;
         app.tasks.enqueue_at(
             TaskType::Overlay(OverlayTask::ShowHide),
             Instant::now().add(Duration::from_secs(1)),

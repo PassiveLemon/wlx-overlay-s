@@ -76,6 +76,7 @@ pub fn openxr_run(
     let modes = xr_instance.enumerate_environment_blend_modes(system, VIEW_TYPE)?;
 
     if show_by_default {
+        app.session.config.tutorial_graduated = true;
         app.tasks.enqueue_at(
             TaskType::Overlay(OverlayTask::ShowHide),
             Instant::now().add(Duration::from_secs(1)),
