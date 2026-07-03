@@ -448,24 +448,30 @@ impl selection_ext::DataControlHandler for Application {
         &self.ext_data_control_state
     }
 }
-
 impl XdgDecorationHandler for Application {
     fn new_decoration(&mut self, toplevel: ToplevelSurface) {
         toplevel.with_pending_state(|state| {
             state.decoration_mode = Some(zxdg_toplevel_decoration_v1::Mode::ServerSide);
         });
+        toplevel.send_configure();
     }
 
     fn request_mode(
         &mut self,
-        _toplevel: ToplevelSurface,
+        toplevel: ToplevelSurface,
         _mode: zxdg_toplevel_decoration_v1::Mode,
     ) {
-        // no switching away from SSD
+        toplevel.with_pending_state(|state| {
+            state.decoration_mode = Some(zxdg_toplevel_decoration_v1::Mode::ServerSide);
+        });
+        toplevel.send_configure();
     }
 
-    fn unset_mode(&mut self, _toplevel: ToplevelSurface) {
-        // no switching away from SSD
+    fn unset_mode(&mut self, toplevel: ToplevelSurface) {
+        toplevel.with_pending_state(|state| {
+            state.decoration_mode = Some(zxdg_toplevel_decoration_v1::Mode::ServerSide);
+        });
+        toplevel.send_configure();
     }
 }
 
