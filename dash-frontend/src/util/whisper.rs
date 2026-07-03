@@ -12,27 +12,27 @@ pub const WHISPER_MODELS: &[WhisperModel] = &[
 	WhisperModel {
 		file_name: "ggml-base-q8_0.bin",
 		display_name: "Base Q8 (78MiB)",
-		url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base-q8_0.bin",
+		url: "https://wayvr.org/files/whisper/ggml-base-q8_0.bin",
 	},
 	WhisperModel {
 		file_name: "ggml-small-q8_0.bin",
 		display_name: "Small Q8 (252MiB)",
-		url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q8_0.bin",
+		url: "https://wayvr.org/files/whisper/ggml-small-q8_0.bin",
 	},
 	WhisperModel {
 		file_name: "ggml-large-v3-turbo-q5_0.bin",
 		display_name: "Turbo Q5 (574MiB)",
-		url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin",
+		url: "https://wayvr.org/files/whisper/ggml-large-v3-turbo-q5_0.bin",
 	},
 	WhisperModel {
 		file_name: "ggml-large-v3-turbo-q8_0.bin",
 		display_name: "Turbo Q8 (874MiB)",
-		url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q8_0.bin",
+		url: "https://wayvr.org/files/whisper/ggml-large-v3-turbo-q8_0.bin",
 	},
 	WhisperModel {
 		file_name: "ggml-large-v3-turbo.bin",
 		display_name: "Turbo (1.5GiB)",
-		url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin",
+		url: "https://wayvr.org/files/whisper/ggml-large-v3-turbo.bin",
 	},
 ];
 
