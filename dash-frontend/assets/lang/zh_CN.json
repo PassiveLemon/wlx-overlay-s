@@ -197,7 +197,13 @@
 		"SPACE_GRAVITY_FLOOR_HEIGHT": "地面高度",
 		"SPACE_GRAVITY_FLOOR_HEIGHT_HELP": "地面所在 Y 轴位置。达到该高度时重力停止。",
 		"SAVE": "保存",
-		"CANCEL": "取消"
+		"CANCEL": "取消",
+		"WHISPER": {
+			"NEED_TO_DOWNLOAD_MODEL": "所选模型需要下载。\n现在开始下载吗？",
+			"REMOVE_UNUSED_MODELS": "您正在关闭语音转文本功能。\n是否删除已下载的 Whisper 模型以释放空间？"
+		},
+		"WHISPER_MODEL": "语音转文本模型",
+		"WHISPER_MODEL_HELP": "要使用的 Whisper 模型。\n模型越大，结果越准确，\n但消耗的显存 (VRAM) 越多。"
 	},
 	"APPLICATION_LAUNCHER": "应用启动器",
 	"APPLICATION_STARTED": "应用已启动",
@@ -289,5 +295,6 @@
 		"THANKS_FOR_INSTALLING": "感谢安装 WayVR！",
 		"WATCH": "Watch",
 		"WORKING_SET": "工作集"
-	}
+	},
+	"DOWNLOAD": "下载"
 }

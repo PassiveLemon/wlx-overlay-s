@@ -176,7 +176,13 @@
 		"SPACE_GRAVITY_FLOOR_HEIGHT": "Altura del suelo",
 		"SPACE_GRAVITY_FLOOR_HEIGHT_HELP": "La posición Y donde se encuentra el suelo. La gravedad se detiene cuando alcanzas esta altura.",
 		"SAVE": "Guardar",
-		"CANCEL": "Cancelar"
+		"CANCEL": "Cancelar",
+		"WHISPER": {
+			"NEED_TO_DOWNLOAD_MODEL": "El modelo seleccionado debe ser descargado.\n¿Deseas descargarlo ahora?",
+			"REMOVE_UNUSED_MODELS": "Estás desactivando la función de voz a texto.\n¿Te gustaría eliminar los modelos de Whisper descargados para liberar espacio?"
+		},
+		"WHISPER_MODEL": "Modelo de voz a texto",
+		"WHISPER_MODEL_HELP": "Modelo de Whisper a utilizar.\nLos modelos más grandes producen\nresultados más precisos, pero consumen más VRAM."
 	},
 	"HELLO": "¡Hola!",
 	"AUDIO": {
@@ -289,5 +295,6 @@
 		"THANKS_FOR_INSTALLING": "¡Gracias por instalar WayVR!",
 		"WATCH": "Watch",
 		"WORKING_SET": "Set de trabajo"
-	}
+	},
+	"DOWNLOAD": "Descargar"
 }

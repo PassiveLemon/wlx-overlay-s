@@ -176,7 +176,13 @@
 		"SPACE_GRAVITY_FLOOR_HEIGHT": "床の高さ",
 		"SPACE_GRAVITY_FLOOR_HEIGHT_HELP": "床のY座標です。この高さに達すると重力が停止します。",
 		"SAVE": "保存",
-		"CANCEL": "キャンセル"
+		"CANCEL": "キャンセル",
+		"WHISPER": {
+			"NEED_TO_DOWNLOAD_MODEL": "選択されたモデルをダウンロードする必要があります。\n今すぐダウンロードしますか？",
+			"REMOVE_UNUSED_MODELS": "文字起こし機能をオフにします。\n空き容量を増やすために、ダウンロード済みのモデルファイルを削除しますか？"
+		},
+		"WHISPER_MODEL": "文字起こしモデル",
+		"WHISPER_MODEL_HELP": "使用するWhisperモデル。\nモデルが大きいほど精度は向上しますが、\nVRAMの消費量が増加します。"
 	},
 	"HELLO": "こんにちは！",
 	"AUDIO": {
@@ -289,5 +295,6 @@
 		"THANKS_FOR_INSTALLING": "WayVRをインストールしていただきありがとうございます！",
 		"WATCH": "Watch",
 		"WORKING_SET": "ワーキングセット"
-	}
+	},
+	"DOWNLOAD": "ダウンロード"
 }
