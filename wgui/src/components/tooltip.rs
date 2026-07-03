@@ -75,11 +75,15 @@ impl Default for Params {
 	}
 }
 
-struct State {}
+struct State {
+	position_shift: Vec2, // in case if the tooltip goes out of bounds
+}
 
 #[allow(clippy::struct_field_names)]
 struct Data {
-	id_root: WidgetID, // Rectangle
+	id_root: WidgetID, // div
+	id_rect: WidgetID, // rectangle
+	side: TooltipSide,
 }
 
 pub struct ComponentTooltip {
@@ -99,8 +103,47 @@ impl ComponentTrait for ComponentTooltip {
 		&self.base
 	}
 
-	fn refresh(&self, _data: &mut RefreshData) {
-		// nothing to do
+	fn refresh(&self, data: &mut RefreshData) {
+		let layout_size = data.layout.content_size;
+		let pin_pos = data.layout.state.get_widget_boundary(self.data.id_root).pos;
+		let rect_size = data.layout.state.get_widget_boundary(self.data.id_rect).size;
+
+		let rect_pos_topleft: Vec2 = match self.data.side {
+			TooltipSide::Left => pin_pos + Vec2::new(-rect_size.x, -rect_size.y / 2.0),
+			TooltipSide::Right => pin_pos + Vec2::new(0.0, -rect_size.y / 2.0),
+			TooltipSide::Top => pin_pos + Vec2::new(-rect_size.x / 2.0, -rect_size.y),
+			TooltipSide::Bottom => pin_pos + Vec2::new(-rect_size.x / 2.0, 0.0),
+		};
+
+		let mut state = self.state.borrow_mut();
+
+		let padding = 8.0;
+		let rect_right = rect_pos_topleft.x + rect_size.x + padding;
+		let rect_bottom = rect_pos_topleft.y + rect_size.y + padding;
+
+		let diff_right = rect_right - layout_size.x;
+		let diff_bottom = rect_bottom - layout_size.y;
+
+		// limit x < 0 or rect_right > layout_size.x
+		if rect_pos_topleft.x < 0.0 {
+			state.position_shift.x = -rect_pos_topleft.x;
+		} else if diff_right > 0.0 {
+			state.position_shift.x = -diff_right;
+		}
+
+		// limit y < 0 or rect_bottom > layout_size.y
+		if rect_pos_topleft.y < 0.0 {
+			state.position_shift.y = -rect_pos_topleft.y;
+		} else if diff_bottom > 0.0 {
+			state.position_shift.y = -diff_bottom;
+		}
+
+		/*log::info!(
+			"layout size {:?}, pin pos {:?}, rect size {:?}",
+			layout_size,
+			pin_pos,
+			rect_size
+		);*/
 	}
 }
 
@@ -127,7 +170,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 
 	let spacing = 8.0;
 
-	let transform = Mat4::from_translation(Vec3::new(-0.5, 0.0, 0.0));
+	let transform = Mat4::from_translation(Vec3::new(0.0, 0.0, 0.0));
 
 	// this value needs to be bigger than rectangle padding sizes due to the
 	// transform stack & scissoring design. Needs investigation, zero-size objects
@@ -219,18 +262,25 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 			},
 		},
 	);
+
 	let (label, _) = ess.layout.add_child(rect.id, label, Default::default())?;
 
-	let data = Rc::new(Data { id_root: div.id });
+	let data = Rc::new(Data {
+		id_root: div.id,
+		id_rect: rect.id,
+		side: params.info.side.clone(),
+	});
 
-	let state = Rc::new(RefCell::new(State {}));
+	let state = Rc::new(RefCell::new(State {
+		position_shift: Vec2::default(),
+	}));
 
 	let base = ComponentBase::default();
 
 	let tooltip = Rc::new(ComponentTooltip {
 		base,
 		data,
-		state,
+		state: state.clone(),
 		tasks: ess.layout.tasks.clone(),
 	});
 
@@ -246,21 +296,29 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 		rect.id,
 		(10.0 * anim_mult) as u32,
 		AnimationEasing::OutQuad,
-		Box::new(move |common, data| {
-			let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap(); /* safe */
-			let alpha = data.pos;
-			rect.params.color.a = alpha;
-			rect.params.border_color.a = alpha;
+		{
+			Box::new(move |common, data| {
+				let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap(); /* safe */
+				let alpha = data.pos;
+				rect.params.color.a = alpha;
+				rect.params.border_color.a = alpha;
 
-			let dir_mult = (1.0 - data.pos) * 5.0;
-			data.data.transform = Mat4::from_translation(Vec3::new(direction.x * dir_mult, direction.y * dir_mult, 0.0));
+				let position_shift = state.borrow().position_shift;
 
-			if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(label.id) {
-				label.set_color(common, Color::new(1.0, 1.0, 1.0, alpha), true);
-			}
+				let dir_mult = (1.0 - data.pos) * 5.0;
+				data.data.transform = Mat4::from_translation(Vec3::new(
+					direction.x * dir_mult + position_shift.x,
+					direction.y * dir_mult + position_shift.y,
+					0.0,
+				));
 
-			common.alterables.mark_redraw();
-		}),
+				if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(label.id) {
+					label.set_color(common, Color::new(1.0, 1.0, 1.0, alpha), true);
+				}
+
+				common.alterables.mark_redraw();
+			})
+		},
 	));
 
 	ess.layout.defer_component_refresh(Component(tooltip.clone()));

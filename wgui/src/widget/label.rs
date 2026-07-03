@@ -5,7 +5,7 @@ use slotmap::Key;
 use taffy::AvailableSpace;
 
 use crate::{
-	drawing::{self, Boundary, PrimitiveExtent},
+	drawing::{self, PrimitiveExtent},
 	event::CallbackDataCommon,
 	globals::Globals,
 	i18n::Translation,
@@ -28,7 +28,6 @@ pub struct WidgetLabel {
 
 	params: WidgetLabelParams,
 	buffer: Rc<RefCell<Buffer>>,
-	last_boundary: Boundary,
 }
 
 impl WidgetLabel {
@@ -64,7 +63,6 @@ impl WidgetLabel {
 			Box::new(Self {
 				params,
 				buffer: Rc::new(RefCell::new(buffer)),
-				last_boundary: Boundary::default(),
 				id: WidgetID::null(),
 			}),
 		)
@@ -122,12 +120,9 @@ impl WidgetObj for WidgetLabel {
 	fn draw(&mut self, state: &mut super::DrawState, _params: &super::DrawParams) {
 		let boundary = drawing::Boundary::construct_relative(state.transform_stack);
 
-		if self.last_boundary != boundary {
-			self.last_boundary = boundary;
-			let mut font_system = state.globals.font_system.system.lock();
-			let mut buffer = self.buffer.borrow_mut();
-			buffer.set_size(&mut font_system, Some(boundary.size.x), Some(boundary.size.y));
-		}
+		let mut font_system = state.globals.font_system.system.lock();
+		let mut buffer = self.buffer.borrow_mut();
+		buffer.set_size(&mut font_system, Some(boundary.size.x), Some(boundary.size.y));
 
 		state.primitives.push(drawing::RenderPrimitive::Text(
 			PrimitiveExtent {
