@@ -5,8 +5,10 @@ use wgui::{assets::AssetProvider, sound::WguiSoundType};
 
 use std::io::Read;
 
+pub use rodio;
+
 pub struct AudioSystem {
-	audio_stream: Option<rodio::OutputStream>,
+	audio_stream: Option<rodio::MixerDeviceSink>,
 	first_try: bool,
 }
 
@@ -100,10 +102,10 @@ impl AudioSystem {
 		}
 	}
 
-	fn get_handle(&mut self) -> Option<&rodio::OutputStream> {
+	fn get_handle(&mut self) -> Option<&rodio::MixerDeviceSink> {
 		if self.audio_stream.is_none() && self.first_try {
 			self.first_try = false;
-			if let Ok(stream) = rodio::OutputStreamBuilder::open_default_stream() {
+			if let Ok(stream) = rodio::DeviceSinkBuilder::open_default_sink() {
 				self.audio_stream = Some(stream);
 			} else {
 				log::error!("Failed to open audio stream. Audio will not work.");
