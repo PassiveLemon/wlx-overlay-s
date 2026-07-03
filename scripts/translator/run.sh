@@ -21,6 +21,10 @@ if [ -z "${MODEL}" ]; then
 	export MODEL="gemma-4-26B-A4B-it-UD-Q3_K_M"
 fi
 
+if [ -z "${LLAMA_BASE_URL}" ]; then
+	export LLAMA_BASE_URL="http://127.0.0.1:8080"
+fi
+
 TEMPLATE="pl" bun main.ts
 TEMPLATE="de" bun main.ts
 TEMPLATE="ja" bun main.ts

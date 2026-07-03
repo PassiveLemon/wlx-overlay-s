@@ -3,6 +3,7 @@ import * as fsp from "fs/promises";
 import path from "path";
 import * as fs from "fs";
 
+const base_url = process.env["LLAMA_BASE_URL"] as string;
 const model_name = process.env["MODEL"] as string;
 const template_name = process.env["TEMPLATE"] as string;
 let lang_path = process.env["LANG_PATH"] as string;
@@ -203,7 +204,7 @@ async function run() {
 			english_translation,
 		);
 
-		const response = await fetch("http://localhost:8080/v1/chat/completions", {
+		const response = await fetch(base_url + "/v1/chat/completions", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
