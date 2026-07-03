@@ -1,6 +1,6 @@
 use std::{rc::Rc, time::Duration};
 
-use glam::{Affine3A, Quat, Vec3, vec3};
+use glam::Affine3A;
 use wgui::{
     components::button::ComponentButton,
     event::EventCallback,
@@ -38,11 +38,9 @@ use crate::{
     },
 };
 
-pub const WHISPER_NAME: &str = "whisper";
+const WHISPER_NAME: &str = "whisper";
 
-#[derive(Default)]
 struct WhisperState {
-    whisper_sst: Option<WhisperStt>,
     clipboard_provider: Option<Box<dyn ClipboardProvider>>,
     last_transcription: Option<Rc<str>>,
 }
@@ -92,7 +90,7 @@ pub fn create_whisper(
 
     let state = WhisperState {
         clipboard_provider,
-        ..Default::default()
+        last_transcription: None,
     };
     let xml = "gui/whisper.xml";
 
@@ -118,18 +116,18 @@ pub fn create_whisper(
                 let button = button.clone();
 
                 let callback: EventCallback<AppState, WhisperState> = match command {
-                    "::WhisperTranscribeStart" => Box::new(move |_common, data, app, state| {
+                    "::WhisperTranscribeStart" => Box::new(move |_common, data, app, _state| {
                         if !test_button(data) || !test_duration(&button, app) {
                             return Ok(EventResult::Pass);
                         }
 
-                        let whisper = match state.whisper_sst.as_mut() {
+                        let whisper = match app.whisper_sst.as_mut() {
                             Some(x) => x,
                             None => {
                                 let model_path = data_dir::get_path("whisper")
                                     .join(app.session.config.whisper_model.as_ref());
                                 if model_path.is_file() {
-                                    state.whisper_sst = match WhisperStt::new(model_path)
+                                    app.whisper_sst = match WhisperStt::new(model_path)
                                         .log_err("Error while starting Whisper engine")
                                     {
                                         Ok(x) => Some(x),
@@ -157,7 +155,7 @@ pub fn create_whisper(
                                     return Ok(EventResult::Consumed);
                                 }
 
-                                state.whisper_sst.as_mut().unwrap()
+                                app.whisper_sst.as_mut().unwrap()
                             }
                         };
 
@@ -167,12 +165,12 @@ pub fn create_whisper(
 
                         Ok(EventResult::Consumed)
                     }),
-                    "::WhisperTranscribeStop" => Box::new(move |_common, data, app, state| {
+                    "::WhisperTranscribeStop" => Box::new(move |_common, data, app, _state| {
                         if !test_button(data) || !test_duration(&button, app) {
                             return Ok(EventResult::Pass);
                         }
 
-                        if let Some(whisper) = state.whisper_sst.as_mut() {
+                        if let Some(whisper) = app.whisper_sst.as_mut() {
                             let _ = whisper
                                 .ptt_end()
                                 .log_err("Could not stop Whisper transcription");
@@ -240,12 +238,12 @@ pub fn create_whisper(
 
                         Ok(EventResult::Consumed)
                     }),
-                    "::WhisperUnloadAndClose" => Box::new(move |_common, data, app, state| {
+                    "::WhisperUnloadAndClose" => Box::new(move |_common, data, app, _state| {
                         if !test_button(data) || !test_duration(&button, app) {
                             return Ok(EventResult::Pass);
                         }
 
-                        state.whisper_sst = None;
+                        app.whisper_sst = None;
                         app.tasks
                             .enqueue(TaskType::Overlay(OverlayTask::ToggleOverlay(
                                 OverlaySelector::Name(WHISPER_NAME.into()),
@@ -297,14 +295,14 @@ pub fn create_whisper(
         .push(GuiTimer::new(Duration::from_millis(100), 0));
 
     let on_label_tick: EventCallback<AppState, WhisperState> =
-        Box::new(move |common, data, _app, state| {
-            if let Some(whisper_stt) = state.whisper_sst.as_mut()
-                && let Some(text) = whisper_stt.take_transcription()
-            {
-                let text: Rc<str> = text.into();
-                state.last_transcription = Some(text.clone());
-                let label = data.obj.get_as_mut::<WidgetLabel>().unwrap();
-                label.set_text(common, Translation::from_raw_text_rc(text));
+        Box::new(move |common, data, app, state| {
+            if let Some(whisper_stt) = app.whisper_sst.as_mut() {
+                if let Some(text) = whisper_stt.take_transcription() {
+                    let text: Rc<str> = text.into();
+                    state.last_transcription = Some(text.clone());
+                    let label = data.obj.get_as_mut::<WidgetLabel>().unwrap();
+                    label.set_text(common, Translation::from_raw_text_rc(text));
+                }
             }
             Ok(EventResult::Pass)
         });

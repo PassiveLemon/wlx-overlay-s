@@ -290,14 +290,6 @@ pub fn realign(transform: &mut Affine3A, hmd: &Affine3A, scale: f32) {
     transform.matrix3 = Mat3A::from_cols(col_x, col_y, col_z).mul_scalar(scale) * rot;
 }
 
-pub fn window_scale(state: &OverlayWindowState) -> f32 {
-    state
-        .saved_transform
-        .as_ref()
-        .map(scalar_scale)
-        .unwrap_or_else(|| scalar_scale(&state.transform))
-}
-
 pub fn scalar_scale(a: &Affine3A) -> f32 {
     let det = a.matrix3.determinant();
     (a.matrix3.x_axis.length() * det.signum()

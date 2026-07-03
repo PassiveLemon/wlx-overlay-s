@@ -20,7 +20,7 @@ use crate::subsystem::hid::WheelDelta;
 use crate::subsystem::input::KeyboardFocus;
 use crate::windowing::backend::OverlayEventData;
 use crate::windowing::manager::OverlayWindowManager;
-use crate::windowing::window::{self, OverlayWindowData, realign, scalar_scale, window_scale};
+use crate::windowing::window::{self, OverlayWindowData, realign, scalar_scale};
 use crate::windowing::{OverlayID, OverlaySelector};
 
 use super::task::TaskType;
