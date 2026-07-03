@@ -28,7 +28,7 @@ use wlx_common::{
 
 use crate::{
 	frontend::{Frontend, FrontendTask, FrontendTasks},
-	tab::{settings::macros::MacroParams, Tab, TabType},
+	tab::{Tab, TabType, settings::macros::MacroParams},
 	views::ViewUpdateParams,
 };
 
@@ -246,10 +246,11 @@ impl<T> Tab<T> for TabSettings<T> {
 
 		// Dropdown handling
 		if let TickResult::Action(name) = self.context_menu.tick(&mut frontend.layout, &mut self.state)? {
-			if name.starts_with(';') && let Some(tab) = self.current_tab.as_mut() {
+			if name.starts_with(';')
+				&& let Some(tab) = self.current_tab.as_mut()
+			{
 				let config = frontend.interface.general_config(data);
-				tab.context_menu_custom(name, config,  &mut frontend.layout, &mut self.state)?;
-				
+				tab.context_menu_custom(name, config, &mut frontend.layout, &mut self.state)?;
 			} else if let (Some(setting), Some(id), Some(value), Some(text), Some(translated)) = {
 				let mut s = name.splitn(5, ';');
 				(s.next(), s.next(), s.next(), s.next(), s.next())
