@@ -3,6 +3,7 @@ use smithay::backend::allocator::dmabuf::Dmabuf;
 use smithay::backend::renderer::{BufferType, buffer_type};
 use smithay::desktop::{PopupKind, PopupManager};
 use smithay::input::{Seat, SeatHandler, SeatState};
+use smithay::output::Output;
 use smithay::reexports::rustix::fs::{OFlags, fcntl_setfl};
 use smithay::reexports::wayland_protocols::xdg::decoration::zv1::server::zxdg_toplevel_decoration_v1;
 use smithay::reexports::wayland_protocols::xdg::shell::server::xdg_toplevel;
@@ -59,6 +60,7 @@ use crate::ipc::event_queue::SyncEventQueue;
 use super::WayVRTask;
 
 pub struct Application {
+    pub output: Output,
     pub image_importer: ImageImporter,
     pub dmabuf_state: (DmabufState, DmabufGlobal, Option<DmabufFeedback>),
     pub compositor: compositor::CompositorState,
@@ -80,6 +82,7 @@ pub struct Application {
 impl Application {
     pub fn cleanup(&mut self) {
         self.image_importer.cleanup();
+        self.output.cleanup();
     }
 
     pub fn set_clipboard_text(&mut self, content: &str) {
@@ -117,6 +120,18 @@ impl Application {
                 }
             }
         }
+    }
+
+    fn send_initial_surface_state(&self, surface: &WlSurface) {
+        self.output.enter(surface);
+
+        smithay::wayland::compositor::with_states(surface, |states| {
+            send_surface_state(surface, states, 1, smithay::utils::Transform::Normal);
+
+            with_fractional_scale(states, |fractional| {
+                fractional.set_preferred_scale(1.0);
+            });
+        });
     }
 }
 
@@ -328,7 +343,9 @@ impl XdgShellHandler for Application {
     }
 
     fn new_toplevel(&mut self, surface: ToplevelSurface) {
-        if let Some(client) = surface.wl_surface().client() {
+        let wl_surface = surface.wl_surface();
+        self.send_initial_surface_state(wl_surface);
+        if let Some(client) = wl_surface.client() {
             self.wayvr_tasks
                 .send(WayVRTask::NewToplevel(client.id(), surface.clone()));
         }
@@ -339,6 +356,8 @@ impl XdgShellHandler for Application {
     }
 
     fn toplevel_destroyed(&mut self, surface: ToplevelSurface) {
+        self.output.leave(surface.wl_surface());
+
         if let Some(client) = surface.wl_surface().client() {
             self.wayvr_tasks
                 .send(WayVRTask::DropToplevel(client.id(), surface.clone()));

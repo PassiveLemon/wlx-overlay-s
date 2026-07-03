@@ -41,6 +41,7 @@ use std::{
     time::{Duration, Instant},
 };
 use vulkano::image::view::ImageView;
+use wayland_protocols::xdg::shell::server::xdg_toplevel;
 use wayvr_ipc::{packet_client::PositionMode, packet_server};
 use wgui::gfx::WGfx;
 use wlx_capture::frame::Transform;
@@ -223,6 +224,7 @@ impl WvrServerState {
         let dma_importer = ImageImporter::new(gfx);
 
         let state = Application {
+            output,
             image_importer: dma_importer,
             display_handle: dh,
             compositor,
@@ -363,6 +365,11 @@ impl WvrServerState {
                             size.w as _,
                             size.h as _,
                         );
+                        toplevel.with_pending_state(|state| {
+                            state.size = Some(size);
+                            state.states.set(xdg_toplevel::State::Activated);
+                        });
+                        toplevel.send_configure();
 
                         let mut icon = icon;
 
