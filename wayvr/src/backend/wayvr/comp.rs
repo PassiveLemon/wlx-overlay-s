@@ -145,15 +145,11 @@ impl compositor::CompositorHandler for Application {
                     match buffer_type(&buffer) {
                         Some(BufferType::Dma) => {
                             let dmabuf = get_dmabuf(&buffer).unwrap(); // always Ok due to buffer_type
-                            if let Ok(image) = self
-                                .image_importer
-                                .get_or_import_dmabuf(dmabuf.clone())
-                                .inspect_err(|e| {
-                                    log::warn!("wayland_server failed to import DMA-buf: {e:?}");
-                                })
+
+                            if let Ok(image) =
+                                self.image_importer.get_or_import_dmabuf(dmabuf.clone())
                             {
                                 let sbwi = SurfaceBufWithImage {
-                                    buffer: Some(buffer.clone()),
                                     image,
                                     transform: wl_transform_to_frame_transform(
                                         attrs.buffer_transform,
@@ -161,7 +157,14 @@ impl compositor::CompositorHandler for Application {
                                     scale: attrs.buffer_scale,
                                     dmabuf: true,
                                 };
-                                sbwi.apply_to_surface(states);
+
+                                if let Some(old_buffer) =
+                                    sbwi.apply_to_surface(states, Some(buffer.clone()))
+                                {
+                                    old_buffer.release();
+                                }
+                            } else {
+                                buffer.release();
                             }
                         }
                         Some(BufferType::Shm) => {
@@ -174,7 +177,6 @@ impl compositor::CompositorHandler for Application {
                                     })
                                 {
                                     let sbwi = SurfaceBufWithImage {
-                                        buffer: None,
                                         image,
                                         transform: wl_transform_to_frame_transform(
                                             attrs.buffer_transform,
@@ -182,7 +184,7 @@ impl compositor::CompositorHandler for Application {
                                         scale: attrs.buffer_scale,
                                         dmabuf: false,
                                     };
-                                    sbwi.apply_to_surface(states);
+                                    sbwi.apply_to_surface(states, None);
                                 }
                             });
                             buffer.release();
@@ -195,7 +197,6 @@ impl compositor::CompositorHandler for Application {
                                 })
                             {
                                 let sbwi = SurfaceBufWithImage {
-                                    buffer: None,
                                     image,
                                     transform: wl_transform_to_frame_transform(
                                         // does this even matter
@@ -204,7 +205,7 @@ impl compositor::CompositorHandler for Application {
                                     scale: attrs.buffer_scale,
                                     dmabuf: false,
                                 };
-                                sbwi.apply_to_surface(states);
+                                sbwi.apply_to_surface(states, None);
                             }
                             buffer.release();
                         }

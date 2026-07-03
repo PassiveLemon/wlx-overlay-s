@@ -716,12 +716,12 @@ fn generate_auth_key() -> String {
 
 struct SurfaceBufWithImageContainer {
     inner: RefCell<SurfaceBufWithImage>,
+    retained_dmabuf_buffer: RefCell<Option<wl_buffer::WlBuffer>>,
 }
 
 #[derive(Clone)]
 #[allow(dead_code)]
 pub struct SurfaceBufWithImage {
-    pub buffer: Option<wl_buffer::WlBuffer>,
     pub image: Arc<ImageView>,
     pub transform: Transform,
     pub scale: i32,
@@ -729,15 +729,22 @@ pub struct SurfaceBufWithImage {
 }
 
 impl SurfaceBufWithImage {
-    fn apply_to_surface(self, surface_data: &SurfaceData) {
+    fn apply_to_surface(
+        self,
+        surface_data: &SurfaceData,
+        retained_buffer: Option<wl_buffer::WlBuffer>,
+    ) -> Option<wl_buffer::WlBuffer> {
         if let Some(container) = surface_data.data_map.get::<SurfaceBufWithImageContainer>() {
             container.inner.replace(self);
+            container.retained_dmabuf_buffer.replace(retained_buffer)
         } else {
             surface_data
                 .data_map
                 .insert_if_missing(|| SurfaceBufWithImageContainer {
                     inner: RefCell::new(self),
+                    retained_dmabuf_buffer: RefCell::new(retained_buffer),
                 });
+            None
         }
     }
 
