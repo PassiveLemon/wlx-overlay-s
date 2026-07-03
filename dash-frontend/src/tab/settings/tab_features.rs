@@ -11,7 +11,7 @@ use wgui::{
 	widget::label::WidgetLabel,
 	windowing::context_menu::{self},
 };
-use wlx_common::{async_executor::AsyncExecutor, config::GeneralConfig};
+use wlx_common::{async_executor::AsyncExecutor, config::GeneralConfig, dash_interface::ConfigChangeKind};
 
 use crate::{
 	frontend::FrontendTasks,
@@ -61,6 +61,7 @@ impl SettingsTab for State {
 						if !whisper_model_path(model.file_name).exists() {
 							// download failed, set to selection to none
 							par.general_config.whisper_model = "".into();
+							par.config_change_kind.replace(ConfigChangeKind::Other);
 							// reload the tab
 							self.parent_tasks.push(ParentTask::SetTab(TabNameEnum::Features));
 						}
@@ -76,6 +77,7 @@ impl SettingsTab for State {
 				Task::WhisperDownloadDone => {
 					if let Some(model) = self.pending_download.take() {
 						par.general_config.whisper_model = model.file_name.into();
+						par.config_change_kind.replace(ConfigChangeKind::Other);
 
 						// reload tab so that the downloaded checkmarks get populated
 						self.parent_tasks.push(ParentTask::SetTab(TabNameEnum::Features));
@@ -98,6 +100,7 @@ impl SettingsTab for State {
 		&mut self,
 		action: Rc<str>,
 		config: &mut GeneralConfig,
+		change_kind: &mut Option<ConfigChangeKind>,
 		layout: &mut wgui::layout::Layout,
 		state: &mut wgui::parser::ParserState,
 	) -> anyhow::Result<()> {
@@ -115,9 +118,12 @@ impl SettingsTab for State {
 				config.whisper_model = model.file_name.into();
 				if !whisper_model_path(model.file_name).exists() {
 					self.show_whisper_model_dialog_box_download(model)?;
+				} else {
+					change_kind.replace(ConfigChangeKind::Other);
 				}
 			} else {
 				config.whisper_model = "".into();
+				change_kind.replace(ConfigChangeKind::Other);
 				// re-init the whole tab
 				if whisper_any_models_downloaded().unwrap_or_default() {
 					self.show_whisper_model_dialog_box_cleanup()?;

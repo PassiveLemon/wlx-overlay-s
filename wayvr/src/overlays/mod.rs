@@ -7,3 +7,5 @@ pub mod screen;
 pub mod toast;
 pub mod watch;
 pub mod wayvr;
+#[cfg(feature = "whisper")]
+pub mod whisper;

@@ -112,5 +112,12 @@
 		"RECENTER": "Recenter playspace",
 		"SWITCH_TO_SET": "Switch to set",
 		"TOGGLE_FOR_CURRENT_SET": "Toggle for current set"
+	},
+	"WHISPER": {
+		"TRANSCRIBE": "Press and hold to transcribe text",
+		"PASTE": "Paste transcription to focused overlay",
+		"UNLOAD": "Unload model from VRAM",
+		"MODEL_NOT_DOWNLOADED": "Speech-to-text not set up!",
+		"DOWNLOAD_GUIDANCE": "Set up speech-to-text under settings, features!"
 	}
 }
