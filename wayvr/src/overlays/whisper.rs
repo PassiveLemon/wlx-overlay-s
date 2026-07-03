@@ -1,4 +1,4 @@
-use std::{path::Path, rc::Rc, time::Duration};
+use std::{rc::Rc, time::Duration};
 
 use glam::{Affine3A, Quat, Vec3, vec3};
 use wgui::{
@@ -27,7 +27,7 @@ use crate::{
     overlays::toast::Toast,
     state::AppState,
     subsystem::{
-        clipboard::{ClipboardProvider, wl::WlClipboardProvider, x11::X11ClipboardProvider},
+        clipboard::{self, ClipboardProvider},
         hid::VirtualKey,
         input::KeyboardFocus,
         whisper_stt::WhisperStt,
@@ -76,20 +76,22 @@ pub fn create_whisper(
     headless: bool,
     wayland: bool,
 ) -> anyhow::Result<OverlayWindowConfig> {
-    // let clipboard_provider: Option<Box<dyn ClipboardProvider>> = match (headless, wayland) {
-    //     (true, _) => None,
-    //     (false, true) => WlClipboardProvider::new()
-    //         .log_err("Could not create Wayland clipboard provider")
-    //         .ok()
-    //         .map(|p| Box::new(p) as Box<dyn ClipboardProvider>),
-    //     (false, false) => X11ClipboardProvider::new()
-    //         .log_err("Could not create X11 clipboard provider")
-    //         .ok()
-    //         .map(|p| Box::new(p) as Box<dyn ClipboardProvider>),
-    // };
+    let clipboard_provider: Option<Box<dyn ClipboardProvider>> = match (headless, wayland) {
+        #[cfg(feature = "wayland")]
+        (false, true) => clipboard::wl::Provider::new()
+            .log_err("Could not create Wayland clipboard provider")
+            .ok()
+            .map(|p| Box::new(p) as Box<dyn ClipboardProvider>),
+        #[cfg(feature = "x11")]
+        (false, false) => clipboard::x11::Provider::new()
+            .log_err("Could not create X11 clipboard provider")
+            .ok()
+            .map(|p| Box::new(p) as Box<dyn ClipboardProvider>),
+        _ => None,
+    };
 
     let state = WhisperState {
-        clipboard_provider: None,
+        clipboard_provider,
         ..Default::default()
     };
     let xml = "gui/whisper.xml";
@@ -205,6 +207,11 @@ pub fn create_whisper(
                             );
                             app.hid_provider.send_key_routed(
                                 app.wvr_server.as_mut(),
+                                VirtualKey::V,
+                                false,
+                            );
+                            app.hid_provider.send_key_routed(
+                                app.wvr_server.as_mut(),
                                 VirtualKey::RCtrl,
                                 false,
                             );
@@ -310,16 +317,19 @@ pub fn create_whisper(
 
     panel.update_layout(app)?;
 
+    let transform = Affine3A::from_cols_array_2d(&[
+        [0.49993715, -0.00020921684, -0.008030709],
+        [-0.0021463279, 0.47818363, -0.14607349],
+        [0.007741399, 0.1460891, 0.478121],
+        [-0.021562248, -0.40786624, -0.3346647],
+    ]);
+
     Ok(OverlayWindowConfig {
         name: WHISPER_NAME.into(),
         default_state: OverlayWindowState {
             interactable: true,
             grabbable: true,
-            transform: Affine3A::from_scale_rotation_translation(
-                Vec3::ONE * 0.5,
-                Quat::IDENTITY,
-                vec3(0.0, 0.0, -0.6),
-            ),
+            transform,
             positioning: Positioning::Anchored,
             ..OverlayWindowState::default()
         },

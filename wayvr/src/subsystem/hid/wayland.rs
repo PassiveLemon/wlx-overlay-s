@@ -1,5 +1,5 @@
 use anyhow::Context;
-use wlx_capture::wayland::wayland_client::{
+use wayland_client::{
     Connection, Dispatch, Proxy, QueueHandle,
     globals::{GlobalListContents, registry_queue_init},
     protocol::{
