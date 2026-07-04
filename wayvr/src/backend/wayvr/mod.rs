@@ -668,9 +668,7 @@ impl WvrServerState {
 
     pub fn send_mouse_scroll_to_surface(
         &mut self,
-        surface: WlSurface,
         global_pos: Vec2,
-        surface_origin: Vec2,
         hover_window: window::WindowHandle,
         delta: WheelDelta,
     ) {

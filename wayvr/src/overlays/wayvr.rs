@@ -109,6 +109,12 @@ pub fn create_wl_window_overlay(
 }
 
 #[derive(Clone)]
+struct PopupRoot {
+    surface: WlSurface,
+    surface_origin: Vec2,
+}
+
+#[derive(Clone)]
 struct RenderedSurface {
     surface: WlSurface,
     surface_id: ObjectId,
@@ -143,6 +149,7 @@ pub struct WvrWindowBackend {
     interaction_transform: Option<Affine2>,
     window: WindowHandle,
     popups: Vec<RenderedSurface>,
+    popup_roots: Vec<PopupRoot>,
     surfaces: Vec<RenderedSurface>,
     just_resumed: bool,
     meta: Option<FrameMeta>,
@@ -242,6 +249,7 @@ impl WvrWindowBackend {
             pipeline: None,
             window,
             popups: vec![],
+            popup_roots: vec![],
             surfaces: vec![],
             subsurface_pipeline,
             popup_outside_button: None,
@@ -336,19 +344,8 @@ impl WvrWindowBackend {
     }
 
     fn popup_hit_at_client_pos(&self, pos: Vec2) -> Option<(WlSurface, Vec2)> {
-        self.popups.iter().rev().find_map(|popup| {
-            let local = pos - popup.pos;
-
-            let hit = local.x >= 0.0
-                && local.y >= 0.0
-                && local.x < popup.size.x
-                && local.y < popup.size.y;
-
-            if hit {
-                Some((popup.surface.clone(), popup.pos))
-            } else {
-                None
-            }
+        self.popup_roots.iter().find_map(|popup| {
+            surface_tree_input_hit_test(&popup.surface, popup.surface_origin, pos, true)
         })
     }
 
@@ -476,25 +473,41 @@ impl OverlayBackend for WvrWindowBackend {
         let surfaces = collect_rendered_surface_tree(toplevel.wl_surface());
         let should_render_panel = self.panel.should_render(app)?;
 
-        let popups = PopupManager::popups_for_surface(toplevel.wl_surface())
-            .flat_map(|(popup, point)| {
-                let configured = with_states(popup.wl_surface(), |states| {
-                    states
-                        .data_map
-                        .get::<XdgPopupSurfaceData>()
-                        .unwrap()
-                        .lock()
-                        .unwrap()
-                        .configured
-                });
+        let mut popup_roots = Vec::new();
+        let mut popups = Vec::new();
 
-                if !configured {
-                    return Vec::new();
-                }
-                let popup_origin = point - popup.geometry().loc;
-                collect_rendered_surface_tree_at(popup.wl_surface(), popup_origin, true)
-            })
-            .collect::<Vec<_>>();
+        for (popup, point) in PopupManager::popups_for_surface(toplevel.wl_surface()) {
+            let configured = with_states(popup.wl_surface(), |states| {
+                states
+                    .data_map
+                    .get::<XdgPopupSurfaceData>()
+                    .unwrap()
+                    .lock()
+                    .unwrap()
+                    .configured
+            });
+
+            if !configured {
+                continue;
+            }
+
+            // Same logic you already use. `point` is the popup tree position;
+            // `geometry().loc` accounts for xdg_surface window geometry offset.
+            let popup_origin = point - popup.geometry().loc;
+
+            popup_roots.push(PopupRoot {
+                surface: popup.wl_surface().clone(),
+                surface_origin: vec2(popup_origin.x as f32, popup_origin.y as f32),
+            });
+
+            popups.extend(collect_rendered_surface_tree_at(
+                popup.wl_surface(),
+                popup_origin,
+                true,
+            ));
+        }
+
+        self.popup_roots = popup_roots;
 
         let mut tree_dirty = false;
 
@@ -879,24 +892,10 @@ impl OverlayBackend for WvrWindowBackend {
                 let _ = hit2;
             }
 
-            Some(WvrHitTarget::Popup {
-                surface,
-                global_pos,
-                surface_origin,
-            })
-            | Some(WvrHitTarget::Surface {
-                surface,
-                global_pos,
-                surface_origin,
-            }) => {
+            Some(WvrHitTarget::Popup { global_pos, .. })
+            | Some(WvrHitTarget::Surface { global_pos, .. }) => {
                 let wvr_server = app.wvr_server.as_mut().unwrap();
-                wvr_server.send_mouse_scroll_to_surface(
-                    surface,
-                    global_pos,
-                    surface_origin,
-                    self.window,
-                    delta,
-                );
+                wvr_server.send_mouse_scroll_to_surface(global_pos, self.window, delta);
             }
             Some(WvrHitTarget::Toplevel { pos }) => {
                 let wvr_server = app.wvr_server.as_mut().unwrap();
@@ -1044,4 +1043,68 @@ fn surface_accepts_input(surface: &RenderedSurface, global_pos: Vec2) -> bool {
             }
         }
     })
+}
+
+fn surface_accepts_input_states(
+    states: &smithay::wayland::compositor::SurfaceData,
+    local: Vec2,
+) -> bool {
+    if local.x < 0.0 || local.y < 0.0 {
+        return false;
+    }
+
+    let mut guard = states.cached_state.get::<SurfaceAttributes>();
+    let attrs = guard.current();
+
+    let point = Point::<i32, Logical>::from((local.x.floor() as i32, local.y.floor() as i32));
+
+    // explicit input region wins, even if no render buffer
+    if let Some(region) = attrs.input_region.as_ref() {
+        return region.contains(point);
+    }
+
+    // fallback for normal rendered surfaces
+    if let Some(surf) = SurfaceBufWithImage::get_from_surface(states) {
+        let extent = surf.image.extent_f32();
+        let scale = surf.scale.max(1) as f32;
+
+        return local.x < extent[0] / scale && local.y < extent[1] / scale;
+    }
+
+    false
+}
+fn surface_tree_input_hit_test(
+    root: &WlSurface,
+    root_origin: Vec2,
+    global_pos: Vec2,
+    include_root: bool,
+) -> Option<(WlSurface, Vec2)> {
+    let mut hit = None;
+    let root_id = root.id();
+
+    with_surface_tree_upward(
+        root,
+        Point::<i32, Logical>::from((root_origin.x as i32, root_origin.y as i32)),
+        |_, states, parent_pos| {
+            let pos = *parent_pos + surface_location(states);
+            TraversalAction::DoChildren(pos)
+        },
+        |surface, states, parent_pos| {
+            if !include_root && surface.id() == root_id {
+                return;
+            }
+
+            let pos = *parent_pos + surface_location(states);
+            let surface_origin = vec2(pos.x as f32, pos.y as f32);
+            let local = global_pos - surface_origin;
+
+            if surface_accepts_input_states(states, local) {
+                // with_surface_tree_upward visits bottom-to-top, so later hits win
+                hit = Some((surface.clone(), surface_origin));
+            }
+        },
+        |_, _, _| true,
+    );
+
+    hit
 }
