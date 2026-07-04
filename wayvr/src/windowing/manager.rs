@@ -16,7 +16,7 @@ use wlx_common::{
 
 use crate::{
     FRAME_COUNTER,
-    backend::task::{OverlayTask, ToggleMode},
+    backend::task::{CreateOverlayTask, OverlayTask, SpawnPos, ToggleMode},
     config::save_state,
     overlays::{
         anchor::{create_anchor, create_grab_help},
@@ -34,7 +34,7 @@ use crate::{
         backend::{OverlayEventData, OverlayMeta},
         set::OverlayWindowSet,
         snap_upright,
-        window::{OverlayCategory, OverlayWindowData},
+        window::{OverlayCategory, OverlayWindowData, save_transform, spawn_transform_from_parent},
     },
 };
 
@@ -345,24 +345,8 @@ where
                     log::warn!("Overlay not found for task: {sel:?}");
                 }
             }
-            OverlayTask::Spawn(sel, pos, f) => {
-                let None = self.mut_by_selector(&sel) else {
-                    log::debug!("Could not create {sel:?}: exists");
-                    return Ok(());
-                };
-
-                let Some(overlay_config) = f(app) else {
-                    log::debug!("Could not create {sel:?}: empty config");
-                    return Ok(());
-                };
-
-                self.add(
-                    OverlayWindowData {
-                        birthframe: FRAME_COUNTER.load(Ordering::Relaxed),
-                        ..OverlayWindowData::from_config(overlay_config)
-                    },
-                    app,
-                );
+            OverlayTask::Spawn(sel, spawn_pos, f) => {
+                self.spawn_overlay(app, sel, spawn_pos, f)?;
             }
             OverlayTask::Drop(sel) => {
                 if let Some(o) = self.mut_by_selector(&sel)
@@ -400,6 +384,35 @@ where
                 }
             }
         }
+        Ok(())
+    }
+
+    fn spawn_overlay(
+        &mut self,
+        app: &mut AppState,
+        sel: OverlaySelector,
+        spawn_pos: SpawnPos,
+        f: Box<CreateOverlayTask>,
+    ) -> anyhow::Result<()> {
+        let None = self.mut_by_selector(&sel) else {
+            log::debug!("Could not spawn {sel:?}: exists");
+            return Ok(());
+        };
+
+        let Some(overlay_config) = f(app) else {
+            log::debug!("Could not spawn {sel:?}: empty config");
+            return Ok(());
+        };
+
+        self.add_with_spawn_pos(
+            OverlayWindowData {
+                birthframe: FRAME_COUNTER.load(Ordering::Relaxed),
+                ..OverlayWindowData::from_config(overlay_config)
+            },
+            app,
+            spawn_pos,
+        );
+
         Ok(())
     }
 }
@@ -734,7 +747,16 @@ impl<T> OverlayWindowManager<T> {
             .map(|(k, _)| k)
     }
 
-    pub fn add(&mut self, mut overlay: OverlayWindowData<T>, app: &mut AppState) -> OverlayID {
+    pub fn add(&mut self, overlay: OverlayWindowData<T>, app: &mut AppState) -> OverlayID {
+        self.add_with_spawn_pos(overlay, app, SpawnPos::Fixed)
+    }
+
+    fn add_with_spawn_pos(
+        &mut self,
+        mut overlay: OverlayWindowData<T>,
+        app: &mut AppState,
+        spawn_pos: SpawnPos,
+    ) -> OverlayID {
         while self.lookup(&overlay.config.name).is_some() {
             log::error!(
                 "An overlay with name {} already exists. Deduplicating, but things may break!",
@@ -778,6 +800,7 @@ impl<T> OverlayWindowManager<T> {
         if !shown && show_on_spawn {
             log::debug!("activating {name} due to show_on_spawn");
             self.overlays[oid].config.activate(app);
+            self.apply_spawn_pos(app, oid, spawn_pos);
         }
         if !internal && let Err(e) = self.overlays_changed(app) {
             log::error!("Error while adding overlay: {e:?}");
@@ -786,6 +809,71 @@ impl<T> OverlayWindowManager<T> {
             log::error!("Error while adding overlay: {e:?}");
         }
         oid
+    }
+
+    fn apply_spawn_pos(&mut self, app: &mut AppState, oid: OverlayID, spawn_pos: SpawnPos) {
+        match spawn_pos {
+            SpawnPos::Fixed => {}
+            SpawnPos::Spread => {
+                let Some(parent_id) = self.spread_parent_for(oid) else {
+                    return;
+                };
+                let parent = OverlaySelector::Id(parent_id);
+                let _ = self.offset_spawn_from_parent(app, oid, &parent);
+            }
+            SpawnPos::Parent(parent) => {
+                let _ = self.offset_spawn_from_parent(app, oid, &parent);
+            }
+        }
+    }
+
+    // TODO: this just uses the last spawned overlay as parent, can probably do better?
+    fn spread_parent_for(&self, oid: OverlayID) -> Option<OverlayID> {
+        self.overlays
+            .iter()
+            .filter(|(id, overlay)| {
+                *id != oid
+                    && overlay.config.active_state.is_some()
+                    && !matches!(
+                        overlay.config.category,
+                        OverlayCategory::Internal
+                            | OverlayCategory::Keyboard
+                            | OverlayCategory::Dashboard
+                    )
+            })
+            .max_by_key(|(_, overlay)| overlay.birthframe)
+            .map(|(id, _)| id)
+    }
+
+    fn offset_spawn_from_parent(
+        &mut self,
+        app: &mut AppState,
+        oid: OverlayID,
+        parent: &OverlaySelector,
+    ) -> Option<()> {
+        let parent_id = self.id_by_selector(parent)?;
+
+        if parent_id == oid {
+            return None;
+        }
+
+        let parent_transform = self
+            .overlays
+            .get(parent_id)?
+            .config
+            .active_state
+            .as_ref()?
+            .transform;
+
+        let spawn_transform = spawn_transform_from_parent(&parent_transform, &app.input_state.hmd);
+        let overlay = self.overlays.get_mut(oid)?;
+        let state = overlay.config.active_state.as_mut()?;
+
+        state.transform = spawn_transform;
+        save_transform(state, app);
+        overlay.config.dirty = true;
+
+        Some(())
     }
 
     pub fn switch_or_toggle_set(&mut self, app: &mut AppState, set: usize) {

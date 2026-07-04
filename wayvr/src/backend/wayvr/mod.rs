@@ -125,6 +125,7 @@ pub struct WvrServerState {
     mouse_freeze: Instant,
     window_to_overlay: HashMap<window::WindowHandle, OverlayID>,
     overlay_to_window: SecondaryMap<OverlayID, window::WindowHandle>,
+    process_overlays: HashMap<process::ProcessHandle, Vec<OverlayID>>,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -274,6 +275,7 @@ impl WvrServerState {
             mouse_freeze: Instant::now(),
             window_to_overlay: HashMap::new(),
             overlay_to_window: SecondaryMap::new(),
+            process_overlays: HashMap::new(),
         })
     }
 
@@ -379,6 +381,12 @@ impl WvrServerState {
                             .unwrap_or_else(|| format!("P{}", client.pid))
                             .into();
 
+                        let spawn_pos = wvr_server
+                            .last_process_overlay(process_handle)
+                            .map_or(SpawnPos::Spread, |oid| {
+                                SpawnPos::Parent(OverlaySelector::Id(oid))
+                            });
+
                         let window_handle = wvr_server.wm.create_window(
                             toplevel.clone(),
                             process_handle,
@@ -436,7 +444,7 @@ impl WvrServerState {
 
                         app.tasks.enqueue(TaskType::Overlay(OverlayTask::Spawn(
                             OverlaySelector::Nothing,
-                            SpawnPos::Spread,
+                            spawn_pos,
                             Box::new(move |app: &mut AppState| {
                                 create_wl_window_overlay(
                                     title,
@@ -469,11 +477,31 @@ impl WvrServerState {
                             continue;
                         };
 
+                        let process_handle = wvr_server
+                            .wm
+                            .windows
+                            .get(&window_handle)
+                            .map(|window| window.process);
+
                         if let Some(oid) = wvr_server.window_to_overlay.remove(&window_handle) {
                             app.tasks.enqueue(TaskType::Overlay(OverlayTask::Drop(
                                 OverlaySelector::Id(oid),
                             )));
                             wvr_server.overlay_to_window.remove(oid);
+
+                            if let Some(process_handle) = process_handle.as_ref() {
+                                let mut empty = false;
+                                if let Some(overlays) =
+                                    wvr_server.process_overlays.get_mut(process_handle)
+                                {
+                                    overlays.retain(|other| *other != oid);
+                                    empty = overlays.is_empty();
+                                }
+
+                                if empty {
+                                    wvr_server.process_overlays.remove(process_handle);
+                                }
+                            }
                         }
 
                         wvr_server.wm.remove_window(window_handle);
@@ -566,6 +594,19 @@ impl WvrServerState {
     pub fn overlay_added(&mut self, oid: OverlayID, window: window::WindowHandle) {
         self.overlay_to_window.insert(oid, window);
         self.window_to_overlay.insert(window, oid);
+
+        if let Some(process_handle) = self.wm.windows.get(&window).map(|window| window.process) {
+            let overlays = self.process_overlays.entry(process_handle).or_default();
+            overlays.retain(|other| *other != oid);
+            overlays.push(oid);
+        }
+    }
+
+    fn last_process_overlay(&self, process_handle: process::ProcessHandle) -> Option<OverlayID> {
+        self.process_overlays
+            .get(&process_handle)
+            .and_then(|overlays| overlays.last())
+            .copied()
     }
 
     pub fn process_removed(&mut self, tasks: &mut TaskContainer, process: process::ProcessHandle) {
@@ -591,6 +632,8 @@ impl WvrServerState {
         for hnd in &to_remove {
             self.wm.windows.remove(hnd);
         }
+
+        self.process_overlays.remove(&process);
     }
 
     pub fn get_overlay_id(&self, window: window::WindowHandle) -> Option<OverlayID> {
