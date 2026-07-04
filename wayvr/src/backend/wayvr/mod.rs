@@ -238,9 +238,10 @@ impl WvrServerState {
             ext_data_control_state,
             kde_decoration_state,
             wayvr_tasks: tasks.clone(),
-            redraw_requests: HashSet::new(),
             dmabuf_state,
             popup_manager: PopupManager::default(),
+            redraw_requests: HashSet::new(),
+            pending_frame_callbacks: HashMap::new(),
         };
 
         Ok(Self {

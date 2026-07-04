@@ -9,7 +9,8 @@ use smithay::reexports::wayland_protocols::xdg::decoration::zv1::server::zxdg_to
 use smithay::reexports::wayland_protocols::xdg::shell::server::xdg_toplevel;
 use smithay::reexports::wayland_protocols_misc::server_decoration::server::org_kde_kwin_server_decoration;
 use smithay::reexports::wayland_server::Resource;
-use smithay::reexports::wayland_server::protocol::{wl_buffer, wl_output, wl_seat};
+use smithay::reexports::wayland_server::backend::ObjectId;
+use smithay::reexports::wayland_server::protocol::{wl_buffer, wl_callback, wl_output, wl_seat};
 use smithay::reexports::wayland_server::{self, DisplayHandle};
 use smithay::wayland::buffer::BufferHandler;
 use smithay::wayland::dmabuf::{
@@ -32,7 +33,7 @@ use smithay::{
     delegate_primary_selection, delegate_seat, delegate_shm, delegate_single_pixel_buffer,
     delegate_xdg_decoration, delegate_xdg_shell,
 };
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::Write;
 use std::os::fd::OwnedFd;
@@ -74,9 +75,10 @@ pub struct Application {
     pub wlr_data_control_state: selection_wlr::DataControlState,
     pub kde_decoration_state: KdeDecorationState,
     pub wayvr_tasks: SyncEventQueue<WayVRTask>,
-    pub redraw_requests: HashSet<wayland_server::backend::ObjectId>,
     pub popup_manager: PopupManager,
     pub display_handle: DisplayHandle,
+    pub redraw_requests: HashSet<ObjectId>,
+    pub pending_frame_callbacks: HashMap<ObjectId, Vec<wl_callback::WlCallback>>,
 }
 
 impl Application {
@@ -132,6 +134,26 @@ impl Application {
                 fractional.set_preferred_scale(1.0);
             });
         });
+    }
+
+    pub fn send_frame_callbacks_for_surface_id(&mut self, surface_id: &ObjectId) {
+        let Some(callbacks) = self.pending_frame_callbacks.remove(surface_id) else {
+            return;
+        };
+
+        let t = time::get_millis() as u32;
+        for cb in callbacks {
+            cb.done(t);
+        }
+    }
+
+    pub fn has_pending_frame_callbacks(
+        &self,
+        surface_id: wayland_server::backend::ObjectId,
+    ) -> bool {
+        self.pending_frame_callbacks
+            .get(&surface_id)
+            .is_some_and(|v| !v.is_empty())
     }
 }
 
@@ -231,10 +253,12 @@ impl compositor::CompositorHandler for Application {
                 Some(BufferAssignment::Removed) | None => {}
             }
 
-            let t = time::get_millis() as u32;
             let callbacks = std::mem::take(&mut attrs.frame_callbacks);
-            for cb in callbacks {
-                cb.done(t);
+            if !callbacks.is_empty() {
+                self.pending_frame_callbacks
+                    .entry(surface.id())
+                    .or_default()
+                    .extend(callbacks);
             }
         });
 

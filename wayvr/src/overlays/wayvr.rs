@@ -1,9 +1,10 @@
 use glam::{Affine2, Affine3A, Quat, Vec2, Vec3, vec2, vec3};
 use smithay::{
     desktop::PopupManager,
+    reexports::wayland_server::{Resource, backend::ObjectId},
     wayland::{compositor::with_states, shell::xdg::XdgPopupSurfaceData},
 };
-use std::{ops::RangeInclusive, sync::Arc};
+use std::{mem, ops::RangeInclusive, sync::Arc};
 use vulkano::{
     buffer::BufferUsage, image::view::ImageView, pipeline::graphics::color_blend::AttachmentBlend,
 };
@@ -107,7 +108,7 @@ pub struct WvrWindowBackend {
     popups_pipeline: Arc<WGfxPipeline<Vert2Uv>>,
     interaction_transform: Option<Affine2>,
     window: WindowHandle,
-    popups: Vec<(Arc<ImageView>, Vec2)>,
+    popups: Vec<(ObjectId, Arc<ImageView>, Vec2)>,
     just_resumed: bool,
     meta: Option<FrameMeta>,
     mouse: Option<MouseMeta>,
@@ -293,6 +294,16 @@ impl OverlayBackend for WvrWindowBackend {
             return Ok(ShouldRender::Unable);
         };
 
+        let surface_id = toplevel.wl_surface().id();
+        let has_pending_callbacks = app
+            .wvr_server
+            .as_ref()
+            .unwrap()
+            .manager
+            .state
+            .has_pending_frame_callbacks(surface_id);
+        let force_render = mem::take(&mut self.just_resumed) | has_pending_callbacks;
+
         let popups = PopupManager::popups_for_surface(toplevel.wl_surface())
             .filter_map(|(popup, point)| {
                 with_states(popup.wl_surface(), |states| {
@@ -309,7 +320,11 @@ impl OverlayBackend for WvrWindowBackend {
                     }
 
                     if let Some(surf) = SurfaceBufWithImage::get_from_surface(states) {
-                        Some((surf.image, vec2(point.x as _, point.y as _)))
+                        Some((
+                            popup.wl_surface().id(),
+                            surf.image,
+                            vec2(point.x as _, point.y as _),
+                        ))
                     } else {
                         None
                     }
@@ -386,6 +401,12 @@ impl OverlayBackend for WvrWindowBackend {
                 self.mouse = mouse;
                 self.popups = popups;
                 self.meta = Some(meta);
+
+                if force_render {
+                    self.cur_image = Some(surf.image);
+                    return Ok(ShouldRender::Should);
+                }
+
                 if self
                     .cur_image
                     .as_ref()
@@ -430,7 +451,7 @@ impl OverlayBackend for WvrWindowBackend {
             .unwrap()
             .render(image, self.mouse.as_ref(), app, rdr)?;
 
-        for (popup_img, point) in &self.popups {
+        for (popup_surface_id, popup_img, point) in &self.popups {
             let meta = self.meta.as_ref().unwrap();
             let extentf = [meta.extent[0] as f32, meta.extent[1] as f32];
             let popup_extentf = popup_img.extent_f32();
@@ -465,6 +486,23 @@ impl OverlayBackend for WvrWindowBackend {
 
             for buf in &mut rdr.cmd_bufs {
                 buf.run_ref(&pass)?;
+            }
+
+            app.wvr_server
+                .as_mut()
+                .unwrap()
+                .manager
+                .state
+                .send_frame_callbacks_for_surface_id(popup_surface_id);
+        }
+
+        if let Some(wvr_server) = app.wvr_server.as_mut() {
+            if let Some(window) = wvr_server.wm.windows.get(&self.window) {
+                let surface_id = window.toplevel.wl_surface().id();
+                wvr_server
+                    .manager
+                    .state
+                    .send_frame_callbacks_for_surface_id(&surface_id);
             }
         }
 
