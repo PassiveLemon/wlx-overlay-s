@@ -475,35 +475,22 @@ impl OverlayBackend for WvrWindowBackend {
         let should_render_panel = self.panel.should_render(app)?;
 
         let popups = PopupManager::popups_for_surface(toplevel.wl_surface())
-            .filter_map(|(popup, point)| {
-                with_states(popup.wl_surface(), |states| {
-                    if !states
+            .flat_map(|(popup, point)| {
+                let configured = with_states(popup.wl_surface(), |states| {
+                    states
                         .data_map
                         .get::<XdgPopupSurfaceData>()
                         .unwrap()
                         .lock()
                         .unwrap()
                         .configured
-                    {
-                        // not yet configured
-                        return None;
-                    }
+                });
 
-                    if let Some(surf) = SurfaceBufWithImage::get_from_surface(states) {
-                        let image = surf.image;
-                        let size = image.extent_f32();
-
-                        Some(RenderedSurface {
-                            surface: popup.wl_surface().clone(),
-                            surface_id: popup.wl_surface().id(),
-                            image,
-                            pos: vec2(point.x as _, point.y as _),
-                            size: vec2(size[0], size[1]),
-                        })
-                    } else {
-                        None
-                    }
-                })
+                if !configured {
+                    return Vec::new();
+                }
+                let popup_origin = point - popup.geometry().loc;
+                collect_rendered_surface_tree_at(popup.wl_surface(), popup_origin, true)
             })
             .collect::<Vec<_>>();
 
@@ -976,21 +963,26 @@ fn surface_location(states: &smithay::wayland::compositor::SurfaceData) -> Point
     }
 }
 
-fn collect_rendered_surface_tree(root: &WlSurface) -> Vec<RenderedSurface> {
+fn collect_rendered_surface_tree_at(
+    root: &WlSurface,
+    initial_pos: Point<i32, Logical>,
+    include_root: bool,
+) -> Vec<RenderedSurface> {
     let mut out = Vec::new();
     let root_id = root.id();
 
     with_surface_tree_upward(
         root,
-        Point::<i32, Logical>::from((0, 0)),
+        initial_pos,
         |_, states, parent_pos| {
             let pos = *parent_pos + surface_location(states);
 
-            // do not skip even though no buffer; children might have buffer
+            // Do not skip even if this surface has no buffer;
+            // children may still have buffers.
             TraversalAction::DoChildren(pos)
         },
         |surface, states, parent_pos| {
-            if surface.id() == root_id {
+            if !include_root && surface.id() == root_id {
                 return;
             }
 
@@ -1013,6 +1005,10 @@ fn collect_rendered_surface_tree(root: &WlSurface) -> Vec<RenderedSurface> {
     );
 
     out
+}
+
+fn collect_rendered_surface_tree(root: &WlSurface) -> Vec<RenderedSurface> {
+    collect_rendered_surface_tree_at(root, Point::<i32, Logical>::from((0, 0)), false)
 }
 
 fn surface_accepts_input(surface: &RenderedSurface, global_pos: Vec2) -> bool {
