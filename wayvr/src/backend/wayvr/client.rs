@@ -1,4 +1,10 @@
-use std::{io::Read, os::unix::net::UnixStream, path::PathBuf, sync::Arc};
+use std::{
+    io::Read,
+    os::unix::net::UnixStream,
+    path::PathBuf,
+    process::{Child, Command},
+    sync::Arc,
+};
 
 use anyhow::Context;
 use glam::Vec2;
@@ -11,6 +17,7 @@ use smithay::{
     reexports::wayland_server::{self, Resource, protocol::wl_surface::WlSurface},
     utils::{Logical, Point, SerialCounter},
 };
+use wgui::log::LogErr;
 use xkbcommon::xkb;
 
 use crate::backend::wayvr::{ExternalProcessRequest, WayVRTask};
@@ -33,12 +40,26 @@ pub struct WayVRCompositor {
     pub serial_counter: SerialCounter,
     pub wayland_env: super::WaylandEnv,
 
+    xwayland_satellite: Option<Child>,
+
     display: wayland_server::Display<comp::Application>,
     listener: wayland_server::ListeningSocket,
 
     toplevel_surf_count: u32, // for logging purposes
 
     pub clients: Vec<WayVRClient>,
+}
+
+impl Drop for WayVRCompositor {
+    fn drop(&mut self) {
+        if let Some(mut child) = self.xwayland_satellite.take() {
+            unsafe {
+                libc::kill(child.id() as i32, libc::SIGKILL);
+            }
+            // reap the pid
+            let _ = child.wait();
+        }
+    }
 }
 
 fn get_wayvr_env_from_pid(pid: i32) -> anyhow::Result<ProcessWayVREnv> {
@@ -75,12 +96,22 @@ impl WayVRCompositor {
     ) -> anyhow::Result<Self> {
         let (wayland_env, listener) = create_wayland_listener()?;
 
+        let xwayland_satellite = Command::new("xwayland-satellite")
+            .arg(":20")
+            .env("WAYLAND_DISPLAY", wayland_env.display_num_string())
+            .spawn()
+            .log_warn(
+                "Could not start xwayland-satellite. Xwayland apps will not work in native mode",
+            )
+            .ok();
+
         Ok(Self {
             state,
             display,
             seat_keyboard,
             seat_pointer,
             listener,
+            xwayland_satellite,
             wayland_env,
             serial_counter: SerialCounter::new(),
             clients: Vec::new(),
