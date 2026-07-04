@@ -45,7 +45,8 @@ pub struct WayVRCompositor {
     display: wayland_server::Display<comp::Application>,
     listener: wayland_server::ListeningSocket,
 
-    toplevel_surf_count: u32, // for logging purposes
+    toplevel_surf_count: u32,     // for logging purposes
+    scroll_accumulator: [f32; 2], // turn smooth scroll into discrete scroll
 
     pub clients: Vec<WayVRClient>,
 }
@@ -116,6 +117,7 @@ impl WayVRCompositor {
             serial_counter: SerialCounter::new(),
             clients: Vec::new(),
             toplevel_surf_count: 0,
+            scroll_accumulator: [0.0, 0.0],
         })
     }
 
@@ -320,6 +322,7 @@ impl WayVRCompositor {
 
         self.seat_pointer.frame(&mut self.state);
     }
+
     pub fn send_pointer_axis_wheel(&mut self, delta: super::WheelDelta) {
         let time = super::time::get_millis() as u32;
 
@@ -331,18 +334,25 @@ impl WayVRCompositor {
             return;
         }
 
+        let steps_x = accumulate_discrete_scroll(&mut self.scroll_accumulator[0], delta_x);
+        let steps_y = accumulate_discrete_scroll(&mut self.scroll_accumulator[1], delta_y);
+
         let mut frame = AxisFrame::new(time).source(AxisSource::Wheel);
 
         if delta_x != 0 {
-            frame = frame
-                .value(Axis::Horizontal, delta_x as f64)
-                .v120(Axis::Horizontal, delta_x);
+            frame = frame.value(Axis::Horizontal, delta_x as f64 / 8.0);
+
+            if steps_x != 0 {
+                frame = frame.v120(Axis::Horizontal, steps_x * 120);
+            }
         }
 
         if delta_y != 0 {
-            frame = frame
-                .value(Axis::Vertical, delta_y as f64)
-                .v120(Axis::Vertical, delta_y);
+            frame = frame.value(Axis::Vertical, delta_y as f64 / 8.0);
+
+            if steps_y != 0 {
+                frame = frame.v120(Axis::Vertical, steps_y * 120);
+            }
         }
 
         self.seat_pointer.axis(&mut self.state, frame);
@@ -393,4 +403,18 @@ fn create_wayland_listener() -> anyhow::Result<(super::WaylandEnv, wayland_serve
     }
 
     Ok((env, listener))
+}
+
+fn accumulate_discrete_scroll(acc: &mut f32, delta_v120: i32) -> i32 {
+    const WHEEL_DETENT_V120: f32 = 120.0;
+    *acc += delta_v120 as f32;
+    let steps = (*acc / WHEEL_DETENT_V120).trunc() as i32;
+    if steps != 0 {
+        *acc -= steps as f32 * WHEEL_DETENT_V120;
+        if acc.abs() < 0.001 {
+            *acc = 0.0;
+        }
+    }
+
+    steps
 }

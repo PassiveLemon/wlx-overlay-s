@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use smithay::backend::input::{AxisRelativeDirection, AxisSource};
 use smithay::{
     input,
     utils::{Logical, Point},
@@ -11,7 +10,6 @@ use wayvr_ipc::packet_server;
 use crate::{
     backend::wayvr::{client::WayVRCompositor, process},
     gen_id,
-    subsystem::hid::WheelDelta,
 };
 
 #[derive(Debug)]
