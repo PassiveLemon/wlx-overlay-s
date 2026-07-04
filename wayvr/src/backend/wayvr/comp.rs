@@ -386,10 +386,6 @@ impl XdgShellHandler for Application {
             self.wayvr_tasks
                 .send(WayVRTask::NewToplevel(client.id(), surface.clone()));
         }
-        surface.with_pending_state(|state| {
-            state.states.set(xdg_toplevel::State::Activated);
-        });
-        surface.send_configure();
     }
 
     fn toplevel_destroyed(&mut self, surface: ToplevelSurface) {

@@ -383,6 +383,7 @@ impl WvrServerState {
                         toplevel.with_pending_state(|state| {
                             state.size = Some(size);
                             state.states.set(xdg_toplevel::State::Activated);
+                            state.states.set(xdg_toplevel::State::Maximized);
                         });
                         toplevel.send_configure();
 
