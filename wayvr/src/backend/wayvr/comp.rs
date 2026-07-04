@@ -3,7 +3,7 @@ use smithay::backend::allocator::dmabuf::Dmabuf;
 use smithay::backend::renderer::{BufferType, buffer_type};
 use smithay::desktop::{
     PopupKeyboardGrab, PopupKind, PopupManager, PopupPointerGrab, PopupUngrabStrategy,
-    find_popup_root_surface,
+    find_popup_root_surface, get_popup_toplevel_coords,
 };
 use smithay::input::pointer::Focus;
 use smithay::input::{Seat, SeatHandler, SeatState};
@@ -16,12 +16,19 @@ use smithay::reexports::wayland_server::Resource;
 use smithay::reexports::wayland_server::backend::ObjectId;
 use smithay::reexports::wayland_server::protocol::{wl_buffer, wl_callback, wl_output, wl_seat};
 use smithay::reexports::wayland_server::{self, DisplayHandle};
+use smithay::utils::{Logical, Rectangle, Serial, Size};
 use smithay::wayland::buffer::BufferHandler;
+use smithay::wayland::compositor::{self, BufferAssignment, SurfaceAttributes, send_surface_state};
 use smithay::wayland::dmabuf::{
     DmabufFeedback, DmabufGlobal, DmabufHandler, DmabufState, ImportNotifier, get_dmabuf,
 };
 use smithay::wayland::fractional_scale::with_fractional_scale;
 use smithay::wayland::output::OutputHandler;
+use smithay::wayland::selection::data_device::{
+    ClientDndGrabHandler, DataDeviceHandler, DataDeviceState, ServerDndGrabHandler,
+    set_data_device_focus, set_data_device_selection,
+};
+use smithay::wayland::selection::{self, SelectionHandler};
 use smithay::wayland::selection::{
     ext_data_control as selection_ext,
     primary_selection::{PrimarySelectionHandler, PrimarySelectionState, set_primary_focus},
@@ -29,6 +36,9 @@ use smithay::wayland::selection::{
 };
 use smithay::wayland::shell::kde::decoration::{KdeDecorationHandler, KdeDecorationState};
 use smithay::wayland::shell::xdg::decoration::{XdgDecorationHandler, XdgDecorationState};
+use smithay::wayland::shell::xdg::{
+    PopupSurface, PositionerState, ToplevelSurface, XdgShellHandler, XdgShellState,
+};
 use smithay::wayland::shm::{ShmHandler, ShmState, with_buffer_contents};
 use smithay::wayland::single_pixel_buffer::get_single_pixel_buffer;
 use smithay::wayland::viewporter::ViewporterState;
@@ -43,24 +53,13 @@ use std::fs::File;
 use std::io::Write;
 use std::os::fd::OwnedFd;
 use std::sync::{Arc, Mutex};
-
-use smithay::utils::Serial;
-use smithay::wayland::compositor::{self, BufferAssignment, SurfaceAttributes, send_surface_state};
-
-use smithay::wayland::selection::data_device::{
-    ClientDndGrabHandler, DataDeviceHandler, DataDeviceState, ServerDndGrabHandler,
-    set_data_device_focus, set_data_device_selection,
-};
-use smithay::wayland::selection::{self, SelectionHandler};
-use smithay::wayland::shell::xdg::{
-    PopupSurface, PositionerState, ToplevelSurface, XdgShellHandler, XdgShellState,
-};
 use wayland_server::Client;
 use wayland_server::backend::{ClientData, ClientId, DisconnectReason};
 use wayland_server::protocol::wl_surface::WlSurface;
 
 use crate::backend::wayvr::image_importer::ImageImporter;
-use crate::backend::wayvr::{SurfaceBufWithImage, time};
+use crate::backend::wayvr::{SurfaceBufWithImage, WAYVR_SCREEN_RES, time};
+use crate::graphics::ExtentExt;
 use crate::ipc::event_queue::SyncEventQueue;
 
 use super::WayVRTask;
@@ -167,6 +166,46 @@ impl Application {
 
     pub fn take_redraw_request(&mut self, surface_id: &ObjectId) -> bool {
         self.redraw_requests.remove(surface_id)
+    }
+
+    fn output_logical_size(&self) -> Size<i32, Logical> {
+        self.output
+            .current_mode()
+            .map(|mode| Size::new(mode.size.w, mode.size.h))
+            .unwrap_or_else(|| Size::new(WAYVR_SCREEN_RES[0], WAYVR_SCREEN_RES[1]))
+    }
+
+    fn surface_logical_size(surface: &WlSurface) -> Option<Size<i32, Logical>> {
+        smithay::wayland::compositor::with_states(surface, |states| {
+            SurfaceBufWithImage::get_from_surface(states).map(|buf| {
+                let extent = buf.image.extent_u32arr();
+                let scale = buf.scale.max(1) as u32;
+
+                Size::new((extent[0] / scale) as i32, (extent[1] / scale) as i32)
+            })
+        })
+    }
+
+    fn constrain_popup(&self, popup: &PopupSurface) {
+        let popup_kind = PopupKind::Xdg(popup.clone());
+
+        let Ok(root_surface) = find_popup_root_surface(&popup_kind) else {
+            log::warn!(
+                "constrain_popup: could not find popup root surface {:?}",
+                popup.wl_surface().id()
+            );
+            return;
+        };
+
+        let root_size =
+            Self::surface_logical_size(&root_surface).unwrap_or_else(|| self.output_logical_size());
+
+        let mut target = Rectangle::from_size(root_size);
+        target.loc -= get_popup_toplevel_coords(&popup_kind);
+
+        popup.with_pending_state(|state| {
+            state.geometry = state.positioner.get_unconstrained_geometry(target);
+        });
     }
 }
 
@@ -398,6 +437,8 @@ impl XdgShellHandler for Application {
     }
 
     fn new_popup(&mut self, surface: PopupSurface, _positioner: PositionerState) {
+        self.constrain_popup(&surface);
+
         let _ = self
             .popup_manager
             .track_popup(PopupKind::Xdg(surface))
@@ -466,11 +507,17 @@ impl XdgShellHandler for Application {
 
     fn reposition_request(
         &mut self,
-        _surface: PopupSurface,
-        _positioner: PositionerState,
-        _token: u32,
+        surface: PopupSurface,
+        positioner: PositionerState,
+        token: u32,
     ) {
-        // Handle popup reposition here
+        surface.with_pending_state(|state| {
+            state.geometry = positioner.get_geometry();
+            state.positioner = positioner;
+        });
+
+        self.constrain_popup(&surface);
+        surface.send_repositioned(token);
     }
 
     // If the app wants to be fullscreen, make it think that it's fullscreen.

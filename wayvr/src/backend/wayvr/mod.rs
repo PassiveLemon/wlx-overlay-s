@@ -140,6 +140,7 @@ pub enum TickTask {
 
 const KEY_REPEAT_DELAY: i32 = 200;
 const KEY_REPEAT_RATE: i32 = 50;
+const WAYVR_SCREEN_RES: [i32; 2] = [2560, 1440];
 
 impl WvrServerState {
     pub fn new(
@@ -191,7 +192,7 @@ impl WvrServerState {
 
         let mode = Mode {
             refresh: dummy_milli_hz,
-            size: (2560, 1440).into(), //logical size in pixels
+            size: (WAYVR_SCREEN_RES[0], WAYVR_SCREEN_RES[1]).into(), //logical size in pixels
         };
 
         let _global = output.create_global::<Application>(&dh);
