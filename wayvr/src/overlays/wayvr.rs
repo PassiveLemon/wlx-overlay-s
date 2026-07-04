@@ -5,7 +5,8 @@ use smithay::{
     utils::{Logical, Point},
     wayland::{
         compositor::{
-            SubsurfaceCachedState, TraversalAction, with_states, with_surface_tree_upward,
+            SUBSURFACE_ROLE, SubsurfaceCachedState, SurfaceAttributes, TraversalAction,
+            with_states, with_surface_tree_upward,
         },
         shell::xdg::XdgPopupSurfaceData,
     },
@@ -367,11 +368,11 @@ impl WvrWindowBackend {
             return self.panel_hit_from_hit(hit).map(WvrHitTarget::Panel);
         }
 
-        let hit_surface = self.surfaces.iter().rev().find(|s| {
-            let local = client_pos - s.pos;
-
-            local.x >= 0.0 && local.y >= 0.0 && local.x < s.size.x && local.y < s.size.y
-        });
+        let hit_surface = self
+            .surfaces
+            .iter()
+            .rev()
+            .find(|s| surface_accepts_input(s, client_pos));
 
         if let Some(surface) = hit_surface {
             return Some(WvrHitTarget::Surface {
@@ -939,7 +940,7 @@ fn rendered_surfaces_dirty(old: &[RenderedSurface], new: &[RenderedSurface]) -> 
 }
 
 fn surface_location(states: &smithay::wayland::compositor::SurfaceData) -> Point<i32, Logical> {
-    if states.role == Some("wl_subsurface") {
+    if states.role == Some(SUBSURFACE_ROLE) {
         let mut guard = states.cached_state.get::<SubsurfaceCachedState>();
         guard.current().location
     } else {
@@ -949,6 +950,7 @@ fn surface_location(states: &smithay::wayland::compositor::SurfaceData) -> Point
 
 fn collect_rendered_surface_tree(root: &WlSurface) -> Vec<RenderedSurface> {
     let mut out = Vec::new();
+    let root_id = root.id();
 
     with_surface_tree_upward(
         root,
@@ -960,6 +962,10 @@ fn collect_rendered_surface_tree(root: &WlSurface) -> Vec<RenderedSurface> {
             TraversalAction::DoChildren(pos)
         },
         |surface, states, parent_pos| {
+            if surface.id() == root_id {
+                return;
+            }
+
             let pos = *parent_pos + surface_location(states);
 
             if let Some(surf) = SurfaceBufWithImage::get_from_surface(states) {
@@ -980,4 +986,26 @@ fn collect_rendered_surface_tree(root: &WlSurface) -> Vec<RenderedSurface> {
     );
 
     out
+}
+
+fn surface_accepts_input(surface: &RenderedSurface, global_pos: Vec2) -> bool {
+    let local = global_pos - surface.pos;
+
+    if local.x < 0.0 || local.y < 0.0 || local.x >= surface.size.x || local.y >= surface.size.y {
+        return false;
+    }
+
+    with_states(&surface.surface, |states| {
+        let mut guard = states.cached_state.get::<SurfaceAttributes>();
+        let attrs = guard.current();
+
+        match attrs.input_region.as_ref() {
+            None => true,
+            Some(region) => {
+                let point =
+                    Point::<i32, Logical>::from((local.x.floor() as i32, local.y.floor() as i32));
+                region.contains(point)
+            }
+        }
+    })
 }

@@ -28,14 +28,14 @@ use smithay::wayland::selection::{
     wlr_data_control as selection_wlr,
 };
 use smithay::wayland::shell::kde::decoration::{KdeDecorationHandler, KdeDecorationState};
-use smithay::wayland::shell::xdg::decoration::XdgDecorationHandler;
+use smithay::wayland::shell::xdg::decoration::{XdgDecorationHandler, XdgDecorationState};
 use smithay::wayland::shm::{ShmHandler, ShmState, with_buffer_contents};
 use smithay::wayland::single_pixel_buffer::get_single_pixel_buffer;
 use smithay::{
     delegate_compositor, delegate_data_control, delegate_data_device, delegate_dmabuf,
     delegate_ext_data_control, delegate_kde_decoration, delegate_output,
     delegate_primary_selection, delegate_seat, delegate_shm, delegate_single_pixel_buffer,
-    delegate_xdg_decoration, delegate_xdg_shell,
+    delegate_viewporter, delegate_xdg_decoration, delegate_xdg_shell,
 };
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
@@ -77,6 +77,7 @@ pub struct Application {
     pub primary_selection_state: PrimarySelectionState,
     pub ext_data_control_state: selection_ext::DataControlState,
     pub wlr_data_control_state: selection_wlr::DataControlState,
+    pub xdg_decoration_state: XdgDecorationState,
     pub kde_decoration_state: KdeDecorationState,
     pub wayvr_tasks: SyncEventQueue<WayVRTask>,
     pub popup_manager: PopupManager,
@@ -162,10 +163,6 @@ impl Application {
 
     pub fn take_redraw_request(&mut self, surface_id: &ObjectId) -> bool {
         self.redraw_requests.remove(surface_id)
-    }
-
-    pub fn has_redraw_request(&self, surface_id: &ObjectId) -> bool {
-        self.redraw_requests.contains(surface_id)
     }
 }
 
@@ -604,6 +601,7 @@ impl KdeDecorationHandler for Application {
 delegate_dmabuf!(Application);
 delegate_xdg_shell!(Application);
 delegate_compositor!(Application);
+delegate_viewporter!(Application);
 delegate_shm!(Application);
 delegate_seat!(Application);
 delegate_data_device!(Application);
