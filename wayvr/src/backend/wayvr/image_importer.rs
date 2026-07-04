@@ -100,6 +100,12 @@ impl ImageImporter {
     }
 
     pub fn get_or_import_dmabuf(&mut self, dmabuf: Dmabuf) -> anyhow::Result<Arc<ImageView>> {
+        let key = dmabuf.weak();
+
+        if let Some(view) = self.dmabufs.get(&key) {
+            return Ok(view.clone());
+        }
+
         let mut frame = DmabufFrame {
             format: FrameFormat {
                 width: dmabuf.width(),
@@ -127,7 +133,7 @@ impl ImageImporter {
 
         let image = self.gfx.dmabuf_texture(frame)?;
         let image_view = ImageView::new_default(image)?;
-        self.dmabufs.insert(dmabuf.weak(), image_view.clone());
+        self.dmabufs.insert(key, image_view.clone());
 
         Ok(image_view)
     }
