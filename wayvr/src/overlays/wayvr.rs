@@ -645,7 +645,7 @@ impl OverlayBackend for WvrWindowBackend {
         self.pipeline
             .as_mut()
             .unwrap()
-            .render(image, self.mouse.as_ref(), app, rdr)?;
+            .render_screen(image, app, rdr)?;
 
         for surface in &self.surfaces {
             self.render_subsurface(app, rdr, surface)?;
@@ -655,6 +655,10 @@ impl OverlayBackend for WvrWindowBackend {
         for popup in &self.popups {
             self.render_subsurface(app, rdr, popup)?;
             callback_surfaces.push(&popup.surface_id);
+        }
+
+        if let Some(mouse) = self.mouse.as_ref() {
+            self.pipeline.as_mut().unwrap().render_mouse(mouse, rdr)?;
         }
 
         // frame callbacks for toplevel + subsurf + popup

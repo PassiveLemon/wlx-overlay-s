@@ -216,6 +216,19 @@ impl ScreenPipeline {
         app: &mut AppState,
         rdr: &mut RenderResources,
     ) -> anyhow::Result<()> {
+        self.render_screen(image, app, rdr)?;
+        if let Some(mouse) = mouse {
+            self.render_mouse(mouse, rdr)?;
+        }
+        Ok(())
+    }
+
+    pub fn render_screen(
+        &mut self,
+        image: Arc<ImageView>,
+        app: &mut AppState,
+        rdr: &mut RenderResources,
+    ) -> anyhow::Result<()> {
         self.ensure_depth(app, rdr.cmd_bufs.len())?;
 
         for (eye, cmd_buf) in rdr.cmd_bufs.iter_mut().enumerate() {
@@ -226,23 +239,31 @@ impl ScreenPipeline {
                 .update_sampler(0, image.clone(), app.gfx.texture_filter)?;
 
             cmd_buf.run_ref(&current.pass)?;
+        }
 
-            if let Some(mouse) = mouse.as_ref() {
-                let size = CURSOR_SIZE * self.extentf[1];
-                let half_size = size * 0.5;
+        Ok(())
+    }
 
-                upload_quad_vertices(
-                    &mut self.mouse.buf_vert,
-                    self.extentf[0],
-                    self.extentf[1],
-                    mouse.x.mul_add(self.extentf[0], -half_size),
-                    mouse.y.mul_add(self.extentf[1], -half_size),
-                    size,
-                    size,
-                )?;
+    pub fn render_mouse(
+        &mut self,
+        mouse: &MouseMeta,
+        rdr: &mut RenderResources,
+    ) -> anyhow::Result<()> {
+        for cmd_buf in rdr.cmd_bufs.iter_mut() {
+            let size = CURSOR_SIZE * self.extentf[1];
+            let half_size = size * 0.5;
 
-                cmd_buf.run_ref(&self.mouse.pass)?;
-            }
+            upload_quad_vertices(
+                &mut self.mouse.buf_vert,
+                self.extentf[0],
+                self.extentf[1],
+                mouse.x.mul_add(self.extentf[0], -half_size),
+                mouse.y.mul_add(self.extentf[1], -half_size),
+                size,
+                size,
+            )?;
+
+            cmd_buf.run_ref(&self.mouse.pass)?;
         }
 
         Ok(())
