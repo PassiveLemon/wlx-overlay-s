@@ -3,10 +3,13 @@ use std::{io::Read, os::unix::net::UnixStream, path::PathBuf, sync::Arc};
 use anyhow::Context;
 use glam::Vec2;
 use smithay::{
-    backend::input::Keycode,
-    input::{keyboard::KeyboardHandle, pointer::PointerHandle},
-    reexports::wayland_server::{self, protocol::wl_surface::WlSurface},
-    utils::SerialCounter,
+    backend::input::{ButtonState, Keycode},
+    input::{
+        keyboard::KeyboardHandle,
+        pointer::{ButtonEvent, MotionEvent, PointerHandle},
+    },
+    reexports::wayland_server::{self, Resource, protocol::wl_surface::WlSurface},
+    utils::{Logical, Point, SerialCounter},
 };
 use xkbcommon::xkb;
 
@@ -211,29 +214,80 @@ impl WayVRCompositor {
             .context("Failed to set keymap")
     }
 
+    pub fn send_mouse_move_unfocused(&mut self, global_pos: Vec2) {
+        let location: Point<f64, Logical> = (global_pos.x as f64, global_pos.y as f64).into();
+
+        self.seat_pointer.motion(
+            &mut self.state,
+            None,
+            &MotionEvent {
+                location,
+                serial: self.serial_counter.next_serial(),
+                time: super::time::get_millis() as u32,
+            },
+        );
+
+        self.seat_pointer.frame(&mut self.state);
+    }
+
     pub fn send_mouse_move_to_surface(
         &mut self,
         surface: WlSurface,
         global_pos: Vec2,
         surface_origin: Vec2,
     ) {
-        use smithay::input::pointer::MotionEvent;
-        use smithay::utils::{Logical, Point};
-
         let location: Point<f64, Logical> = (global_pos.x as f64, global_pos.y as f64).into();
 
         let focus_location: Point<f64, Logical> =
             (surface_origin.x as f64, surface_origin.y as f64).into();
+
+        let serial = self.serial_counter.next_serial();
+        let time = super::time::get_millis() as u32;
 
         self.seat_pointer.motion(
             &mut self.state,
             Some((surface, focus_location)),
             &MotionEvent {
                 location,
-                serial: self.serial_counter.next_serial(),
-                time: 0,
+                serial,
+                time,
             },
         );
+
+        self.seat_pointer.frame(&mut self.state);
+    }
+
+    pub fn send_pointer_button(&mut self, index: super::MouseIndex, pressed: bool) {
+        let state = if pressed {
+            ButtonState::Pressed
+        } else {
+            ButtonState::Released
+        };
+
+        let serial = self.serial_counter.next_serial();
+        let time = super::time::get_millis() as u32;
+        let button = match index {
+            super::MouseIndex::Left => 0x110,
+            super::MouseIndex::Center => 0x112,
+            super::MouseIndex::Right => 0x111,
+        };
+
+        log::trace!(
+            "pointer button: button={button:#x} pressed={pressed} focus={:?}",
+            self.seat_pointer.current_focus().map(|s| s.id())
+        );
+
+        self.seat_pointer.button(
+            &mut self.state,
+            &ButtonEvent {
+                serial,
+                time,
+                button,
+                state,
+            },
+        );
+
+        self.seat_pointer.frame(&mut self.state);
     }
 }
 

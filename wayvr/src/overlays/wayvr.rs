@@ -129,6 +129,7 @@ pub struct WvrWindowBackend {
     icon: Arc<str>,
     pipeline: Option<ScreenPipeline>,
     popups_pipeline: Arc<WGfxPipeline<Vert2Uv>>,
+    popup_outside_button: Option<wayvr::MouseIndex>,
     interaction_transform: Option<Affine2>,
     window: WindowHandle,
     popups: Vec<RenderedPopup>,
@@ -230,6 +231,7 @@ impl WvrWindowBackend {
             window,
             popups: vec![],
             popups_pipeline,
+            popup_outside_button: None,
             interaction_transform: None,
             just_resumed: false,
             meta: None,
@@ -315,6 +317,11 @@ impl WvrWindowBackend {
             transformed.x * self.inner_extent[0] as f32,
             transformed.y * self.inner_extent[1] as f32,
         )
+    }
+
+    fn unclamped_client_pos_from_hit(&self, hit: &input::PointerHit) -> Vec2 {
+        let transformed = self.transformed_uv_from_hit(hit);
+        self.client_pos_from_transformed_uv(transformed)
     }
 
     fn is_inside_client_area(&self, transformed: Vec2) -> bool {
@@ -724,19 +731,88 @@ impl OverlayBackend for WvrWindowBackend {
     }
 
     fn on_pointer(&mut self, app: &mut state::AppState, hit: &input::PointerHit, pressed: bool) {
-        match self.hit_target(hit) {
+        let Some(index) = Self::mouse_index_from_mode(hit.mode) else {
+            return;
+        };
+
+        let target = self.hit_target(hit);
+        let outside_pos = self.unclamped_client_pos_from_hit(hit);
+
+        // if the press was consumed to dismiss a popup, consume the matching release too.
+        if !pressed && self.popup_outside_button == Some(index) {
+            self.popup_outside_button = None;
+
+            let click_freeze = app.session.config.click_freeze_time_ms;
+            app.wvr_server
+                .as_mut()
+                .unwrap()
+                .send_mouse_button_main_surface(
+                    click_freeze,
+                    self.window,
+                    outside_pos,
+                    index,
+                    false,
+                );
+            return;
+        }
+
+        let popup_grab_active = !self.popups.is_empty()
+            && app
+                .wvr_server
+                .as_ref()
+                .is_some_and(|server| server.pointer_is_grabbed());
+
+        let outside_grabbed_popup =
+            popup_grab_active && !matches!(&target, Some(WvrHitTarget::Popup { .. }));
+
+        if outside_grabbed_popup {
+            if pressed {
+                self.popup_outside_button = Some(index);
+            }
+
+            let click_freeze = app.session.config.click_freeze_time_ms;
+            app.wvr_server
+                .as_mut()
+                .unwrap()
+                .send_mouse_button_main_surface(
+                    click_freeze,
+                    self.window,
+                    outside_pos,
+                    index,
+                    pressed,
+                );
+            return;
+        }
+
+        match target {
             Some(WvrHitTarget::Panel(hit2)) => {
                 self.panel_hovered = true;
                 self.panel.on_pointer(app, &hit2, pressed);
             }
 
-            Some(WvrHitTarget::Popup { .. }) | Some(WvrHitTarget::Toplevel { .. }) => {
-                let Some(index) = Self::mouse_index_from_mode(hit.mode) else {
-                    return;
-                };
+            Some(WvrHitTarget::Popup {
+                surface,
+                global_pos,
+                surface_origin,
+            }) => {
+                let wvr_server = app.wvr_server.as_mut().unwrap();
 
+                wvr_server.send_mouse_button_to_surface(
+                    surface,
+                    global_pos,
+                    surface_origin,
+                    self.window,
+                    index,
+                    pressed,
+                );
+            }
+
+            Some(WvrHitTarget::Toplevel { pos }) => {
                 let click_freeze = app.session.config.click_freeze_time_ms;
                 let wvr_server = app.wvr_server.as_mut().unwrap();
+
+                // normal toplevel click path, only when no popup grab is active.
+                wvr_server.send_mouse_move(self.window, pos.x as u32, pos.y as u32);
 
                 if pressed {
                     wvr_server.send_mouse_down(click_freeze, self.window, index);

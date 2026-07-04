@@ -119,6 +119,7 @@ pub struct WvrServerState {
     overlay_to_window: SecondaryMap<OverlayID, window::WindowHandle>,
 }
 
+#[derive(Clone, Copy, PartialEq)]
 pub enum MouseIndex {
     Left,
     Center,
@@ -581,6 +582,10 @@ impl WvrServerState {
         self.window_to_overlay.get(&window).copied()
     }
 
+    pub fn pointer_is_grabbed(&self) -> bool {
+        self.manager.seat_pointer.is_grabbed()
+    }
+
     pub fn send_mouse_move_to_surface(
         &mut self,
         surface: WlSurface,
@@ -602,6 +607,50 @@ impl WvrServerState {
             x: global_pos.x as u32,
             y: global_pos.y as u32,
         });
+    }
+
+    pub fn send_mouse_button_to_surface(
+        &mut self,
+        surface: WlSurface,
+        global_pos: Vec2,
+        surface_origin: Vec2,
+        hover_window: window::WindowHandle,
+        index: MouseIndex,
+        pressed: bool,
+    ) {
+        self.manager
+            .send_mouse_move_to_surface(surface, global_pos, surface_origin);
+
+        self.wm.mouse = Some(window::MouseState {
+            hover_window,
+            x: global_pos.x as u32,
+            y: global_pos.y as u32,
+        });
+
+        self.manager.send_pointer_button(index, pressed);
+    }
+
+    pub fn send_mouse_button_main_surface(
+        &mut self,
+        click_freeze: i32,
+        hover_window: window::WindowHandle,
+        global_pos: Vec2,
+        index: MouseIndex,
+        pressed: bool,
+    ) {
+        if pressed {
+            self.mouse_freeze = Instant::now() + Duration::from_millis(click_freeze.max(0) as u64);
+        }
+
+        self.manager.send_mouse_move_unfocused(global_pos);
+
+        self.wm.mouse = Some(window::MouseState {
+            hover_window,
+            x: global_pos.x.max(0.0) as u32,
+            y: global_pos.y.max(0.0) as u32,
+        });
+
+        self.manager.send_pointer_button(index, pressed);
     }
 
     pub fn send_mouse_move(&mut self, handle: window::WindowHandle, x: u32, y: u32) {
