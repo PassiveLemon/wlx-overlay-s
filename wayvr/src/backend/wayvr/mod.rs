@@ -80,9 +80,13 @@ pub struct WaylandEnv {
 }
 
 impl WaylandEnv {
-    pub fn display_num_string(&self) -> String {
+    pub fn wayland_display_num_string(&self) -> String {
         // e.g. "wayland-20"
         format!("wayland-{}", self.display_num)
+    }
+    pub fn display_num_string(&self) -> String {
+        // e.g. ":20"
+        format!(":{}", self.display_num)
     }
 }
 
@@ -788,10 +792,10 @@ impl WvrServerState {
     }
 
     fn configure_env(&self, cmd: &mut std::process::Command, auth_key: &str, is_flatpak: bool) {
-        cmd.env_remove("DISPLAY"); // Goodbye X11
+        cmd.env("DISPLAY", self.manager.wayland_env.display_num_string());
         cmd.env(
             "WAYLAND_DISPLAY",
-            self.manager.wayland_env.display_num_string(),
+            self.manager.wayland_env.wayland_display_num_string(),
         );
 
         if is_flatpak {

@@ -97,8 +97,8 @@ impl WayVRCompositor {
         let (wayland_env, listener) = create_wayland_listener()?;
 
         let xwayland_satellite = Command::new("xwayland-satellite")
-            .arg(":20")
-            .env("WAYLAND_DISPLAY", wayland_env.display_num_string())
+            .arg(wayland_env.display_num_string())
+            .env("WAYLAND_DISPLAY", wayland_env.wayland_display_num_string())
             .spawn()
             .log_warn(
                 "Could not start xwayland-satellite. Xwayland apps will not work in native mode",
@@ -339,7 +339,7 @@ fn create_wayland_listener() -> anyhow::Result<(super::WaylandEnv, wayland_serve
     };
 
     let listener = loop {
-        let display_str = env.display_num_string();
+        let display_str = env.wayland_display_num_string();
         log::debug!("Trying to open socket \"{display_str}\"");
         match wayland_server::ListeningSocket::bind(display_str.as_str()) {
             Ok(listener) => {
