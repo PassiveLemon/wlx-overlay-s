@@ -31,6 +31,7 @@ use smithay::wayland::shell::kde::decoration::{KdeDecorationHandler, KdeDecorati
 use smithay::wayland::shell::xdg::decoration::{XdgDecorationHandler, XdgDecorationState};
 use smithay::wayland::shm::{ShmHandler, ShmState, with_buffer_contents};
 use smithay::wayland::single_pixel_buffer::get_single_pixel_buffer;
+use smithay::wayland::viewporter::ViewporterState;
 use smithay::{
     delegate_compositor, delegate_data_control, delegate_data_device, delegate_dmabuf,
     delegate_ext_data_control, delegate_kde_decoration, delegate_output,
@@ -77,10 +78,13 @@ pub struct Application {
     pub primary_selection_state: PrimarySelectionState,
     pub ext_data_control_state: selection_ext::DataControlState,
     pub wlr_data_control_state: selection_wlr::DataControlState,
+    #[allow(dead_code)]
     pub xdg_decoration_state: XdgDecorationState,
     pub kde_decoration_state: KdeDecorationState,
     pub wayvr_tasks: SyncEventQueue<WayVRTask>,
     pub popup_manager: PopupManager,
+    #[allow(dead_code)]
+    pub viewporter: ViewporterState,
     pub display_handle: DisplayHandle,
     pub redraw_requests: HashSet<ObjectId>,
     pub pending_frame_callbacks: HashMap<ObjectId, Vec<wl_callback::WlCallback>>,

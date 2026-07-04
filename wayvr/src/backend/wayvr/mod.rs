@@ -39,6 +39,7 @@ use smithay::{
             },
         },
         shm::ShmState,
+        viewporter::ViewporterState,
     },
 };
 use std::{
@@ -170,6 +171,7 @@ impl WvrServerState {
         let xdg_decoration_state = XdgDecorationState::new::<Application>(&dh);
         let kde_decoration_state =
             KdeDecorationState::new::<Application>(&dh, kde_decoration::Mode::Server);
+        let viewporter = ViewporterState::new::<Application>(&dh);
 
         let dummy_milli_hz = 60000; /* refresh rate in millihertz */
 
@@ -251,6 +253,7 @@ impl WvrServerState {
             wayvr_tasks: tasks.clone(),
             dmabuf_state,
             popup_manager: PopupManager::default(),
+            viewporter,
             redraw_requests: HashSet::new(),
             pending_frame_callbacks: HashMap::new(),
         };
