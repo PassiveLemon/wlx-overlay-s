@@ -323,9 +323,9 @@ impl WayVRCompositor {
     pub fn send_pointer_axis_wheel(&mut self, delta: super::WheelDelta) {
         let time = super::time::get_millis() as u32;
 
-        let multiplier = 64.0; // stolen from uniput.rs
+        let multiplier = 32.0;
         let delta_x = (delta.x * multiplier) as i32;
-        let delta_y = (delta.y * multiplier) as i32;
+        let delta_y = (-delta.y * multiplier) as i32;
 
         if delta_x == 0 && delta_y == 0 {
             return;
@@ -335,14 +335,14 @@ impl WayVRCompositor {
 
         if delta_x != 0 {
             frame = frame
-                .value(Axis::Horizontal, delta_x as f64 * 15.0)
-                .v120(Axis::Horizontal, delta_x * 120);
+                .value(Axis::Horizontal, delta_x as f64)
+                .v120(Axis::Horizontal, delta_x);
         }
 
         if delta_y != 0 {
             frame = frame
-                .value(Axis::Vertical, delta_y as f64 * 15.0)
-                .v120(Axis::Vertical, delta_y * 120);
+                .value(Axis::Vertical, delta_y as f64)
+                .v120(Axis::Vertical, delta_y);
         }
 
         self.seat_pointer.axis(&mut self.state, frame);

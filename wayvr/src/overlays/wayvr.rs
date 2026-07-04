@@ -115,7 +115,6 @@ struct RenderedSurface {
     image: Arc<ImageView>,
     pos: Vec2,
     size: Vec2,
-    dmabuf: bool,
 }
 
 enum WvrHitTarget {
@@ -500,7 +499,6 @@ impl OverlayBackend for WvrWindowBackend {
                             image,
                             pos: vec2(point.x as _, point.y as _),
                             size: vec2(size[0], size[1]),
-                            dmabuf: false,
                         })
                     } else {
                         None
@@ -1004,7 +1002,6 @@ fn collect_rendered_surface_tree(root: &WlSurface) -> Vec<RenderedSurface> {
                     image: surf.image,
                     pos: vec2(pos.x as f32, pos.y as f32),
                     size: vec2(extent[0] / scale, extent[1] / scale),
-                    dmabuf: surf.dmabuf,
                 });
             }
         },
