@@ -34,7 +34,10 @@ use crate::{
         backend::{OverlayEventData, OverlayMeta},
         set::OverlayWindowSet,
         snap_upright,
-        window::{OverlayCategory, OverlayWindowData, save_transform, spawn_transform_from_parent},
+        window::{
+            OverlayCategory, OverlayWindowData, save_transform, scalar_scale,
+            spawn_transform_from_parent,
+        },
     },
 };
 
@@ -834,11 +837,9 @@ impl<T> OverlayWindowManager<T> {
             .filter(|(id, overlay)| {
                 *id != oid
                     && overlay.config.active_state.is_some()
-                    && !matches!(
+                    && matches!(
                         overlay.config.category,
-                        OverlayCategory::Internal
-                            | OverlayCategory::Keyboard
-                            | OverlayCategory::Dashboard
+                        OverlayCategory::Panel | OverlayCategory::WayVR | OverlayCategory::Screen
                     )
             })
             .max_by_key(|(_, overlay)| overlay.birthframe)
@@ -865,9 +866,12 @@ impl<T> OverlayWindowManager<T> {
             .as_ref()?
             .transform;
 
-        let spawn_transform = spawn_transform_from_parent(&parent_transform, &app.input_state.hmd);
         let overlay = self.overlays.get_mut(oid)?;
         let state = overlay.config.active_state.as_mut()?;
+
+        let child_scale = scalar_scale(&overlay.config.default_state.transform);
+        let spawn_transform =
+            spawn_transform_from_parent(&parent_transform, &app.input_state.hmd, child_scale);
 
         state.transform = spawn_transform;
         save_transform(state, app);

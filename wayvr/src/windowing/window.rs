@@ -310,7 +310,11 @@ pub fn save_transform(state: &mut OverlayWindowState, app: &mut AppState) {
     state.saved_transform = Some(parent_transform.inverse() * state.transform);
 }
 
-pub fn spawn_transform_from_parent(parent: &Affine3A, hmd: &Affine3A) -> Affine3A {
+pub fn spawn_transform_from_parent(
+    parent: &Affine3A,
+    hmd: &Affine3A,
+    child_scale: f32,
+) -> Affine3A {
     const LEFT: f32 = 0.08;
     const DOWN: f32 = 0.08;
     const CLOSER_TO_HMD: f32 = 0.06;
@@ -325,8 +329,10 @@ pub fn spawn_transform_from_parent(parent: &Affine3A, hmd: &Affine3A) -> Affine3
         -z_axis
     };
 
-    let world_offset = -x_axis * LEFT - y_axis * DOWN + toward_hmd * CLOSER_TO_HMD;
-    let mut transform = *parent;
-    transform.translation += world_offset;
-    transform
+    let translation =
+        parent.translation - x_axis * LEFT - y_axis * DOWN + toward_hmd * CLOSER_TO_HMD;
+
+    let rotation = Quat::from_mat3a(&Mat3A::from_cols(x_axis, y_axis, z_axis));
+
+    Affine3A::from_scale_rotation_translation(Vec3::ONE * child_scale, rotation, translation.into())
 }
