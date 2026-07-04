@@ -287,27 +287,6 @@ impl WvrWindowBackend {
         Ok(())
     }
 
-    fn surface_point_from_hit(&self, hit: &input::PointerHit) -> Option<Vec2> {
-        if self.inner_extent == [0, 0] {
-            return None;
-        }
-
-        let transformed = self.mouse_transform.transform_point2(hit.uv);
-
-        Some(vec2(
-            transformed.x * self.inner_extent[0] as f32,
-            transformed.y * self.inner_extent[1] as f32,
-        ))
-    }
-
-    fn popup_at(&self, p: Vec2) -> Option<&RenderedPopup> {
-        self.popups.iter().rev().find(|popup| {
-            let local = p - popup.pos;
-
-            local.x >= 0.0 && local.y >= 0.0 && local.x < popup.size.x && local.y < popup.size.y
-        })
-    }
-
     fn transformed_uv_from_hit(&self, hit: &input::PointerHit) -> Vec2 {
         self.mouse_transform.transform_point2(hit.uv)
     }
