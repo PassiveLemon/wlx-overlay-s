@@ -153,11 +153,19 @@ impl Application {
 
     pub fn has_pending_frame_callbacks(
         &self,
-        surface_id: wayland_server::backend::ObjectId,
+        surface_id: &wayland_server::backend::ObjectId,
     ) -> bool {
         self.pending_frame_callbacks
-            .get(&surface_id)
+            .get(surface_id)
             .is_some_and(|v| !v.is_empty())
+    }
+
+    pub fn take_redraw_request(&mut self, surface_id: &ObjectId) -> bool {
+        self.redraw_requests.remove(surface_id)
+    }
+
+    pub fn has_redraw_request(&self, surface_id: &ObjectId) -> bool {
+        self.redraw_requests.contains(surface_id)
     }
 }
 

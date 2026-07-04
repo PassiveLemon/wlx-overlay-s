@@ -470,34 +470,9 @@ impl OverlayBackend for WvrWindowBackend {
             return Ok(ShouldRender::Unable);
         };
 
+        let surface_id = toplevel.wl_surface().id();
         let surfaces = collect_rendered_surface_tree(toplevel.wl_surface());
-
-        let has_pending_callbacks = surfaces.iter().any(|s| {
-            app.wvr_server
-                .as_ref()
-                .unwrap()
-                .manager
-                .state
-                .has_pending_frame_callbacks(s.surface_id.clone())
-        });
-
-        let subtree_dirty = rendered_surfaces_dirty(&self.surfaces, &surfaces)
-            || surfaces.iter().any(|s| {
-                app.wvr_server
-                    .as_ref()
-                    .unwrap()
-                    .manager
-                    .state
-                    .redraw_requests
-                    .contains(&s.surface_id)
-            });
-
-        self.surfaces = surfaces;
-
         let should_render_panel = self.panel.should_render(app)?;
-
-        let force_render =
-            has_pending_callbacks || subtree_dirty || mem::take(&mut self.just_resumed);
 
         let popups = PopupManager::popups_for_surface(toplevel.wl_surface())
             .filter_map(|(popup, point)| {
@@ -532,6 +507,26 @@ impl OverlayBackend for WvrWindowBackend {
                 })
             })
             .collect::<Vec<_>>();
+
+        let mut tree_dirty = false;
+
+        if let Some(wvr_server) = app.wvr_server.as_mut() {
+            let state = &mut wvr_server.manager.state;
+            tree_dirty |= state.take_redraw_request(&surface_id);
+            tree_dirty |= state.has_pending_frame_callbacks(&surface_id);
+            for surface in &surfaces {
+                tree_dirty |= state.take_redraw_request(&surface.surface_id);
+                tree_dirty |= state.has_pending_frame_callbacks(&surface.surface_id);
+            }
+            for popup in &popups {
+                tree_dirty |= state.take_redraw_request(&popup.surface_id);
+                tree_dirty |= state.has_pending_frame_callbacks(&popup.surface_id);
+            }
+        }
+
+        self.surfaces = surfaces;
+
+        let force_render = tree_dirty || mem::take(&mut self.just_resumed);
 
         with_states(toplevel.wl_surface(), |states| {
             if let Some(surf) = SurfaceBufWithImage::get_from_surface(states) {
