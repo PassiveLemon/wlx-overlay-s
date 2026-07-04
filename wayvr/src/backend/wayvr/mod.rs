@@ -33,7 +33,10 @@ use smithay::{
         },
         shell::{
             kde::decoration::KdeDecorationState,
-            xdg::{SurfaceCachedState, ToplevelSurface, XdgShellState, XdgToplevelSurfaceData},
+            xdg::{
+                SurfaceCachedState, ToplevelSurface, XdgShellState, XdgToplevelSurfaceData,
+                decoration::XdgDecorationState,
+            },
         },
         shm::ShmState,
     },
@@ -164,6 +167,7 @@ impl WvrServerState {
             filter_allow_any,
         );
 
+        let xdg_decoration_state = XdgDecorationState::new::<Application>(&dh);
         let kde_decoration_state =
             KdeDecorationState::new::<Application>(&dh, kde_decoration::Mode::Server);
 
@@ -242,6 +246,7 @@ impl WvrServerState {
             primary_selection_state,
             wlr_data_control_state,
             ext_data_control_state,
+            xdg_decoration_state,
             kde_decoration_state,
             wayvr_tasks: tasks.clone(),
             dmabuf_state,
