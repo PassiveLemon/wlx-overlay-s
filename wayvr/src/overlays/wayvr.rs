@@ -1,7 +1,7 @@
 use glam::{Affine2, Affine3A, Quat, Vec2, Vec3, vec2, vec3};
 use smithay::{
     desktop::PopupManager,
-    reexports::wayland_server::{Resource, backend::ObjectId},
+    reexports::wayland_server::{Resource, backend::ObjectId, protocol::wl_surface::WlSurface},
     wayland::{compositor::with_states, shell::xdg::XdgPopupSurfaceData},
 };
 use std::{mem, ops::RangeInclusive, sync::Arc};
@@ -101,6 +101,29 @@ pub fn create_wl_window_overlay(
     })
 }
 
+#[derive(Clone)]
+struct RenderedPopup {
+    surface: WlSurface,
+    surface_id: ObjectId,
+    image: Arc<ImageView>,
+    pos: Vec2,
+    size: Vec2,
+}
+
+enum WvrHitTarget {
+    Panel(input::PointerHit),
+
+    Toplevel {
+        pos: Vec2,
+    },
+
+    Popup {
+        surface: WlSurface,
+        global_pos: Vec2,
+        surface_origin: Vec2,
+    },
+}
+
 pub struct WvrWindowBackend {
     name: Arc<str>,
     icon: Arc<str>,
@@ -108,7 +131,7 @@ pub struct WvrWindowBackend {
     popups_pipeline: Arc<WGfxPipeline<Vert2Uv>>,
     interaction_transform: Option<Affine2>,
     window: WindowHandle,
-    popups: Vec<(ObjectId, Arc<ImageView>, Vec2)>,
+    popups: Vec<RenderedPopup>,
     just_resumed: bool,
     meta: Option<FrameMeta>,
     mouse: Option<MouseMeta>,
@@ -261,6 +284,106 @@ impl WvrWindowBackend {
 
         Ok(())
     }
+
+    fn surface_point_from_hit(&self, hit: &input::PointerHit) -> Option<Vec2> {
+        if self.inner_extent == [0, 0] {
+            return None;
+        }
+
+        let transformed = self.mouse_transform.transform_point2(hit.uv);
+
+        Some(vec2(
+            transformed.x * self.inner_extent[0] as f32,
+            transformed.y * self.inner_extent[1] as f32,
+        ))
+    }
+
+    fn popup_at(&self, p: Vec2) -> Option<&RenderedPopup> {
+        self.popups.iter().rev().find(|popup| {
+            let local = p - popup.pos;
+
+            local.x >= 0.0 && local.y >= 0.0 && local.x < popup.size.x && local.y < popup.size.y
+        })
+    }
+
+    fn transformed_uv_from_hit(&self, hit: &input::PointerHit) -> Vec2 {
+        self.mouse_transform.transform_point2(hit.uv)
+    }
+
+    fn client_pos_from_transformed_uv(&self, transformed: Vec2) -> Vec2 {
+        vec2(
+            transformed.x * self.inner_extent[0] as f32,
+            transformed.y * self.inner_extent[1] as f32,
+        )
+    }
+
+    fn is_inside_client_area(&self, transformed: Vec2) -> bool {
+        self.uv_range.contains(&transformed.x) && self.uv_range.contains(&transformed.y)
+    }
+
+    fn panel_hit_from_hit(&self, hit: &input::PointerHit) -> Option<input::PointerHit> {
+        let meta = self.meta.as_ref()?;
+
+        let panel_height = meta.extent[1].checked_sub(self.inner_extent[1])?;
+        if panel_height == 0 {
+            return None;
+        }
+
+        let mut hit2 = *hit;
+        hit2.uv.y *= meta.extent[1] as f32 / panel_height as f32;
+
+        Some(hit2)
+    }
+
+    fn popup_hit_at_client_pos(&self, pos: Vec2) -> Option<(WlSurface, Vec2)> {
+        self.popups.iter().rev().find_map(|popup| {
+            let local = pos - popup.pos;
+
+            let hit = local.x >= 0.0
+                && local.y >= 0.0
+                && local.x < popup.size.x
+                && local.y < popup.size.y;
+
+            if hit {
+                Some((popup.surface.clone(), popup.pos))
+            } else {
+                None
+            }
+        })
+    }
+
+    fn hit_target(&self, hit: &input::PointerHit) -> Option<WvrHitTarget> {
+        let transformed = self.transformed_uv_from_hit(hit);
+        let client_pos = self.client_pos_from_transformed_uv(transformed);
+
+        // Important: popups are checked before the panel/client bounds.
+        // Real xdg_popups may extend outside the parent toplevel rect.
+        if let Some((surface, surface_origin)) = self.popup_hit_at_client_pos(client_pos) {
+            return Some(WvrHitTarget::Popup {
+                surface,
+                global_pos: client_pos,
+                surface_origin,
+            });
+        }
+
+        if !self.is_inside_client_area(transformed) {
+            return self.panel_hit_from_hit(hit).map(WvrHitTarget::Panel);
+        }
+
+        let clamped = transformed.clamp(Vec2::ZERO, Vec2::ONE);
+        let pos = self.client_pos_from_transformed_uv(clamped);
+
+        Some(WvrHitTarget::Toplevel { pos })
+    }
+
+    fn mouse_index_from_mode(mode: input::PointerMode) -> Option<wayvr::MouseIndex> {
+        match mode {
+            input::PointerMode::Left => Some(wayvr::MouseIndex::Left),
+            input::PointerMode::Middle => Some(wayvr::MouseIndex::Center),
+            input::PointerMode::Right => Some(wayvr::MouseIndex::Right),
+            _ => None,
+        }
+    }
 }
 
 impl OverlayBackend for WvrWindowBackend {
@@ -320,11 +443,16 @@ impl OverlayBackend for WvrWindowBackend {
                     }
 
                     if let Some(surf) = SurfaceBufWithImage::get_from_surface(states) {
-                        Some((
-                            popup.wl_surface().id(),
-                            surf.image,
-                            vec2(point.x as _, point.y as _),
-                        ))
+                        let image = surf.image;
+                        let size = image.extent_f32();
+
+                        Some(RenderedPopup {
+                            surface: popup.wl_surface().clone(),
+                            surface_id: popup.wl_surface().id(),
+                            image,
+                            pos: vec2(point.x as _, point.y as _),
+                            size: vec2(size[0], size[1]),
+                        })
                     } else {
                         None
                     }
@@ -397,7 +525,7 @@ impl OverlayBackend for WvrWindowBackend {
                         y: (m.y as f32) / (inner_extent[1] as f32),
                     });
 
-                let dirty = self.mouse != mouse || self.popups != popups;
+                let dirty = self.mouse != mouse || rendered_popups_dirty(&self.popups, &popups);
                 self.mouse = mouse;
                 self.popups = popups;
                 self.meta = Some(meta);
@@ -451,10 +579,10 @@ impl OverlayBackend for WvrWindowBackend {
             .unwrap()
             .render(image, self.mouse.as_ref(), app, rdr)?;
 
-        for (popup_surface_id, popup_img, point) in &self.popups {
+        for popup in &self.popups {
             let meta = self.meta.as_ref().unwrap();
             let extentf = [meta.extent[0] as f32, meta.extent[1] as f32];
-            let popup_extentf = popup_img.extent_f32();
+
             let mut buf_vert = app
                 .gfx
                 .empty_buffer(BufferUsage::TRANSFER_DST | BufferUsage::VERTEX_BUFFER, 4)?;
@@ -463,15 +591,15 @@ impl OverlayBackend for WvrWindowBackend {
                 &mut buf_vert,
                 extentf[0],
                 extentf[1],
-                point.x,
-                point.y,
-                popup_extentf[0],
-                popup_extentf[1],
+                popup.pos.x,
+                popup.pos.y,
+                popup.size.x,
+                popup.size.y,
             )?;
 
             let set0 = self.popups_pipeline.uniform_sampler(
                 0,
-                popup_img.clone(),
+                popup.image.clone(),
                 app.gfx.texture_filter,
             )?;
             let pass = self.popups_pipeline.create_pass(
@@ -493,7 +621,7 @@ impl OverlayBackend for WvrWindowBackend {
                 .unwrap()
                 .manager
                 .state
-                .send_frame_callbacks_for_surface_id(popup_surface_id);
+                .send_frame_callbacks_for_surface_id(&popup.surface_id);
         }
 
         if let Some(wvr_server) = app.wvr_server.as_mut() {
@@ -540,33 +668,51 @@ impl OverlayBackend for WvrWindowBackend {
     }
 
     fn on_hover(&mut self, app: &mut state::AppState, hit: &input::PointerHit) -> HoverResult {
-        let transformed = self.mouse_transform.transform_point2(hit.uv);
+        match self.hit_target(hit) {
+            Some(WvrHitTarget::Panel(hit2)) => {
+                self.panel_hovered = true;
+                self.panel.on_hover(app, &hit2)
+            }
+            Some(WvrHitTarget::Popup {
+                surface,
+                global_pos,
+                surface_origin,
+            }) => {
+                if self.panel_hovered {
+                    self.panel.on_left(app, hit.pointer);
+                    self.panel_hovered = false;
+                }
 
-        if !self.uv_range.contains(&transformed.x) || !self.uv_range.contains(&transformed.y) {
-            let Some(meta) = self.meta.as_ref() else {
-                return HoverResult::default();
-            };
+                let wvr_server = app.wvr_server.as_mut().unwrap();
 
-            let mut hit2 = *hit;
-            hit2.uv.y *= meta.extent[1] as f32 / (meta.extent[1] - self.inner_extent[1]) as f32;
-            self.panel_hovered = true;
-            return self.panel.on_hover(app, &hit2);
-        } else if self.panel_hovered {
-            self.panel.on_left(app, hit.pointer);
-            self.panel_hovered = false;
-        }
+                wvr_server.send_mouse_move_to_surface(
+                    surface,
+                    global_pos,
+                    surface_origin,
+                    self.window,
+                );
 
-        let clamped = transformed.clamp(Vec2::ZERO, Vec2::ONE);
+                HoverResult {
+                    haptics: None,
+                    consume: true,
+                }
+            }
+            Some(WvrHitTarget::Toplevel { pos }) => {
+                if self.panel_hovered {
+                    self.panel.on_left(app, hit.pointer);
+                    self.panel_hovered = false;
+                }
 
-        let x = (clamped.x * (self.inner_extent[0] as f32)) as u32;
-        let y = (clamped.y * (self.inner_extent[1] as f32)) as u32;
+                let wvr_server = app.wvr_server.as_mut().unwrap();
 
-        let wvr_server = app.wvr_server.as_mut().unwrap(); //never None
-        wvr_server.send_mouse_move(self.window, x, y);
+                wvr_server.send_mouse_move(self.window, pos.x as u32, pos.y as u32);
 
-        HoverResult {
-            haptics: None, // haptics are handled via task
-            consume: true,
+                HoverResult {
+                    haptics: None,
+                    consume: true,
+                }
+            }
+            None => HoverResult::default(),
         }
     }
 
@@ -578,35 +724,28 @@ impl OverlayBackend for WvrWindowBackend {
     }
 
     fn on_pointer(&mut self, app: &mut state::AppState, hit: &input::PointerHit, pressed: bool) {
-        let transformed = self.mouse_transform.transform_point2(hit.uv);
-
-        if !self.uv_range.contains(&transformed.x) || !self.uv_range.contains(&transformed.y) {
-            let Some(meta) = self.meta.as_ref() else {
-                return;
-            };
-
-            let mut hit2 = *hit;
-            hit2.uv.y *= meta.extent[1] as f32 / (meta.extent[1] - self.inner_extent[1]) as f32;
-            self.panel_hovered = true;
-            return self.panel.on_pointer(app, &hit2, pressed);
-        }
-
-        if let Some(index) = match hit.mode {
-            input::PointerMode::Left => Some(wayvr::MouseIndex::Left),
-            input::PointerMode::Middle => Some(wayvr::MouseIndex::Center),
-            input::PointerMode::Right => Some(wayvr::MouseIndex::Right),
-            _ => {
-                // Unknown pointer event, ignore
-                None
+        match self.hit_target(hit) {
+            Some(WvrHitTarget::Panel(hit2)) => {
+                self.panel_hovered = true;
+                self.panel.on_pointer(app, &hit2, pressed);
             }
-        } {
-            let click_freeze = app.session.config.click_freeze_time_ms;
-            let wvr_server = app.wvr_server.as_mut().unwrap(); //never None
-            if pressed {
-                wvr_server.send_mouse_down(click_freeze, self.window, index);
-            } else {
-                wvr_server.send_mouse_up(index);
+
+            Some(WvrHitTarget::Popup { .. }) | Some(WvrHitTarget::Toplevel { .. }) => {
+                let Some(index) = Self::mouse_index_from_mode(hit.mode) else {
+                    return;
+                };
+
+                let click_freeze = app.session.config.click_freeze_time_ms;
+                let wvr_server = app.wvr_server.as_mut().unwrap();
+
+                if pressed {
+                    wvr_server.send_mouse_down(click_freeze, self.window, index);
+                } else {
+                    wvr_server.send_mouse_up(index);
+                }
             }
+
+            None => {}
         }
     }
 
@@ -666,4 +805,17 @@ impl OverlayBackend for WvrWindowBackend {
             _ => false,
         }
     }
+}
+
+fn rendered_popups_dirty(a: &[RenderedPopup], b: &[RenderedPopup]) -> bool {
+    if a.len() != b.len() {
+        return true;
+    }
+
+    a.iter().zip(b).any(|(a, b)| {
+        a.surface_id != b.surface_id
+            || !Arc::ptr_eq(&a.image, &b.image)
+            || a.pos != b.pos
+            || a.size != b.size
+    })
 }

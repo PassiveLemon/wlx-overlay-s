@@ -1,10 +1,11 @@
 use std::{io::Read, os::unix::net::UnixStream, path::PathBuf, sync::Arc};
 
 use anyhow::Context;
+use glam::Vec2;
 use smithay::{
     backend::input::Keycode,
     input::{keyboard::KeyboardHandle, pointer::PointerHandle},
-    reexports::wayland_server,
+    reexports::wayland_server::{self, protocol::wl_surface::WlSurface},
     utils::SerialCounter,
 };
 use xkbcommon::xkb;
@@ -208,6 +209,31 @@ impl WayVRCompositor {
                 keymap.get_as_string(xkb::KEYMAP_FORMAT_USE_ORIGINAL),
             )
             .context("Failed to set keymap")
+    }
+
+    pub fn send_mouse_move_to_surface(
+        &mut self,
+        surface: WlSurface,
+        global_pos: Vec2,
+        surface_origin: Vec2,
+    ) {
+        use smithay::input::pointer::MotionEvent;
+        use smithay::utils::{Logical, Point};
+
+        let location: Point<f64, Logical> = (global_pos.x as f64, global_pos.y as f64).into();
+
+        let focus_location: Point<f64, Logical> =
+            (surface_origin.x as f64, surface_origin.y as f64).into();
+
+        self.seat_pointer.motion(
+            &mut self.state,
+            Some((surface, focus_location)),
+            &MotionEvent {
+                location,
+                serial: self.serial_counter.next_serial(),
+                time: 0,
+            },
+        );
     }
 }
 

@@ -7,6 +7,7 @@ mod time;
 pub mod window;
 use anyhow::Context;
 use comp::Application;
+use glam::Vec2;
 use process::ProcessVec;
 use slotmap::SecondaryMap;
 use smallvec::SmallVec;
@@ -16,7 +17,11 @@ use smithay::{
     output::{Mode, Output},
     reexports::{
         wayland_protocols_misc::server_decoration::server::org_kde_kwin_server_decoration_manager as kde_decoration,
-        wayland_server::{self, backend::ClientId, protocol::wl_buffer},
+        wayland_server::{
+            self,
+            backend::ClientId,
+            protocol::{wl_buffer, wl_surface::WlSurface},
+        },
     },
     utils::{Logical, Size},
     wayland::{
@@ -574,6 +579,29 @@ impl WvrServerState {
 
     pub fn get_overlay_id(&self, window: window::WindowHandle) -> Option<OverlayID> {
         self.window_to_overlay.get(&window).copied()
+    }
+
+    pub fn send_mouse_move_to_surface(
+        &mut self,
+        surface: WlSurface,
+        global_pos: Vec2,
+        surface_origin: Vec2,
+        hover_window: window::WindowHandle,
+    ) {
+        if self.mouse_freeze > Instant::now() {
+            return;
+        }
+
+        self.manager
+            .send_mouse_move_to_surface(surface, global_pos, surface_origin);
+
+        self.mouse_freeze = Instant::now() + Duration::from_millis(1);
+
+        self.wm.mouse = Some(window::MouseState {
+            hover_window,
+            x: global_pos.x as u32,
+            y: global_pos.y as u32,
+        });
     }
 
     pub fn send_mouse_move(&mut self, handle: window::WindowHandle, x: u32, y: u32) {
