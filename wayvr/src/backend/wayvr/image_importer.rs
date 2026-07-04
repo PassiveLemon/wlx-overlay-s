@@ -63,13 +63,40 @@ impl ImageImporter {
         let format = fourcc_to_vk(fourcc)
             .with_context(|| format!("Could not convert {fourcc} to vkFormat"))?;
 
-        let data = unsafe { std::slice::from_raw_parts(data, size) };
-        let image = cmd_buf.upload_image(bd.width as _, bd.height as _, format, data)?;
+        let bytes_per_pixel = match format {
+            Format::R8G8B8A8_UNORM
+            | Format::B8G8R8A8_UNORM
+            | Format::R8G8B8A8_SRGB
+            | Format::B8G8R8A8_SRGB => 4,
+            other => anyhow::bail!("unsupported SHM format for packed upload: {other:?}"),
+        };
 
-        cmd_buf.build_and_execute_now()?; //TODO: async
+        let row_bytes = bd.width as usize * bytes_per_pixel;
+        let stride = bd.stride as usize;
+        let height = bd.height as usize;
 
-        let image_view = ImageView::new_default(image)?;
-        Ok(image_view)
+        if stride < row_bytes {
+            anyhow::bail!("invalid wl_shm stride: {stride} < {row_bytes}");
+        }
+
+        let required = stride * height;
+        if size < required {
+            anyhow::bail!("wl_shm buffer too small: {size} < {required}");
+        }
+
+        let src = unsafe { std::slice::from_raw_parts(data, required) };
+        let mut packed = vec![0u8; row_bytes * height];
+
+        for y in 0..height {
+            let src_row = &src[y * stride..y * stride + row_bytes];
+            let dst_row = &mut packed[y * row_bytes..(y + 1) * row_bytes];
+            dst_row.copy_from_slice(src_row);
+        }
+
+        let image = cmd_buf.upload_image(bd.width as _, bd.height as _, format, &packed)?;
+        cmd_buf.build_and_execute_now()?;
+
+        Ok(ImageView::new_default(image)?)
     }
 
     pub fn get_or_import_dmabuf(&mut self, dmabuf: Dmabuf) -> anyhow::Result<Arc<ImageView>> {
