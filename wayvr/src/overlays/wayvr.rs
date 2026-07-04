@@ -156,6 +156,7 @@ pub struct WvrWindowBackend {
     mouse_transform: Affine2,
     uv_range: RangeInclusive<f32>,
     panel_hovered: bool,
+    scrolling: bool,
 }
 
 impl WvrWindowBackend {
@@ -261,6 +262,7 @@ impl WvrWindowBackend {
             mouse_transform: Affine2::ZERO,
             uv_range: 0.0..=1.0,
             panel_hovered: false,
+            scrolling: false,
         })
     }
 
@@ -580,7 +582,9 @@ impl OverlayBackend for WvrWindowBackend {
                     });
 
                 let dirty = self.mouse != mouse || rendered_surfaces_dirty(&self.popups, &popups);
-                self.mouse = mouse;
+                if !self.scrolling {
+                    self.mouse = mouse;
+                }
                 self.popups = popups;
                 self.meta = Some(meta);
 
@@ -697,6 +701,14 @@ impl OverlayBackend for WvrWindowBackend {
     }
 
     fn on_hover(&mut self, app: &mut state::AppState, hit: &input::PointerHit) -> HoverResult {
+        if std::mem::take(&mut self.scrolling) {
+            // we scrolled on previous frame so don't send mouse move events in case the user wants to scroll on this frame as well
+            return HoverResult {
+                haptics: None,
+                consume: true,
+            };
+        }
+
         match self.hit_target(hit) {
             Some(WvrHitTarget::Panel(hit2)) => {
                 self.panel_hovered = true;
@@ -859,6 +871,7 @@ impl OverlayBackend for WvrWindowBackend {
 
     fn on_scroll(&mut self, app: &mut state::AppState, hit: &input::PointerHit, delta: WheelDelta) {
         let target = self.hit_target(hit);
+        self.scrolling = true;
 
         match target {
             Some(WvrHitTarget::Panel(hit2)) => {

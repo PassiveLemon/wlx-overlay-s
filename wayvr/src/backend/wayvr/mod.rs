@@ -674,10 +674,6 @@ impl WvrServerState {
         hover_window: window::WindowHandle,
         delta: WheelDelta,
     ) {
-        // Do not respect mouse_freeze here. A scroll event should still update focus.
-        self.manager
-            .send_mouse_move_to_surface(surface, global_pos, surface_origin);
-
         self.wm.mouse = Some(window::MouseState {
             hover_window,
             x: global_pos.x.max(0.0) as u32,
@@ -693,12 +689,6 @@ impl WvrServerState {
         pos: Vec2,
         delta: WheelDelta,
     ) {
-        if let Some(window) = self.wm.windows.get_mut(&handle) {
-            window.send_mouse_move(&mut self.manager, pos.x as u32, pos.y as u32);
-        } else {
-            return;
-        }
-
         self.wm.mouse = Some(window::MouseState {
             hover_window: handle,
             x: pos.x.max(0.0) as u32,
