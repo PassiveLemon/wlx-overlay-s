@@ -156,8 +156,8 @@ impl WvrWindowBackend {
     ) -> anyhow::Result<Self> {
         let popups_pipeline = app.gfx.create_pipeline(
             app.gfx_extras.shaders.get("vert_quad").unwrap(), // want panic
-            app.gfx_extras.shaders.get("frag_screen").unwrap(), // want panic
-            WPipelineCreateInfo::new(app.gfx.surface_format).use_blend(AttachmentBlend::default()),
+            app.gfx_extras.shaders.get("frag_simple").unwrap(), // want panic
+            WPipelineCreateInfo::new(app.gfx.surface_format).use_blend(AttachmentBlend::alpha()),
         )?;
 
         let on_custom_attrib: OnCustomAttribFunc =
