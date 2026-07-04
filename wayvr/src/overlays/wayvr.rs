@@ -784,7 +784,7 @@ impl OverlayBackend for WvrWindowBackend {
             app.wvr_server
                 .as_mut()
                 .unwrap()
-                .send_mouse_button_main_surface(
+                .send_mouse_button_to_toplevel(
                     click_freeze,
                     self.window,
                     outside_pos,
@@ -812,7 +812,7 @@ impl OverlayBackend for WvrWindowBackend {
             app.wvr_server
                 .as_mut()
                 .unwrap()
-                .send_mouse_button_main_surface(
+                .send_mouse_button_to_toplevel(
                     click_freeze,
                     self.window,
                     outside_pos,
@@ -868,14 +868,40 @@ impl OverlayBackend for WvrWindowBackend {
         }
     }
 
-    fn on_scroll(
-        &mut self,
-        app: &mut state::AppState,
-        _hit: &input::PointerHit,
-        delta: WheelDelta,
-    ) {
-        let wvr_server = app.wvr_server.as_mut().unwrap(); //never None
-        wvr_server.send_mouse_scroll(delta);
+    fn on_scroll(&mut self, app: &mut state::AppState, hit: &input::PointerHit, delta: WheelDelta) {
+        let target = self.hit_target(hit);
+
+        match target {
+            Some(WvrHitTarget::Panel(hit2)) => {
+                self.panel.on_scroll(app, &hit2, delta);
+                let _ = hit2;
+            }
+
+            Some(WvrHitTarget::Popup {
+                surface,
+                global_pos,
+                surface_origin,
+            })
+            | Some(WvrHitTarget::Surface {
+                surface,
+                global_pos,
+                surface_origin,
+            }) => {
+                let wvr_server = app.wvr_server.as_mut().unwrap();
+                wvr_server.send_mouse_scroll_to_surface(
+                    surface,
+                    global_pos,
+                    surface_origin,
+                    self.window,
+                    delta,
+                );
+            }
+            Some(WvrHitTarget::Toplevel { pos }) => {
+                let wvr_server = app.wvr_server.as_mut().unwrap();
+                wvr_server.send_mouse_scroll_to_toplevel(self.window, pos, delta);
+            }
+            None => {}
+        }
     }
 
     fn get_interaction_transform(&mut self) -> Option<Affine2> {

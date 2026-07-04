@@ -643,7 +643,7 @@ impl WvrServerState {
         self.manager.send_pointer_button(index, pressed);
     }
 
-    pub fn send_mouse_button_main_surface(
+    pub fn send_mouse_button_to_toplevel(
         &mut self,
         click_freeze: i32,
         hover_window: window::WindowHandle,
@@ -664,6 +664,48 @@ impl WvrServerState {
         });
 
         self.manager.send_pointer_button(index, pressed);
+    }
+
+    pub fn send_mouse_scroll_to_surface(
+        &mut self,
+        surface: WlSurface,
+        global_pos: Vec2,
+        surface_origin: Vec2,
+        hover_window: window::WindowHandle,
+        delta: WheelDelta,
+    ) {
+        // Do not respect mouse_freeze here. A scroll event should still update focus.
+        self.manager
+            .send_mouse_move_to_surface(surface, global_pos, surface_origin);
+
+        self.wm.mouse = Some(window::MouseState {
+            hover_window,
+            x: global_pos.x.max(0.0) as u32,
+            y: global_pos.y.max(0.0) as u32,
+        });
+
+        self.manager.send_pointer_axis_wheel(delta);
+    }
+
+    pub fn send_mouse_scroll_to_toplevel(
+        &mut self,
+        handle: window::WindowHandle,
+        pos: Vec2,
+        delta: WheelDelta,
+    ) {
+        if let Some(window) = self.wm.windows.get_mut(&handle) {
+            window.send_mouse_move(&mut self.manager, pos.x as u32, pos.y as u32);
+        } else {
+            return;
+        }
+
+        self.wm.mouse = Some(window::MouseState {
+            hover_window: handle,
+            x: pos.x.max(0.0) as u32,
+            y: pos.y.max(0.0) as u32,
+        });
+
+        self.manager.send_pointer_axis_wheel(delta);
     }
 
     pub fn send_mouse_move(&mut self, handle: window::WindowHandle, x: u32, y: u32) {
@@ -698,10 +740,6 @@ impl WvrServerState {
 
     pub fn send_mouse_up(&mut self, index: MouseIndex) {
         Window::send_mouse_up(&mut self.manager, index);
-    }
-
-    pub fn send_mouse_scroll(&mut self, delta: WheelDelta) {
-        Window::send_mouse_scroll(&mut self.manager, delta);
     }
 
     pub fn send_key(&mut self, virtual_key: u32, down: bool) {
