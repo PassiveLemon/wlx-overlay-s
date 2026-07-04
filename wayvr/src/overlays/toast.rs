@@ -14,7 +14,7 @@ use wlx_common::{
 };
 
 use crate::{
-    backend::task::{OverlayTask, TaskType},
+    backend::task::{OverlayTask, SpawnPos, TaskType},
     gui::panel::{GuiPanel, NewGuiPanelParams, OnCustomIdFunc},
     state::AppState,
     windowing::{OverlaySelector, Z_ORDER_TOAST, window::OverlayWindowConfig},
@@ -88,8 +88,9 @@ impl Toast {
         // multiple toasts are submitted for the same
         // frame, only the first one gets created
         app.tasks.enqueue_at(
-            TaskType::Overlay(OverlayTask::Create(
+            TaskType::Overlay(OverlayTask::Spawn(
                 selector.clone(),
+                SpawnPos::Fixed,
                 Box::new(move |app| {
                     let maybe_toast = new_toast(self, app);
                     app.tasks.enqueue_at(

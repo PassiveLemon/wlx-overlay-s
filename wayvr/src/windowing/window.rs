@@ -309,3 +309,11 @@ pub fn save_transform(state: &mut OverlayWindowState, app: &mut AppState) {
 
     state.saved_transform = Some(parent_transform.inverse() * state.transform);
 }
+
+pub fn spawn_transform_from_parent(parent: &Affine3A, _hmd: &Affine3A) -> Affine3A {
+    let local_offset = Vec3A::new(0.08, -0.08, 0.06);
+    let world_offset = parent.x_axis * local_offset.x - parent.y_axis * local_offset.y
+        + parent.z_axis * local_offset.z;
+
+    Affine3A::from_translation((parent.translation + world_offset).into())
+}

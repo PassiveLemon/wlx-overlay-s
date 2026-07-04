@@ -59,7 +59,7 @@ use xkbcommon::xkb;
 
 use crate::{
     backend::{
-        task::{OverlayTask, TaskContainer, TaskType, ToggleMode},
+        task::{OverlayTask, SpawnPos, TaskContainer, TaskType, ToggleMode},
         wayvr::{
             image_importer::ImageImporter,
             process::{KillSignal, Process},
@@ -434,8 +434,9 @@ impl WvrServerState {
                             None => DesktopFinder::create_icon(&title)?.into(),
                         };
 
-                        app.tasks.enqueue(TaskType::Overlay(OverlayTask::Create(
+                        app.tasks.enqueue(TaskType::Overlay(OverlayTask::Spawn(
                             OverlaySelector::Nothing,
+                            SpawnPos::Spread,
                             Box::new(move |app: &mut AppState| {
                                 create_wl_window_overlay(
                                     title,

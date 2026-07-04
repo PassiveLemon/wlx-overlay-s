@@ -345,7 +345,7 @@ where
                     log::warn!("Overlay not found for task: {sel:?}");
                 }
             }
-            OverlayTask::Create(sel, f) => {
+            OverlayTask::Spawn(sel, pos, f) => {
                 let None = self.mut_by_selector(&sel) else {
                     log::debug!("Could not create {sel:?}: exists");
                     return Ok(());

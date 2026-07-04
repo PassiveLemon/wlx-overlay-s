@@ -85,10 +85,21 @@ pub struct ModifyPanelTask {
     pub command: ModifyPanelCommand,
 }
 
+#[derive(Clone, Copy)]
 pub enum ToggleMode {
     EnsureOn,
     EnsureOff,
     Toggle,
+}
+
+#[derive(Clone)]
+pub enum SpawnPos {
+    /// Always spawn at the designated pos
+    Fixed,
+    /// Automatically spread out for user experience
+    Spread,
+    /// Spawn relative to a different overlay
+    Parent(OverlaySelector),
 }
 
 pub type ModifyOverlayTask = dyn FnOnce(&mut AppState, &mut OverlayWindowConfig) + Send;
@@ -107,7 +118,7 @@ pub enum OverlayTask {
     SettingsChanged,
     KeyboardChanged,
     Modify(OverlaySelector, Box<ModifyOverlayTask>),
-    Create(OverlaySelector, Box<CreateOverlayTask>),
+    Spawn(OverlaySelector, SpawnPos, Box<CreateOverlayTask>),
     ModifyPanel(ModifyPanelTask),
     Drop(OverlaySelector),
 }

@@ -26,7 +26,7 @@ use wlx_common::{config::HandsfreePointer, overlays::ToastTopic};
 use crate::{
     RESTART, RUNNING,
     backend::{
-        task::{OverlayTask, PlayspaceTask, TaskType, ToggleMode},
+        task::{OverlayTask, PlayspaceTask, SpawnPos, TaskType, ToggleMode},
         wayvr::process::KillSignal,
     },
     gui::panel::{log_cmd_invalid_arg, log_cmd_missing_arg},
@@ -441,8 +441,9 @@ pub(super) fn setup_custom_button<S: 'static>(
                                 app.tasks.enqueue(TaskType::Overlay(OverlayTask::Drop(
                                     OverlaySelector::Name(name.clone()),
                                 )));
-                                app.tasks.enqueue(TaskType::Overlay(OverlayTask::Create(
+                                app.tasks.enqueue(TaskType::Overlay(OverlayTask::Spawn(
                                     OverlaySelector::Name(owc.name.clone()),
+                                    SpawnPos::Spread,
                                     Box::new(move |app| {
                                         if let Some(mut owc) = create_custom(app, name) {
                                             owc.show_on_spawn = true;
@@ -534,8 +535,9 @@ pub(super) fn setup_custom_button<S: 'static>(
                     }
 
                     let name = crate::overlays::screen::mirror::new_mirror_name();
-                    app.tasks.enqueue(TaskType::Overlay(OverlayTask::Create(
+                    app.tasks.enqueue(TaskType::Overlay(OverlayTask::Spawn(
                         OverlaySelector::Name(name.clone()),
+                        SpawnPos::Spread,
                         Box::new(move |app| {
                             Some(crate::overlays::screen::mirror::new_mirror(
                                 name,
