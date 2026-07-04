@@ -2,7 +2,13 @@ use glam::{Affine2, Affine3A, Quat, Vec2, Vec3, vec2, vec3};
 use smithay::{
     desktop::PopupManager,
     reexports::wayland_server::{Resource, backend::ObjectId, protocol::wl_surface::WlSurface},
-    wayland::{compositor::with_states, shell::xdg::XdgPopupSurfaceData},
+    utils::{Logical, Point},
+    wayland::{
+        compositor::{
+            SubsurfaceCachedState, TraversalAction, with_states, with_surface_tree_upward,
+        },
+        shell::xdg::XdgPopupSurfaceData,
+    },
 };
 use std::{mem, ops::RangeInclusive, sync::Arc};
 use vulkano::{
@@ -102,21 +108,25 @@ pub fn create_wl_window_overlay(
 }
 
 #[derive(Clone)]
-struct RenderedPopup {
+struct RenderedSurface {
     surface: WlSurface,
     surface_id: ObjectId,
     image: Arc<ImageView>,
     pos: Vec2,
     size: Vec2,
+    dmabuf: bool,
 }
 
 enum WvrHitTarget {
     Panel(input::PointerHit),
-
     Toplevel {
         pos: Vec2,
     },
-
+    Surface {
+        surface: WlSurface,
+        global_pos: Vec2,
+        surface_origin: Vec2,
+    },
     Popup {
         surface: WlSurface,
         global_pos: Vec2,
@@ -128,11 +138,12 @@ pub struct WvrWindowBackend {
     name: Arc<str>,
     icon: Arc<str>,
     pipeline: Option<ScreenPipeline>,
-    popups_pipeline: Arc<WGfxPipeline<Vert2Uv>>,
+    subsurface_pipeline: Arc<WGfxPipeline<Vert2Uv>>,
     popup_outside_button: Option<wayvr::MouseIndex>,
     interaction_transform: Option<Affine2>,
     window: WindowHandle,
-    popups: Vec<RenderedPopup>,
+    popups: Vec<RenderedSurface>,
+    surfaces: Vec<RenderedSurface>,
     just_resumed: bool,
     meta: Option<FrameMeta>,
     mouse: Option<MouseMeta>,
@@ -154,7 +165,7 @@ impl WvrWindowBackend {
         window: wayvr::window::WindowHandle,
         icon: Arc<str>,
     ) -> anyhow::Result<Self> {
-        let popups_pipeline = app.gfx.create_pipeline(
+        let subsurface_pipeline = app.gfx.create_pipeline(
             app.gfx_extras.shaders.get("vert_quad").unwrap(), // want panic
             app.gfx_extras.shaders.get("frag_simple").unwrap(), // want panic
             WPipelineCreateInfo::new(app.gfx.surface_format).use_blend(AttachmentBlend::alpha()),
@@ -230,7 +241,8 @@ impl WvrWindowBackend {
             pipeline: None,
             window,
             popups: vec![],
-            popups_pipeline,
+            surfaces: vec![],
+            subsurface_pipeline,
             popup_outside_button: None,
             interaction_transform: None,
             just_resumed: false,
@@ -342,8 +354,7 @@ impl WvrWindowBackend {
         let transformed = self.transformed_uv_from_hit(hit);
         let client_pos = self.client_pos_from_transformed_uv(transformed);
 
-        // Important: popups are checked before the panel/client bounds.
-        // Real xdg_popups may extend outside the parent toplevel rect.
+        // popups are checked before the panel/client bounds.
         if let Some((surface, surface_origin)) = self.popup_hit_at_client_pos(client_pos) {
             return Some(WvrHitTarget::Popup {
                 surface,
@@ -354,6 +365,20 @@ impl WvrWindowBackend {
 
         if !self.is_inside_client_area(transformed) {
             return self.panel_hit_from_hit(hit).map(WvrHitTarget::Panel);
+        }
+
+        let hit_surface = self.surfaces.iter().rev().find(|s| {
+            let local = client_pos - s.pos;
+
+            local.x >= 0.0 && local.y >= 0.0 && local.x < s.size.x && local.y < s.size.y
+        });
+
+        if let Some(surface) = hit_surface {
+            return Some(WvrHitTarget::Surface {
+                surface: surface.surface.clone(),
+                global_pos: client_pos,
+                surface_origin: surface.pos,
+            });
         }
 
         let clamped = transformed.clamp(Vec2::ZERO, Vec2::ONE);
@@ -369,6 +394,50 @@ impl WvrWindowBackend {
             input::PointerMode::Right => Some(wayvr::MouseIndex::Right),
             _ => None,
         }
+    }
+
+    fn render_subsurface(
+        &self,
+        app: &mut AppState,
+        rdr: &mut RenderResources,
+        s: &RenderedSurface,
+    ) -> anyhow::Result<()> {
+        let meta = self.meta.as_ref().unwrap();
+        let extentf = [meta.extent[0] as f32, meta.extent[1] as f32];
+
+        let mut buf_vert = app
+            .gfx
+            .empty_buffer(BufferUsage::TRANSFER_DST | BufferUsage::VERTEX_BUFFER, 4)?;
+
+        upload_quad_vertices(
+            &mut buf_vert,
+            extentf[0],
+            extentf[1],
+            s.pos.x,
+            s.pos.y,
+            s.size.x,
+            s.size.y,
+        )?;
+
+        let set0 =
+            self.subsurface_pipeline
+                .uniform_sampler(0, s.image.clone(), app.gfx.texture_filter)?;
+
+        let pass = self.subsurface_pipeline.create_pass(
+            extentf,
+            [BORDER_SIZE as _, (BAR_SIZE + BORDER_SIZE) as _],
+            buf_vert,
+            0..4,
+            0..1,
+            vec![set0],
+            &Default::default(),
+        )?;
+
+        for buf in &mut rdr.cmd_bufs {
+            buf.run_ref(&pass)?;
+        }
+
+        Ok(())
     }
 }
 
@@ -388,8 +457,6 @@ impl OverlayBackend for WvrWindowBackend {
 
     #[allow(clippy::too_many_lines)]
     fn should_render(&mut self, app: &mut AppState) -> anyhow::Result<ShouldRender> {
-        let should_render_panel = self.panel.should_render(app)?;
-
         let Some(toplevel) = app
             .wvr_server
             .as_ref()
@@ -403,15 +470,34 @@ impl OverlayBackend for WvrWindowBackend {
             return Ok(ShouldRender::Unable);
         };
 
-        let surface_id = toplevel.wl_surface().id();
-        let has_pending_callbacks = app
-            .wvr_server
-            .as_ref()
-            .unwrap()
-            .manager
-            .state
-            .has_pending_frame_callbacks(surface_id);
-        let force_render = mem::take(&mut self.just_resumed) | has_pending_callbacks;
+        let surfaces = collect_rendered_surface_tree(toplevel.wl_surface());
+
+        let has_pending_callbacks = surfaces.iter().any(|s| {
+            app.wvr_server
+                .as_ref()
+                .unwrap()
+                .manager
+                .state
+                .has_pending_frame_callbacks(s.surface_id.clone())
+        });
+
+        let subtree_dirty = rendered_surfaces_dirty(&self.surfaces, &surfaces)
+            || surfaces.iter().any(|s| {
+                app.wvr_server
+                    .as_ref()
+                    .unwrap()
+                    .manager
+                    .state
+                    .redraw_requests
+                    .contains(&s.surface_id)
+            });
+
+        self.surfaces = surfaces;
+
+        let should_render_panel = self.panel.should_render(app)?;
+
+        let force_render =
+            has_pending_callbacks || subtree_dirty || mem::take(&mut self.just_resumed);
 
         let popups = PopupManager::popups_for_surface(toplevel.wl_surface())
             .filter_map(|(popup, point)| {
@@ -432,12 +518,13 @@ impl OverlayBackend for WvrWindowBackend {
                         let image = surf.image;
                         let size = image.extent_f32();
 
-                        Some(RenderedPopup {
+                        Some(RenderedSurface {
                             surface: popup.wl_surface().clone(),
                             surface_id: popup.wl_surface().id(),
                             image,
                             pos: vec2(point.x as _, point.y as _),
                             size: vec2(size[0], size[1]),
+                            dmabuf: false,
                         })
                     } else {
                         None
@@ -511,7 +598,7 @@ impl OverlayBackend for WvrWindowBackend {
                         y: (m.y as f32) / (inner_extent[1] as f32),
                     });
 
-                let dirty = self.mouse != mouse || rendered_popups_dirty(&self.popups, &popups);
+                let dirty = self.mouse != mouse || rendered_surfaces_dirty(&self.popups, &popups);
                 self.mouse = mouse;
                 self.popups = popups;
                 self.meta = Some(meta);
@@ -559,64 +646,35 @@ impl OverlayBackend for WvrWindowBackend {
         }
 
         let image = self.cur_image.as_ref().unwrap().clone();
+        let mut callback_surfaces = Vec::with_capacity(self.surfaces.len() + self.popups.len());
 
         self.pipeline
             .as_mut()
             .unwrap()
             .render(image, self.mouse.as_ref(), app, rdr)?;
 
-        for popup in &self.popups {
-            let meta = self.meta.as_ref().unwrap();
-            let extentf = [meta.extent[0] as f32, meta.extent[1] as f32];
-
-            let mut buf_vert = app
-                .gfx
-                .empty_buffer(BufferUsage::TRANSFER_DST | BufferUsage::VERTEX_BUFFER, 4)?;
-
-            upload_quad_vertices(
-                &mut buf_vert,
-                extentf[0],
-                extentf[1],
-                popup.pos.x,
-                popup.pos.y,
-                popup.size.x,
-                popup.size.y,
-            )?;
-
-            let set0 = self.popups_pipeline.uniform_sampler(
-                0,
-                popup.image.clone(),
-                app.gfx.texture_filter,
-            )?;
-            let pass = self.popups_pipeline.create_pass(
-                extentf,
-                [BORDER_SIZE as _, (BAR_SIZE + BORDER_SIZE) as _],
-                buf_vert,
-                0..4,
-                0..1,
-                vec![set0],
-                &Default::default(),
-            )?;
-
-            for buf in &mut rdr.cmd_bufs {
-                buf.run_ref(&pass)?;
-            }
-
-            app.wvr_server
-                .as_mut()
-                .unwrap()
-                .manager
-                .state
-                .send_frame_callbacks_for_surface_id(&popup.surface_id);
+        for surface in &self.surfaces {
+            self.render_subsurface(app, rdr, surface)?;
+            callback_surfaces.push(&surface.surface_id);
         }
 
+        for popup in &self.popups {
+            self.render_subsurface(app, rdr, popup)?;
+            callback_surfaces.push(&popup.surface_id);
+        }
+
+        // frame callbacks for toplevel + subsurf + popup
         if let Some(wvr_server) = app.wvr_server.as_mut() {
+            let state = &mut wvr_server.manager.state;
             if let Some(window) = wvr_server.wm.windows.get(&self.window) {
                 let surface_id = window.toplevel.wl_surface().id();
-                wvr_server
-                    .manager
-                    .state
-                    .send_frame_callbacks_for_surface_id(&surface_id);
+                state.send_frame_callbacks_for_surface_id(&surface_id);
+            }
+            for surface in &self.surfaces {
+                state.send_frame_callbacks_for_surface_id(&surface.surface_id);
+            }
+            for popup in &self.popups {
+                state.send_frame_callbacks_for_surface_id(&popup.surface_id);
             }
         }
 
@@ -660,6 +718,11 @@ impl OverlayBackend for WvrWindowBackend {
                 self.panel.on_hover(app, &hit2)
             }
             Some(WvrHitTarget::Popup {
+                surface,
+                global_pos,
+                surface_origin,
+            })
+            | Some(WvrHitTarget::Surface {
                 surface,
                 global_pos,
                 surface_origin,
@@ -773,6 +836,11 @@ impl OverlayBackend for WvrWindowBackend {
                 surface,
                 global_pos,
                 surface_origin,
+            })
+            | Some(WvrHitTarget::Surface {
+                surface,
+                global_pos,
+                surface_origin,
             }) => {
                 let wvr_server = app.wvr_server.as_mut().unwrap();
 
@@ -862,15 +930,59 @@ impl OverlayBackend for WvrWindowBackend {
     }
 }
 
-fn rendered_popups_dirty(a: &[RenderedPopup], b: &[RenderedPopup]) -> bool {
-    if a.len() != b.len() {
+fn rendered_surfaces_dirty(old: &[RenderedSurface], new: &[RenderedSurface]) -> bool {
+    if old.len() != new.len() {
         return true;
     }
 
-    a.iter().zip(b).any(|(a, b)| {
+    old.iter().zip(new).any(|(a, b)| {
         a.surface_id != b.surface_id
-            || !Arc::ptr_eq(&a.image, &b.image)
             || a.pos != b.pos
             || a.size != b.size
+            || *a.image.image() != *b.image.image()
     })
+}
+
+fn surface_location(states: &smithay::wayland::compositor::SurfaceData) -> Point<i32, Logical> {
+    if states.role == Some("wl_subsurface") {
+        let mut guard = states.cached_state.get::<SubsurfaceCachedState>();
+        guard.current().location
+    } else {
+        (0, 0).into()
+    }
+}
+
+fn collect_rendered_surface_tree(root: &WlSurface) -> Vec<RenderedSurface> {
+    let mut out = Vec::new();
+
+    with_surface_tree_upward(
+        root,
+        Point::<i32, Logical>::from((0, 0)),
+        |_, states, parent_pos| {
+            let pos = *parent_pos + surface_location(states);
+
+            // do not skip even though no buffer; children might have buffer
+            TraversalAction::DoChildren(pos)
+        },
+        |surface, states, parent_pos| {
+            let pos = *parent_pos + surface_location(states);
+
+            if let Some(surf) = SurfaceBufWithImage::get_from_surface(states) {
+                let extent = surf.image.extent_f32();
+                let scale = surf.scale.max(1) as f32;
+
+                out.push(RenderedSurface {
+                    surface: surface.clone(),
+                    surface_id: surface.id(),
+                    image: surf.image,
+                    pos: vec2(pos.x as f32, pos.y as f32),
+                    size: vec2(extent[0] / scale, extent[1] / scale),
+                    dmabuf: surf.dmabuf,
+                });
+            }
+        },
+        |_, _, _| true,
+    );
+
+    out
 }
