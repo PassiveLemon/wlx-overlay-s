@@ -62,6 +62,7 @@ enum ResizeState {
         pointer: usize,
         start_uv: Vec2,
         last_uv: Vec2,
+        last_extent: [u32; 2],
     },
 }
 
@@ -271,17 +272,26 @@ impl OverlayBackend for EditModeBackendWrapper {
                 pointer,
                 start_uv,
                 last_uv,
+                last_extent,
             } if *pointer == hit.pointer => {
+                fn lerp_u32(a: [u32; 2], b: [u32; 2], t: f32) -> [u32; 2] {
+                    [
+                        (a[0] as f32 + (b[0] as f32 - a[0] as f32) * t).round() as u32,
+                        (a[1] as f32 + (b[1] as f32 - a[1] as f32) * t).round() as u32,
+                    ]
+                }
+
                 // freshest extent we can get is from last frame, so use uv from that frame
-                let new_extent = resize_centered_from_uv(*start_uv, *last_uv, self.extent);
+                let want_extent = resize_centered_from_uv(*start_uv, *last_uv, self.extent);
 
                 app.tasks
                     .enqueue(TaskType::Overlay(OverlayTask::ResizeOverlay(
                         OverlaySelector::Id(*overlay_id),
-                        new_extent,
+                        lerp_u32(*last_extent, want_extent, 0.33),
                     )));
 
                 *last_uv = hit.uv;
+                *last_extent = self.extent;
             }
             _ => {}
         }
@@ -317,6 +327,7 @@ impl OverlayBackend for EditModeBackendWrapper {
                     pointer: hit.pointer,
                     start_uv: last_uv,
                     last_uv: last_uv,
+                    last_extent: self.extent,
                 };
             }
             _ => {}

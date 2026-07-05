@@ -146,7 +146,7 @@ pub enum TickTask {
 
 const KEY_REPEAT_DELAY: i32 = 200;
 const KEY_REPEAT_RATE: i32 = 50;
-const WAYVR_SCREEN_RES: [i32; 2] = [2560, 2560];
+const WAYVR_SCREEN_RES: [i32; 2] = [2048, 2048];
 
 impl WvrServerState {
     pub fn new(

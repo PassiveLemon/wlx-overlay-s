@@ -19,7 +19,7 @@ pub struct Window {
 }
 
 impl Window {
-    const fn new(
+    fn new(
         toplevel: Rc<ToplevelSurface>,
         process: process::ProcessHandle,
         bounds: Size<i32, Logical>,
@@ -29,7 +29,7 @@ impl Window {
         Self {
             bounds,
             min_size,
-            max_size,
+            max_size: max_size.clamp(Size::new(160, 160), bounds),
             size_x: 0,
             size_y: 0,
             visible: true,
