@@ -392,6 +392,8 @@ impl WvrServerState {
                         let window_handle = wvr_server.wm.create_window(
                             toplevel.clone(),
                             process_handle,
+                            min_size,
+                            max_size,
                             fallback_size.w as _,
                             fallback_size.h as _,
                         );

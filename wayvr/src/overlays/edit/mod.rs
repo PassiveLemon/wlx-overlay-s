@@ -6,13 +6,14 @@ use std::{
     time::{Duration, Instant},
 };
 
-use glam::vec2;
+use glam::{Vec2, vec2};
 use slotmap::Key;
 use wgui::{
     components::{button::ComponentButton, checkbox::ComponentCheckbox, slider::ComponentSlider},
-    event::EventCallback,
+    event::{CallbackDataCommon, EventCallback, StyleSetRequest},
     i18n::Translation,
     parser::Fetchable,
+    taffy::Display,
     widget::EventResult,
 };
 use wlx_common::overlays::{BackendAttrib, BackendAttribValue, MouseTransform, StereoMode};
@@ -59,6 +60,7 @@ struct EditModeState {
     pos: SpriteTabHandler<PosTabState>,
     stereo: SpriteTabHandler<StereoMode>,
     mouse: SpriteTabHandler<MouseTransform>,
+    resize_uv: Option<Vec2>,
 }
 
 type EditModeWrapPanel = GuiPanel<EditModeState>;
@@ -94,6 +96,7 @@ impl EditWrapperManager {
         owc.backend = Box::new(EditModeBackendWrapper {
             inner: ManuallyDrop::new(inner),
             panel: ManuallyDrop::new(panel),
+            last_extent: [0, 0],
             last_render: Instant::now(),
             can_render_inner: false,
         });
@@ -135,6 +138,7 @@ pub struct EditModeBackendWrapper {
     panel: ManuallyDrop<EditModeWrapPanel>,
     inner: ManuallyDrop<Box<dyn OverlayBackend>>,
 
+    last_extent: [u32; 2],
     last_render: Instant,
     can_render_inner: bool,
 }
@@ -213,6 +217,8 @@ impl OverlayBackend for EditModeBackendWrapper {
             rdr.cmd_bufs.reverse();
         }
 
+        self.last_extent = rdr.extent;
+
         Ok(())
     }
     fn frame_meta(&mut self) -> Option<crate::windowing::backend::FrameMeta> {
@@ -225,7 +231,23 @@ impl OverlayBackend for EditModeBackendWrapper {
     ) -> HoverResult {
         // pass through hover events to force pipewire to capture frames for us
         let _ = self.inner.on_hover(app, hit);
-        self.panel.on_hover(app, hit)
+        let res = self.panel.on_hover(app, hit);
+
+        if let Some(start_uv) = self.panel.state.resize_uv.as_mut() {
+            let extent_f32 = vec2(self.last_extent[0] as f32, self.last_extent[1] as f32);
+
+            if start_uv.length_squared() > 10.0 {
+                // at first this is raw position in pixels, transform to UV here
+                *start_uv /= extent_f32;
+            } else {
+                // actually do resize
+                let new_res = extent_f32 * hit.uv / *start_uv;
+                let new_extent = [new_res.x as u32, new_res.y as u32];
+                log::warn!("NEW SIZE: {new_extent:?}");
+            }
+        }
+
+        res
     }
     fn on_left(&mut self, app: &mut crate::state::AppState, pointer: usize) {
         self.inner.on_left(app, pointer);
@@ -271,6 +293,7 @@ fn make_edit_panel(app: &mut AppState) -> anyhow::Result<EditModeWrapPanel> {
         pos: SpriteTabHandler::default(),
         stereo: SpriteTabHandler::default(),
         mouse: SpriteTabHandler::default(),
+        resize_uv: None,
     };
 
     let anim_mult = app.wgui_theme.animation_mult;
@@ -405,6 +428,20 @@ fn make_edit_panel(app: &mut AppState) -> anyhow::Result<EditModeWrapPanel> {
                                 owc.active_state = None;
                             }),
                         )));
+                        Ok(EventResult::Consumed)
+                    }),
+                    "::EditModeResizeStart" => Box::new(move |_common, data, app, state| {
+                        if !test_button(data) || !test_duration(&button, app) {
+                            return Ok(EventResult::Pass);
+                        }
+                        state.resize_uv = data.metadata.get_mouse_pos_absolute();
+                        Ok(EventResult::Consumed)
+                    }),
+                    "::EditModeResizeStop" => Box::new(move |_common, data, app, state| {
+                        if !test_button(data) || !test_duration(&button, app) {
+                            return Ok(EventResult::Pass);
+                        }
+                        state.resize_uv = None;
                         Ok(EventResult::Consumed)
                     }),
                     _ => return,
@@ -563,6 +600,27 @@ fn reset_panel(
             .fetch_component_as::<ComponentCheckbox>("stereo_adjust_mouse_box")?;
         c.set_checked(&mut com, adjust_mouse);
     }
+
+    let resizable = attrib_value!(
+        owc.backend.get_attrib(BackendAttrib::Resizable),
+        BackendAttribValue::Resizable
+    )
+    .unwrap_or(false);
+    let c = panel
+        .parser_state
+        .fetch_component_as::<ComponentButton>("resize_corner")?;
+    let common = CallbackDataCommon {
+        state: &panel.layout.state,
+        alterables: &mut panel.layout.alterables,
+    };
+    common.alterables.set_style(
+        c.get_rect(),
+        StyleSetRequest::Display(if resizable {
+            Display::Block
+        } else {
+            Display::None
+        }),
+    );
 
     Ok(())
 }

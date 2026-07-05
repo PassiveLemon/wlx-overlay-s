@@ -26,6 +26,7 @@ pub enum BackendAttrib {
 	StereoAdjustMouse,
 	MouseTransform,
 	Icon,
+	Resizable,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -36,9 +37,12 @@ pub enum BackendAttribValue {
 	MouseTransform(MouseTransform),
 	#[serde(skip_serializing, skip_deserializing)]
 	Icon(Arc<str>),
+	#[serde(skip_serializing, skip_deserializing)]
+	Resizable(bool),
 }
 
 impl BackendAttribValue {
+	/// Used to determine if value should be saved
 	pub fn is_default(&self) -> bool {
 		match self {
 			Self::Stereo(val) => *val == StereoMode::default(),
@@ -46,6 +50,7 @@ impl BackendAttribValue {
 			Self::StereoAdjustMouse(val) => !*val,
 			Self::MouseTransform(val) => *val == MouseTransform::default(),
 			Self::Icon(_) => false,
+			Self::Resizable(_) => false,
 		}
 	}
 }

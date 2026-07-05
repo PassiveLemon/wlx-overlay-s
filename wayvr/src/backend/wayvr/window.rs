@@ -8,6 +8,8 @@ use crate::{backend::wayvr::process, gen_id};
 
 #[derive(Debug)]
 pub struct Window {
+    pub min_size: Size<i32, Logical>,
+    pub max_size: Size<i32, Logical>,
     pub size_x: u32,
     pub size_y: u32,
     pub visible: bool,
@@ -16,14 +18,25 @@ pub struct Window {
 }
 
 impl Window {
-    const fn new(toplevel: Rc<ToplevelSurface>, process: process::ProcessHandle) -> Self {
+    const fn new(
+        toplevel: Rc<ToplevelSurface>,
+        process: process::ProcessHandle,
+        min_size: Size<i32, Logical>,
+        max_size: Size<i32, Logical>,
+    ) -> Self {
         Self {
+            min_size,
+            max_size,
             size_x: 0,
             size_y: 0,
             visible: true,
             toplevel,
             process,
         }
+    }
+
+    pub fn resizable(&self) -> bool {
+        self.min_size != self.max_size
     }
 
     pub fn configure_size(&mut self, size: Option<Size<i32, Logical>>, bounds: Size<i32, Logical>) {
@@ -93,10 +106,12 @@ impl WindowManager {
         &mut self,
         toplevel: Rc<ToplevelSurface>,
         process: process::ProcessHandle,
+        min_size: Size<i32, Logical>,
+        max_size: Size<i32, Logical>,
         size_x: u32,
         size_y: u32,
     ) -> WindowHandle {
-        let mut window = Window::new(toplevel, process);
+        let mut window = Window::new(toplevel, process, min_size, max_size);
         window.remember_committed_size(Size::new(size_x as i32, size_y as i32));
         self.windows.add(window)
     }

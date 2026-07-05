@@ -126,6 +126,9 @@
             </div>
           </rectangle>
         </div>
+        <Button id="resize_corner" macro="button_style" tooltip="EDIT_MODE.RESIZE" _press="::EditModeResizeStart" _release="::EditModeResizeStop" border_color="~color_accent_translucent" color="~color_accent_50" color2="~color_accent_10">
+          <sprite width="48" height="48" src="edit/resize-corner.svg" />
+        </Button>
       </rectangle>
     </div>
   </elements>

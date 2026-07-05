@@ -86,6 +86,13 @@ pub fn create_wl_window_overlay(
         -0.95
     };
 
+    let resizable = app
+        .wvr_server
+        .as_mut()
+        .and_then(|wvr| wvr.wm.windows.get(&window))
+        .map(|w| w.resizable())
+        .unwrap_or(false);
+
     Ok(OverlayWindowConfig {
         name: name.clone(),
         default_state: OverlayWindowState {
@@ -113,6 +120,7 @@ pub fn create_wl_window_overlay(
             window,
             icon,
             (scale, curve_scale),
+            resizable,
         )?))
     })
 }
@@ -175,6 +183,7 @@ pub struct WvrWindowBackend {
     scrolling: bool,
     overlay_id: OverlayID,
     scale: (f32, f32),
+    resizable: bool,
 }
 
 impl WvrWindowBackend {
@@ -184,6 +193,7 @@ impl WvrWindowBackend {
         window: wayvr::window::WindowHandle,
         icon: Arc<str>,
         scale: (f32, f32),
+        resizable: bool,
     ) -> anyhow::Result<Self> {
         let subsurface_pipeline = app.gfx.create_pipeline(
             app.gfx_extras.shaders.get("vert_quad").unwrap(), // want panic
@@ -285,6 +295,7 @@ impl WvrWindowBackend {
             scrolling: false,
             overlay_id: OverlayID::null(),
             scale,
+            resizable,
         })
     }
 
@@ -300,6 +311,13 @@ impl WvrWindowBackend {
             if (scale_delta - 1.0).abs() > f32::EPSILON
                 || (curve_scale_delta - 1.0).abs() > f32::EPSILON
             {
+                self.resizable = app
+                    .wvr_server
+                    .as_mut()
+                    .and_then(|wvr| wvr.wm.windows.get(&self.window))
+                    .map(|w| w.resizable())
+                    .unwrap_or(false);
+
                 app.tasks.enqueue(TaskType::Overlay(OverlayTask::Modify(
                     OverlaySelector::Id(self.overlay_id),
                     Box::new(move |_app, owc| {
@@ -978,6 +996,8 @@ impl OverlayBackend for WvrWindowBackend {
             BackendAttrib::StereoAdjustMouse => Some(BackendAttribValue::StereoAdjustMouse(
                 self.stereo_adjust_mouse,
             )),
+            BackendAttrib::Resizable => Some(BackendAttribValue::Resizable(self.resizable)),
+
             _ => None,
         }
     }
