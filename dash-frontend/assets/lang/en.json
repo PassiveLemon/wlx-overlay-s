@@ -108,6 +108,8 @@
 		"DELETE_ALL_CONFIGS_HELP": "Remove all configuration files from conf.d",
 		"DOUBLE_CURSOR_FIX": "Double cursor fix",
 		"DOUBLE_CURSOR_FIX_HELP": "Enable this if you see 2 cursors",
+		"DEFAULT_OVERLAY_SCALE": "Default overlay size",
+		"DEFAULT_OVERLAY_SCALE_HELP": "Spawn new overlays at this scale.",
 		"ENABLED": "Enabled",
 		"FEATURES": "Features",
 		"FOCUS_FOLLOWS_MOUSE_MODE": "Mouse move on trigger touch",

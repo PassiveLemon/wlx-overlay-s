@@ -315,6 +315,7 @@ enum SettingType {
 	LongPressDuration,
 	NotificationsEnabled,
 	NotificationsSoundEnabled,
+	DefaultOverlayScale,
 	OpaqueBackground,
 	PointerLerpFactor,
 	ScreenRenderDown,
@@ -383,6 +384,7 @@ impl SettingType {
 
 	pub fn mut_f32(self, config: &mut GeneralConfig) -> &mut f32 {
 		match self {
+			Self::DefaultOverlayScale => &mut config.default_overlay_scale,
 			Self::GridOpacity => &mut config.grid_opacity,
 			Self::LongPressDuration => &mut config.long_press_duration,
 			Self::PointerLerpFactor => &mut config.pointer_lerp_factor,
@@ -475,6 +477,7 @@ impl SettingType {
 			Self::CaptureMethod => Ok("APP_SETTINGS.CAPTURE_METHOD"),
 			Self::ClickFreezeTimeMs => Ok("APP_SETTINGS.CLICK_FREEZE_TIME_MS"),
 			Self::Clock12h => Ok("APP_SETTINGS.CLOCK_12H"),
+			Self::DefaultOverlayScale => Ok("APP_SETTINGS.DEFAULT_OVERLAY_SCALE"),
 			Self::DoubleCursorFix => Ok("APP_SETTINGS.DOUBLE_CURSOR_FIX"),
 			Self::FocusFollowsMouseMode => Ok("APP_SETTINGS.FOCUS_FOLLOWS_MOUSE_MODE"),
 			Self::GridOpacity => Ok("APP_SETTINGS.GRID_OPACITY"),
@@ -525,6 +528,7 @@ impl SettingType {
 			Self::BlockGameInputIgnoreWatch => Some("APP_SETTINGS.BLOCK_GAME_INPUT_IGNORE_WATCH_HELP"),
 			Self::BlockPosesOnKbdInteraction => Some("APP_SETTINGS.BLOCK_POSES_ON_KBD_INTERACTION_HELP"),
 			Self::CaptureMethod => Some("APP_SETTINGS.CAPTURE_METHOD_HELP"),
+			Self::DefaultOverlayScale => Some("APP_SETTINGS.DEFAULT_OVERLAY_SCALE_HELP"),
 			Self::DoubleCursorFix => Some("APP_SETTINGS.DOUBLE_CURSOR_FIX_HELP"),
 			Self::GridOpacity => Some("APP_SETTINGS.GRID_OPACITY_HELP"),
 			Self::HandsfreePointer => Some("APP_SETTINGS.HANDSFREE_POINTER_HELP"),

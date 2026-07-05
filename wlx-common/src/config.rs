@@ -282,7 +282,7 @@ pub struct GeneralConfig {
 	pub keyboard_scale: f32,
 
 	#[serde(default = "def_one")]
-	pub desktop_view_scale: f32,
+	pub default_overlay_scale: f32,
 
 	#[serde(default = "def_half")]
 	pub watch_view_angle_min: f32,

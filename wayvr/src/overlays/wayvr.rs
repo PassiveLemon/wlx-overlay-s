@@ -98,7 +98,7 @@ pub fn create_wl_window_overlay(
             },
             curvature: Some(0.15 * curve_scale),
             transform: Affine3A::from_scale_rotation_translation(
-                Vec3::ONE * scale,
+                Vec3::ONE * app.session.config.default_overlay_scale * scale,
                 Quat::IDENTITY,
                 vec3(0.0, 0.0, z_dist),
             ),

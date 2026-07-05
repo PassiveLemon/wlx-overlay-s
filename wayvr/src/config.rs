@@ -185,6 +185,7 @@ pub struct AutoSettings {
     pub input_emulation_method: InputEmulationMethod,
     pub tutorial_graduated: bool,
     pub whisper_model: Arc<str>,
+    pub default_overlay_scale: f32,
 }
 
 fn get_settings_path() -> PathBuf {
@@ -248,6 +249,7 @@ pub fn save_settings(config: &GeneralConfig) -> anyhow::Result<()> {
         input_emulation_method: config.input_emulation_method,
         tutorial_graduated: config.tutorial_graduated,
         whisper_model: config.whisper_model.clone(),
+        default_overlay_scale: config.default_overlay_scale,
     };
 
     let json = serde_json::to_string_pretty(&conf).unwrap(); // want panic

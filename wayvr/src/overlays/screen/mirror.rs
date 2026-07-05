@@ -200,7 +200,7 @@ pub fn new_mirror(name: Arc<str>, session: &AppSession) -> OverlayWindowConfig {
             grabbable: true,
             curvature: Some(0.15),
             transform: Affine3A::from_scale_rotation_translation(
-                Vec3::ONE * session.config.desktop_view_scale,
+                Vec3::ONE * session.config.default_overlay_scale,
                 Quat::IDENTITY,
                 vec3(0.0, 0.2, -0.35),
             ),

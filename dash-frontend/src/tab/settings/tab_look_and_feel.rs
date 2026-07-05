@@ -1,6 +1,6 @@
 use crate::tab::settings::{
-	SettingType, SettingsMountParams, SettingsTab,
 	macros::{options_category, options_checkbox, options_dropdown, options_slider_f32},
+	SettingType, SettingsMountParams, SettingsTab,
 };
 
 pub struct State {}
@@ -19,6 +19,7 @@ impl State {
 		options_checkbox(par.mp, c, SettingType::OpaqueBackground)?;
 		options_checkbox(par.mp, c, SettingType::HideUsername)?;
 		options_checkbox(par.mp, c, SettingType::HideGrabHelp)?;
+		options_slider_f32(par.mp, c, SettingType::DefaultOverlayScale, 0.7, 1.5, 0.05)?; // min, max, step
 		options_slider_f32(par.mp, c, SettingType::UiAnimationSpeed, 0.5, 5.0, 0.1)?; // min, max, step
 		options_slider_f32(par.mp, c, SettingType::UiGradientIntensity, 0.0, 1.0, 0.05)?; // min, max, step
 		options_slider_f32(par.mp, c, SettingType::UiRoundMultiplier, 0.1, 5.0, 0.1)?;
