@@ -9,6 +9,7 @@ use glam::Vec3A;
 use interprocess::local_socket::{self, ToNsName, traits::Listener};
 use smallvec::SmallVec;
 use std::io::{Read, Write};
+use wayvr_ipc::packet_client::HandsfreeParams;
 use wayvr_ipc::{
     ipc::{self},
     packet_client::{self, PacketClient},
@@ -356,6 +357,10 @@ impl Connection {
         params.signals.send(WayVRSignal::SwitchSet(set));
     }
 
+    fn handle_wlx_handsfree(params: &mut TickParams, payload: HandsfreeParams) {
+        params.signals.send(WayVRSignal::Handsfree(payload));
+    }
+
     fn handle_wlx_panel(
         params: &mut TickParams,
         custom_params: packet_client::WlxModifyPanelParams,
@@ -432,6 +437,9 @@ impl Connection {
             }
             PacketClient::WlxModifyPanel(custom_params) => {
                 Self::handle_wlx_panel(params, custom_params);
+            }
+            PacketClient::WlxHandsfree(payload) => {
+                Self::handle_wlx_handsfree(params, payload);
             }
         }
 

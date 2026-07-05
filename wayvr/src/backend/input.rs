@@ -8,6 +8,7 @@ use glam::{Affine3A, Vec2, Vec3A, Vec3Swizzles};
 use idmap_derive::IntegerId;
 use smallvec::{SmallVec, smallvec};
 use strum::AsRefStr;
+use wayvr_ipc::packet_client::{HandsfreeAction, HandsfreeParams};
 use wlx_common::common::LeftRight;
 use wlx_common::windowing::{OverlayWindowState, Positioning};
 
@@ -62,6 +63,7 @@ pub struct InputState {
     pub ipd: f32,
     pub pointers: [Pointer; 2],
     pub devices: Vec<TrackedDevice>,
+    pub handsfree_state: PointerState,
     processes: Vec<Child>,
 }
 
@@ -73,7 +75,42 @@ impl InputState {
             pointers: [Pointer::new(0), Pointer::new(1)],
             devices: Vec::new(),
             processes: Vec::new(),
+            handsfree_state: PointerState::default(),
         }
+    }
+
+    pub fn apply_handsfree_action(&mut self, params: HandsfreeParams) {
+        fn set_true(v: &mut bool) {
+            *v = true;
+        }
+        fn set_false(v: &mut bool) {
+            *v = false;
+        }
+        fn toggle(v: &mut bool) {
+            *v = !*v;
+        }
+
+        let (action, apply) = match params {
+            HandsfreeParams::SetMode(_) => {
+                return;
+            }
+            HandsfreeParams::Press(action) => (action, set_true as fn(&mut bool)),
+            HandsfreeParams::Release(action) => (action, set_false as fn(&mut bool)),
+            HandsfreeParams::Toggle(action) => (action, toggle as fn(&mut bool)),
+            HandsfreeParams::Scroll(val) => {
+                self.handsfree_state.scroll_y = val;
+                return;
+            }
+        };
+
+        match action {
+            HandsfreeAction::Click => apply(&mut self.handsfree_state.click),
+            HandsfreeAction::RightModifier => apply(&mut self.handsfree_state.click_modifier_right),
+            HandsfreeAction::MiddleModifier => {
+                apply(&mut self.handsfree_state.click_modifier_middle)
+            }
+            HandsfreeAction::Grab => apply(&mut self.handsfree_state.grab),
+        };
     }
 
     pub fn handle_task(&mut self, task: InputTask) {
@@ -271,7 +308,7 @@ impl Pointer {
     }
 }
 
-#[derive(Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct PointerState {
     pub scroll_x: f32,
     pub scroll_y: f32,
@@ -350,7 +387,7 @@ fn populate_lines(
 
         // horizontal arm
         lines.push(PointerLine {
-            mode: PointerMode::Left,
+            mode: hit.mode,
             a: raw_hit.global_pos - (hmd.x_axis * HALF_SIZE),
             b: raw_hit.global_pos + (hmd.x_axis * HALF_SIZE),
         });

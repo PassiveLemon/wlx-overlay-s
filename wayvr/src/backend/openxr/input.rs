@@ -14,7 +14,9 @@ use wlx_common::{
 };
 
 use crate::{
-    backend::input::{Haptics, InputState, Pointer, TrackedDevice, TrackedDeviceRole},
+    backend::input::{
+        Haptics, InputState, Pointer, PointerState, TrackedDevice, TrackedDeviceRole,
+    },
     state::{AppSession, AppState},
 };
 
@@ -246,6 +248,7 @@ impl OpenXrInputSource {
                 &state.session,
                 hmd,
                 hmd_tracked,
+                &state.input_state.handsfree_state,
             )?;
         }
 
@@ -349,6 +352,7 @@ impl OpenXrPointer {
         session: &AppSession,
         hmd: Affine3A,
         hmd_tracked: bool,
+        handsfree_state: &PointerState,
     ) -> anyhow::Result<()> {
         match session.config.handsfree_pointer {
             HandsfreePointer::None => return Ok(()),
@@ -379,11 +383,21 @@ impl OpenXrPointer {
             session.config.handsfree_pointer,
             HandsfreePointer::HmdOnly | HandsfreePointer::EyeTrackingOnly
         ) {
-            // skip actions
+            // input from wayvrctl
+            pointer.now.click = handsfree_state.click;
+            pointer.now.grab = handsfree_state.grab;
+            pointer.now.click_modifier_right = handsfree_state.click_modifier_right;
+            pointer.now.click_modifier_middle = handsfree_state.click_modifier_middle;
+            pointer.now.scroll_y = handsfree_state.scroll_y;
+
+            // skip action loading
             return Ok(());
         }
 
         self.pointer_load_actions(pointer, xr)?;
+        pointer.now.click_modifier_right = handsfree_state.click_modifier_right;
+        pointer.now.click_modifier_middle = handsfree_state.click_modifier_middle;
+        pointer.now.scroll_y = handsfree_state.scroll_y;
 
         Ok(())
     }

@@ -20,6 +20,32 @@ pub enum PositionMode {
 	Static,
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum HandsfreeMode {
+	None,
+	Hmd,
+	HmdPinch,
+	EyeTracking,
+	EyeTrackingPinch,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum HandsfreeAction {
+	Click,
+	Grab,
+	RightModifier,
+	MiddleModifier,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum HandsfreeParams {
+	SetMode(HandsfreeMode),
+	Press(HandsfreeAction),
+	Release(HandsfreeAction),
+	Toggle(HandsfreeAction),
+	Scroll(f32),
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WvrProcessLaunchParams {
 	pub name: String,
@@ -69,4 +95,5 @@ pub enum PacketClient {
 	WlxDeviceHaptics(usize, WlxHapticsParams),
 	WlxShowHide,
 	WlxSwitchSet(Option<usize>),
+	WlxHandsfree(HandsfreeParams),
 }

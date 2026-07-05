@@ -1,4 +1,6 @@
+use wayvr_ipc::packet_client::{HandsfreeMode, HandsfreeParams};
 use wayvr_ipc::packet_server;
+use wlx_common::config::HandsfreePointer;
 
 use crate::backend::wayvr::{self, WvrServerState};
 
@@ -58,6 +60,19 @@ where
                 app.tasks
                     .enqueue(TaskType::Overlay(OverlayTask::ModifyPanel(custom_task)));
             }
+            WayVRSignal::Handsfree(params) => match params {
+                HandsfreeParams::SetMode(mode) => {
+                    let mode = match mode {
+                        HandsfreeMode::None => HandsfreePointer::None,
+                        HandsfreeMode::Hmd => HandsfreePointer::HmdOnly,
+                        HandsfreeMode::HmdPinch => HandsfreePointer::Hmd,
+                        HandsfreeMode::EyeTracking => HandsfreePointer::EyeTrackingOnly,
+                        HandsfreeMode::EyeTrackingPinch => HandsfreePointer::EyeTracking,
+                    };
+                    app.session.config.handsfree_pointer = mode;
+                }
+                _ => app.input_state.apply_handsfree_action(params),
+            },
         }
     }
 

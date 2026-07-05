@@ -15,7 +15,7 @@ use tokio_util::sync::CancellationToken;
 use crate::{
 	gen_id,
 	ipc::{self, Serial},
-	packet_client::{self, PacketClient},
+	packet_client::{self, HandsfreeParams, PacketClient},
 	packet_server::{self, PacketServer},
 	util::notifier::Notifier,
 };
@@ -422,6 +422,14 @@ impl WayVRClient {
 		Ok(())
 	}
 
+	pub async fn fn_wlx_handsfree(
+		client: WayVRClientMutex,
+		params: HandsfreeParams
+	) -> anyhow::Result<()> {
+		send_only!(client, &PacketClient::WlxHandsfree(params));
+		Ok(())
+	}
+	
 	pub async fn fn_wlx_modify_panel(
 		client: WayVRClientMutex,
 		params: packet_client::WlxModifyPanelParams,

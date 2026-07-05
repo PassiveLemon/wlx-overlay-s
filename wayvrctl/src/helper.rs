@@ -5,7 +5,7 @@ use serde::Serialize;
 use wayvr_ipc::{
     client::{WayVRClient, WayVRClientMutex},
     ipc,
-    packet_client::{self, PositionMode},
+    packet_client::{self, HandsfreeParams, PositionMode},
     packet_server,
 };
 
@@ -170,6 +170,14 @@ pub async fn wlx_switch_set(state: &mut WayVRClientState, set: Option<usize>) {
         WayVRClient::fn_wlx_switch_set(state.wayvr_client.clone(), set)
             .await
             .context("failed to switch to set"),
+    )
+}
+
+pub async fn wlx_handsfree(state: &mut WayVRClientState, params: HandsfreeParams) {
+    handle_empty_result(
+        WayVRClient::fn_wlx_handsfree(state.wayvr_client.clone(), params)
+            .await
+            .context("failed to set handsfree mode"),
     )
 }
 
