@@ -35,13 +35,13 @@ static LINE_AUTO_INCREMENT: AtomicUsize = AtomicUsize::new(1);
 pub(super) const LINE_WIDTH: f32 = 0.002;
 
 // TODO customizable colors
-static COLORS: [[f32; 6]; 5] = {
+static COLORS: [[f32; 4]; 5] = {
     [
-        [1., 1., 1., 1., 0., 0.],
-        [0., 0.375, 0.5, 1., 0., 0.],
-        [0.69, 0.188, 0., 1., 0., 0.],
-        [0.375, 0., 0.5, 1., 0., 0.],
-        [1., 0., 0., 1., 0., 0.],
+        [1., 1., 1., 1.],
+        [0., 0.375, 0.5, 1.],
+        [0.69, 0.188, 0., 1.],
+        [0.375, 0., 0.5, 1.],
+        [1., 0., 0., 1.],
     ]
 };
 
@@ -69,7 +69,7 @@ impl LinePool {
 
         let buf_color = app
             .gfx
-            .empty_buffer(BufferUsage::TRANSFER_DST | BufferUsage::UNIFORM_BUFFER, 6)?;
+            .empty_buffer(BufferUsage::TRANSFER_DST | BufferUsage::UNIFORM_BUFFER, 4)?;
 
         let set0 = self.pipeline.buffer(0, buf_color.clone())?;
 
@@ -173,7 +173,7 @@ impl LinePool {
                     .next()
                     .unwrap();
 
-                line.buf_color.write()?[0..6].copy_from_slice(&COLORS[inner.color]);
+                line.buf_color.write()?[0..4].copy_from_slice(&COLORS[inner.color]);
 
                 let mut cmd_buffer = app
                     .gfx

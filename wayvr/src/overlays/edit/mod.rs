@@ -238,12 +238,15 @@ impl OverlayBackend for EditModeBackendWrapper {
             self.inner.render(app, rdr)?;
         }
 
-        self.panel.render(app, rdr)?;
-        // `GuiPanel` is not stereo-aware, so just render the same pass twice
-        if rdr.cmd_bufs.len() > 1 {
-            rdr.cmd_bufs.reverse();
+        // during resize, just fade the color
+        if matches!(self.panel.state.resize, ResizeState::None) {
             self.panel.render(app, rdr)?;
-            rdr.cmd_bufs.reverse();
+            // `GuiPanel` is not stereo-aware, so just render the same pass twice
+            if rdr.cmd_bufs.len() > 1 {
+                rdr.cmd_bufs.reverse();
+                self.panel.render(app, rdr)?;
+                rdr.cmd_bufs.reverse();
+            }
         }
 
         self.extent = rdr.extent;
