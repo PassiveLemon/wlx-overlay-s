@@ -16,6 +16,8 @@ pub struct Window {
     pub visible: bool,
     pub toplevel: Rc<ToplevelSurface>,
     pub process: process::ProcessHandle,
+
+    pub pending_configure_size: Option<Size<i32, Logical>>,
 }
 
 impl Window {
@@ -35,6 +37,7 @@ impl Window {
             visible: true,
             toplevel,
             process,
+            pending_configure_size: None,
         }
     }
 
@@ -42,33 +45,48 @@ impl Window {
         self.min_size != self.max_size
     }
 
-    pub fn checked_configure_size(&mut self, size: Size<i32, Logical>) {
-        let clamped_size = size.clamp(self.min_size, self.max_size);
+    pub fn clamp_configure_size(
+        &self,
+        size: Size<i32, Logical>,
+        bounds: Size<i32, Logical>,
+    ) -> Size<i32, Logical> {
+        let min_size = Size::new(
+            self.min_size.w.max(1).min(bounds.w),
+            self.min_size.h.max(1).min(bounds.h),
+        );
 
-        self.toplevel.with_pending_state(|state| {
-            state.bounds = Some(self.bounds);
-            state.size = Some(clamped_size);
-        });
-        self.toplevel.send_configure();
-        self.remember_committed_size(size);
+        let max_size = Size::new(
+            self.max_size.w.max(min_size.w).min(bounds.w),
+            self.max_size.h.max(min_size.h).min(bounds.h),
+        );
+
+        Size::new(size.w.max(1), size.h.max(1)).clamp(min_size, max_size)
     }
 
-    pub fn configure_size(&mut self, size: Option<Size<i32, Logical>>, bounds: Size<i32, Logical>) {
+    fn send_size_configure(&mut self, size: Size<i32, Logical>, bounds: Size<i32, Logical>) {
+        let clamped_size = self.clamp_configure_size(size, bounds);
+
+        if self.pending_configure_size == Some(clamped_size) {
+            return;
+        }
+
         self.toplevel.with_pending_state(|state| {
             state.bounds = Some(bounds);
-            state.size = size;
+            state.size = Some(clamped_size);
         });
+
         self.toplevel.send_configure();
 
         self.bounds = bounds;
-        if let Some(size) = size {
-            self.remember_committed_size(size);
-        }
+        self.pending_configure_size = Some(clamped_size);
+    }
+
+    pub fn checked_configure_size(&mut self, size: Size<i32, Logical>) {
+        self.send_size_configure(size, self.bounds);
     }
 
     pub fn request_size(&mut self, size: Size<i32, Logical>, bounds: Size<i32, Logical>) {
-        let size = size.clamp(Size::new(1, 1), bounds);
-        self.configure_size(Some(size), bounds);
+        self.send_size_configure(size, bounds);
     }
 
     pub fn remember_committed_size(&mut self, size: Size<i32, Logical>) -> bool {
@@ -79,6 +97,8 @@ impl Window {
 
         self.size_x = size_x;
         self.size_y = size_y;
+
+        self.pending_configure_size = None;
 
         changed
     }

@@ -511,22 +511,27 @@ impl WvrWindowBackend {
         let Some(wvr_server) = app.wvr_server.as_mut() else {
             return Ok(());
         };
+
         let bounds = wvr_server.manager.state.output_logical_size();
-        let requested = Size::new(inner_extent[0].max(1) as i32, inner_extent[1].max(1) as i32);
-        let clamped = requested.clamp(Size::new(1, 1), bounds);
+
+        let committed = Size::new(inner_extent[0].max(1) as i32, inner_extent[1].max(1) as i32);
 
         let Some(window) = wvr_server.wm.windows.get_mut(&self.window) else {
             return Ok(());
         };
 
-        if requested == clamped {
-            // client picked a new size that fits
-            window.remember_committed_size(requested);
+        let clamped = window.clamp_configure_size(committed, bounds);
+
+        if committed == clamped {
+            window.remember_committed_size(committed);
+        } else if window.pending_configure_size.is_none() {
+            log::warn!("Client committed invalid size {committed:?}; requesting {clamped:?}");
+            window.request_size(clamped, bounds);
         } else {
-            // client committed something outside the output bounds
-            if window.size_x != clamped.w as u32 || window.size_y != clamped.h as u32 {
-                window.request_size(clamped, bounds);
-            }
+            log::trace!(
+                "Client committed invalid size {committed:?}, but configure {:?} is already pending",
+                window.pending_configure_size,
+            );
         }
 
         Ok(())
@@ -620,107 +625,106 @@ impl OverlayBackend for WvrWindowBackend {
 
         let force_render = tree_dirty || mem::take(&mut self.just_resumed);
 
-        with_states(toplevel.wl_surface(), |states| {
-            if let Some(surf) = SurfaceBufWithImage::get_from_surface(states) {
-                let mut meta = FrameMeta {
-                    extent: surf.image.extent_u32arr(),
-                    format: surf.image.format(),
-                    clear: WGfxClearMode::Clear([0.0, 0.0, 0.0, 0.0]),
-                    stereo: self.stereo.unwrap_or(StereoMode::None),
-                    ..Default::default()
-                };
+        let Some(surf) = with_states(toplevel.wl_surface(), SurfaceBufWithImage::get_from_surface)
+        else {
+            log::trace!("{}: no buffer for wl_surface", self.name);
+            return Ok(ShouldRender::Unable);
+        };
 
-                if let Some(stereo) = self.stereo {
-                    // Apply stereo full frame logic
-                    if self.stereo_full_frame {
-                        match stereo {
-                            StereoMode::LeftRight | StereoMode::RightLeft => {
-                                meta.extent[0] /= 2;
-                            }
-                            StereoMode::TopBottom | StereoMode::BottomTop => {
-                                meta.extent[1] /= 2;
-                            }
-                            _ => {}
-                        }
+        let mut meta = FrameMeta {
+            extent: surf.image.extent_u32arr(),
+            format: surf.image.format(),
+            clear: WGfxClearMode::Clear([0.0, 0.0, 0.0, 0.0]),
+            stereo: self.stereo.unwrap_or(StereoMode::None),
+            ..Default::default()
+        };
+
+        if let Some(stereo) = self.stereo {
+            // Apply stereo full frame logic
+            if self.stereo_full_frame {
+                match stereo {
+                    StereoMode::LeftRight | StereoMode::RightLeft => {
+                        meta.extent[0] /= 2;
                     }
-                }
-
-                let inner_extent = meta.extent;
-                self.sync_committed_toplevel_size(app, inner_extent)?;
-
-                meta.extent[0] += BORDER_SIZE * 2;
-                meta.extent[1] += BORDER_SIZE * 2 + BAR_SIZE;
-
-                if let Some(pipeline) = self.pipeline.as_mut() {
-                    if self.inner_extent != inner_extent {
-                        pipeline.set_layout(
-                            app,
-                            [inner_extent[0] as _, inner_extent[1] as _],
-                            [BORDER_SIZE as _, (BAR_SIZE + BORDER_SIZE) as _],
-                            Transform::Normal,
-                        )?;
-                        self.apply_extent(app, &meta)?;
-                        self.inner_extent = inner_extent;
+                    StereoMode::TopBottom | StereoMode::BottomTop => {
+                        meta.extent[1] /= 2;
                     }
-                } else {
-                    let pipeline = ScreenPipeline::new(
-                        &meta,
-                        app,
-                        self.stereo.unwrap_or(StereoMode::None),
-                        [BORDER_SIZE as _, (BAR_SIZE + BORDER_SIZE) as _],
-                        Transform::Normal,
-                    )?;
-                    self.apply_extent(app, &meta)?;
-                    self.pipeline = Some(pipeline);
+                    _ => {}
                 }
-
-                let mouse = app
-                    .wvr_server
-                    .as_ref()
-                    .unwrap()
-                    .wm
-                    .mouse
-                    .as_ref()
-                    .filter(|m| m.hover_window == self.window)
-                    .map(|m| MouseMeta {
-                        x: (m.x as f32) / (inner_extent[0] as f32),
-                        y: (m.y as f32) / (inner_extent[1] as f32),
-                    });
-
-                let dirty = self.mouse != mouse || rendered_surfaces_dirty(&self.popups, &popups);
-                if !self.scrolling {
-                    self.mouse = mouse;
-                }
-                self.popups = popups;
-                self.meta = Some(meta);
-
-                if force_render {
-                    self.cur_image = Some(surf.image);
-                    return Ok(ShouldRender::Should);
-                }
-
-                if self
-                    .cur_image
-                    .as_ref()
-                    .is_none_or(|i| *i.image() != *surf.image.image())
-                {
-                    log::trace!(
-                        "{}: new {} image",
-                        self.name,
-                        if surf.dmabuf { "DMA-buf" } else { "SHM" }
-                    );
-                    self.cur_image = Some(surf.image);
-                    Ok(ShouldRender::Should)
-                } else if dirty {
-                    Ok(ShouldRender::Should)
-                } else {
-                    Ok(should_render_panel)
-                }
-            } else {
-                log::trace!("{}: no buffer for wl_surface", self.name);
-                Ok(ShouldRender::Unable)
             }
-        })
+        }
+
+        let inner_extent = meta.extent;
+        self.sync_committed_toplevel_size(app, inner_extent)?;
+
+        meta.extent[0] += BORDER_SIZE * 2;
+        meta.extent[1] += BORDER_SIZE * 2 + BAR_SIZE;
+
+        if let Some(pipeline) = self.pipeline.as_mut() {
+            if self.inner_extent != inner_extent {
+                pipeline.set_layout(
+                    app,
+                    [inner_extent[0] as _, inner_extent[1] as _],
+                    [BORDER_SIZE as _, (BAR_SIZE + BORDER_SIZE) as _],
+                    Transform::Normal,
+                )?;
+                self.apply_extent(app, &meta)?;
+                self.inner_extent = inner_extent;
+            }
+        } else {
+            let pipeline = ScreenPipeline::new(
+                &meta,
+                app,
+                self.stereo.unwrap_or(StereoMode::None),
+                [BORDER_SIZE as _, (BAR_SIZE + BORDER_SIZE) as _],
+                Transform::Normal,
+            )?;
+            self.apply_extent(app, &meta)?;
+            self.pipeline = Some(pipeline);
+        }
+
+        let mouse = app
+            .wvr_server
+            .as_ref()
+            .unwrap()
+            .wm
+            .mouse
+            .as_ref()
+            .filter(|m| m.hover_window == self.window)
+            .map(|m| MouseMeta {
+                x: (m.x as f32) / (inner_extent[0] as f32),
+                y: (m.y as f32) / (inner_extent[1] as f32),
+            });
+
+        let dirty = self.mouse != mouse || rendered_surfaces_dirty(&self.popups, &popups);
+        if !self.scrolling {
+            self.mouse = mouse;
+        }
+        self.popups = popups;
+        self.meta = Some(meta);
+
+        if force_render {
+            self.cur_image = Some(surf.image);
+            return Ok(ShouldRender::Should);
+        }
+
+        if self
+            .cur_image
+            .as_ref()
+            .is_none_or(|i| *i.image() != *surf.image.image())
+        {
+            log::trace!(
+                "{}: new {} image",
+                self.name,
+                if surf.dmabuf { "DMA-buf" } else { "SHM" }
+            );
+            self.cur_image = Some(surf.image);
+            Ok(ShouldRender::Should)
+        } else if dirty {
+            Ok(ShouldRender::Should)
+        } else {
+            Ok(should_render_panel)
+        }
     }
 
     fn render(
