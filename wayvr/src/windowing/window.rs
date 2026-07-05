@@ -87,6 +87,8 @@ pub struct OverlayWindowConfig {
     pub dirty: bool,
     /// True if the window is showing the edit overlay
     pub editing: bool,
+    /// True if the window is being resized. Captures pointer hits even if not directly hit.
+    pub resizing: bool,
     /// Used by grab to pause following of HMD or other devices
     pub pause_movement: bool,
 }
@@ -108,6 +110,7 @@ impl OverlayWindowConfig {
             global: false,
             dirty: true,
             editing: false,
+            resizing: false,
             pause_movement: false,
         }
     }

@@ -24,7 +24,7 @@
           <sprite src_builtin="dashboard/welcome.svg" width="32" height="32" margin="16"/>
         </Button>
 
-        <Button id="btn_website" macro="home_button" tooltip="wayvr.org">
+        <Button id="btn_website" macro="home_button" tooltip_str="wayvr.org">
           <sprite src_builtin="dashboard/globe.svg" width="32" height="32" margin="16"/>
         </Button>
 

@@ -735,7 +735,9 @@ where
         };
 
         if uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 {
-            continue;
+            if !overlay.config.resizing {
+                continue;
+            }
         }
 
         let pointer_hit = PointerHit {

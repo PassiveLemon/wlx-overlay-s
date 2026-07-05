@@ -108,6 +108,7 @@ pub struct OverlayMeta {
 }
 
 #[allow(clippy::enum_variant_names)]
+#[derive(Clone)]
 pub enum OverlayEventData {
     /// Notifies a newly added overlay of its ID, even before the overlay is shown.
     IdAssigned(OverlayID),
@@ -128,6 +129,7 @@ pub enum OverlayEventData {
         command: ModifyPanelCommand,
     },
     WvrCommand(WvrCommand),
+    ResizeRequest([u32; 2]),
 }
 
 pub trait OverlayBackend: Any {

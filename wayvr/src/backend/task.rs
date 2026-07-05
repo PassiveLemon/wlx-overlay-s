@@ -110,6 +110,7 @@ pub enum OverlayTask {
     SwitchSet(Option<usize>),
     ToggleOverlay(OverlaySelector, ToggleMode),
     ResetOverlay(OverlaySelector),
+    ResizeOverlay(OverlaySelector, [u32; 2]),
     DeleteActiveSet,
     ToggleEditMode,
     ToggleDashboard,

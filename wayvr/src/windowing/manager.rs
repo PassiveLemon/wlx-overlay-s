@@ -193,6 +193,18 @@ where
                     }
                 }
             }
+            OverlayTask::ResizeOverlay(sel, size) => {
+                let Some(id) = self.id_by_selector(&sel) else {
+                    log::warn!("Overlay not found for task: {sel:?}");
+                    return Ok(());
+                };
+
+                let o = &mut self.overlays[id];
+
+                o.config
+                    .backend
+                    .notify(app, OverlayEventData::ResizeRequest(size))?;
+            }
             OverlayTask::ToggleOverlay(sel, mode) => {
                 let Some(id) = self.id_by_selector(&sel) else {
                     log::warn!("Overlay not found for task: {sel:?}");
@@ -230,8 +242,6 @@ where
                     o.config.activate(app);
                 }
                 self.visible_overlays_changed(app)?;
-
-                return Ok(());
             }
             OverlayTask::ToggleEditMode => {
                 self.set_edit_mode(!self.edit_mode, app)?;

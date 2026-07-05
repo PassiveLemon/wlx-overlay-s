@@ -23,11 +23,13 @@ use crate::{
 pub struct DeviceBitmask(pub u8);
 
 impl DeviceBitmask {
-	pub fn from_usize(mask: usize) -> Self {
-		// more than 8 input devices?
-		debug_assert!(mask & !0xff == 0);
-		Self(mask as u8)
-	}
+    pub fn from_index(index: usize) -> Self {
+        debug_assert!(index < 8);
+        Self(1u8 << index)
+    }
+    pub fn to_index(self) -> Option<usize> {
+	    (self.0 != 0).then(|| self.0.trailing_zeros() as usize)
+		}
 }
 
 #[derive(Debug, Clone, Copy)]

@@ -367,7 +367,7 @@ impl<S: 'static> OverlayBackend for GuiPanel<S> {
         let e = WguiEvent::MouseWheel(MouseWheelEvent {
             delta: vec2(delta.x, delta.y) / 8.0,
             pos: hit.uv * self.layout.content_size,
-            device: DeviceBitmask::from_usize(hit.pointer),
+            device: DeviceBitmask::from_index(hit.pointer),
         });
         self.push_event(app, &e);
     }
@@ -375,7 +375,7 @@ impl<S: 'static> OverlayBackend for GuiPanel<S> {
     fn on_hover(&mut self, app: &mut AppState, hit: &PointerHit) -> HoverResult {
         let e = &WguiEvent::MouseMotion(MouseMotionEvent {
             pos: hit.uv * self.layout.content_size,
-            device: DeviceBitmask::from_usize(hit.pointer),
+            device: DeviceBitmask::from_index(hit.pointer),
         });
 
         self.has_focus[hit.pointer] = true;
@@ -397,7 +397,7 @@ impl<S: 'static> OverlayBackend for GuiPanel<S> {
 
     fn on_left(&mut self, app: &mut AppState, pointer: usize) {
         let e = WguiEvent::MouseLeave(MouseLeaveEvent {
-            device: DeviceBitmask::from_usize(pointer),
+            device: DeviceBitmask::from_index(pointer),
         });
         self.has_focus[pointer] = false;
         self.push_event(app, &e);
@@ -415,13 +415,13 @@ impl<S: 'static> OverlayBackend for GuiPanel<S> {
             WguiEvent::MouseDown(MouseButtonEvent {
                 pos: hit.uv * self.layout.content_size,
                 index,
-                device: DeviceBitmask::from_usize(hit.pointer),
+                device: DeviceBitmask::from_index(hit.pointer),
             })
         } else {
             WguiEvent::MouseUp(MouseButtonEvent {
                 pos: hit.uv * self.layout.content_size,
                 index,
-                device: DeviceBitmask::from_usize(hit.pointer),
+                device: DeviceBitmask::from_index(hit.pointer),
             })
         };
         self.push_event(app, &e);
@@ -430,11 +430,11 @@ impl<S: 'static> OverlayBackend for GuiPanel<S> {
         if !pressed && !self.has_focus[hit.pointer] {
             let e = WguiEvent::MouseMotion(MouseMotionEvent {
                 pos: vec2(-1., -1.),
-                device: DeviceBitmask::from_usize(hit.pointer),
+                device: DeviceBitmask::from_index(hit.pointer),
             });
             self.push_event(app, &e);
             let e = WguiEvent::MouseLeave(MouseLeaveEvent {
-                device: DeviceBitmask::from_usize(hit.pointer),
+                device: DeviceBitmask::from_index(hit.pointer),
             });
             self.push_event(app, &e);
         }

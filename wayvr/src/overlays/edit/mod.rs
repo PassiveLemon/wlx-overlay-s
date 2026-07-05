@@ -52,6 +52,19 @@ mod sprite_tab;
 mod stereo;
 pub mod tab;
 
+enum ResizeState {
+    None,
+    Start {
+        overlay_id: OverlayID,
+    },
+    Active {
+        overlay_id: OverlayID,
+        pointer: usize,
+        start_uv: Vec2,
+        last_uv: Vec2,
+    },
+}
+
 struct EditModeState {
     tasks: Rc<RefCell<TaskContainer>>,
     id: Rc<RefCell<OverlayID>>,
@@ -60,7 +73,23 @@ struct EditModeState {
     pos: SpriteTabHandler<PosTabState>,
     stereo: SpriteTabHandler<StereoMode>,
     mouse: SpriteTabHandler<MouseTransform>,
-    resize_uv: Option<Vec2>,
+    resize: ResizeState,
+}
+
+impl EditModeState {
+    fn resize_end(&mut self, app: &mut AppState) {
+        match std::mem::replace(&mut self.resize, ResizeState::None) {
+            ResizeState::Active { overlay_id, .. } => {
+                app.tasks.enqueue(TaskType::Overlay(OverlayTask::Modify(
+                    OverlaySelector::Id(overlay_id),
+                    Box::new(|_app, owc| {
+                        owc.resizing = false;
+                    }),
+                )));
+            }
+            _ => {}
+        }
+    }
 }
 
 type EditModeWrapPanel = GuiPanel<EditModeState>;
@@ -96,7 +125,7 @@ impl EditWrapperManager {
         owc.backend = Box::new(EditModeBackendWrapper {
             inner: ManuallyDrop::new(inner),
             panel: ManuallyDrop::new(panel),
-            last_extent: [0, 0],
+            extent: [0, 0],
             last_render: Instant::now(),
             can_render_inner: false,
         });
@@ -138,7 +167,7 @@ pub struct EditModeBackendWrapper {
     panel: ManuallyDrop<EditModeWrapPanel>,
     inner: ManuallyDrop<Box<dyn OverlayBackend>>,
 
-    last_extent: [u32; 2],
+    extent: [u32; 2],
     last_render: Instant,
     can_render_inner: bool,
 }
@@ -217,7 +246,7 @@ impl OverlayBackend for EditModeBackendWrapper {
             rdr.cmd_bufs.reverse();
         }
 
-        self.last_extent = rdr.extent;
+        self.extent = rdr.extent;
 
         Ok(())
     }
@@ -233,23 +262,32 @@ impl OverlayBackend for EditModeBackendWrapper {
         let _ = self.inner.on_hover(app, hit);
         let res = self.panel.on_hover(app, hit);
 
-        if let Some(start_uv) = self.panel.state.resize_uv.as_mut() {
-            let extent_f32 = vec2(self.last_extent[0] as f32, self.last_extent[1] as f32);
+        match &mut self.panel.state.resize {
+            ResizeState::Active {
+                overlay_id,
+                pointer,
+                start_uv,
+                last_uv,
+            } if *pointer == hit.pointer => {
+                // freshest extent we can get is from last frame, so use uv from that frame
+                let new_extent = resize_centered_from_uv(*start_uv, *last_uv, self.extent);
 
-            if start_uv.length_squared() > 10.0 {
-                // at first this is raw position in pixels, transform to UV here
-                *start_uv /= extent_f32;
-            } else {
-                // actually do resize
-                let new_res = extent_f32 * hit.uv / *start_uv;
-                let new_extent = [new_res.x as u32, new_res.y as u32];
-                log::warn!("NEW SIZE: {new_extent:?}");
+                app.tasks
+                    .enqueue(TaskType::Overlay(OverlayTask::ResizeOverlay(
+                        OverlaySelector::Id(*overlay_id),
+                        new_extent,
+                    )));
+
+                *last_uv = hit.uv;
             }
+            _ => {}
         }
 
         res
     }
     fn on_left(&mut self, app: &mut crate::state::AppState, pointer: usize) {
+        self.panel.state.resize_end(app);
+
         self.inner.on_left(app, pointer);
         self.panel.on_left(app, pointer);
     }
@@ -260,6 +298,26 @@ impl OverlayBackend for EditModeBackendWrapper {
         pressed: bool,
     ) {
         self.panel.on_pointer(app, hit, pressed);
+
+        match &mut self.panel.state.resize {
+            ResizeState::Start { overlay_id } => {
+                app.tasks.enqueue(TaskType::Overlay(OverlayTask::Modify(
+                    OverlaySelector::Id(*overlay_id),
+                    Box::new(|_app, owc| {
+                        owc.resizing = true;
+                    }),
+                )));
+
+                let last_uv = hit.uv;
+                self.panel.state.resize = ResizeState::Active {
+                    overlay_id: *overlay_id,
+                    pointer: hit.pointer,
+                    start_uv: last_uv,
+                    last_uv: last_uv,
+                };
+            }
+            _ => {}
+        }
     }
     fn on_scroll(
         &mut self,
@@ -270,7 +328,8 @@ impl OverlayBackend for EditModeBackendWrapper {
         self.panel.on_scroll(app, hit, delta);
     }
     fn notify(&mut self, app: &mut AppState, event_data: OverlayEventData) -> anyhow::Result<()> {
-        self.panel.notify(app, event_data)
+        self.panel.notify(app, event_data.clone())?;
+        self.inner.notify(app, event_data)
     }
     fn get_interaction_transform(&mut self) -> Option<glam::Affine2> {
         self.inner.get_interaction_transform()
@@ -293,7 +352,7 @@ fn make_edit_panel(app: &mut AppState) -> anyhow::Result<EditModeWrapPanel> {
         pos: SpriteTabHandler::default(),
         stereo: SpriteTabHandler::default(),
         mouse: SpriteTabHandler::default(),
-        resize_uv: None,
+        resize: ResizeState::None,
     };
 
     let anim_mult = app.wgui_theme.animation_mult;
@@ -434,14 +493,16 @@ fn make_edit_panel(app: &mut AppState) -> anyhow::Result<EditModeWrapPanel> {
                         if !test_button(data) || !test_duration(&button, app) {
                             return Ok(EventResult::Pass);
                         }
-                        state.resize_uv = data.metadata.get_mouse_pos_absolute();
+                        state.resize = ResizeState::Start {
+                            overlay_id: state.id.borrow().clone(),
+                        };
                         Ok(EventResult::Consumed)
                     }),
                     "::EditModeResizeStop" => Box::new(move |_common, data, app, state| {
                         if !test_button(data) || !test_duration(&button, app) {
                             return Ok(EventResult::Pass);
                         }
-                        state.resize_uv = None;
+                        state.resize_end(app);
                         Ok(EventResult::Consumed)
                     }),
                     _ => return,
@@ -741,4 +802,26 @@ fn set_up_checkbox(
     }));
 
     Ok(())
+}
+
+pub fn resize_centered_from_uv(grab_uv: Vec2, cur_uv: Vec2, cur_extent: [u32; 2]) -> [u32; 2] {
+    const MIN_SIZE: Vec2 = Vec2::new(160.0, 160.0);
+    const CENTER_DEADZONE: f32 = 0.1;
+
+    let cur_extent_v = Vec2::new(cur_extent[0] as f32, cur_extent[1] as f32);
+    let grab_from_center = grab_uv - Vec2::splat(0.5);
+    let cur_from_center = (cur_uv - Vec2::splat(0.5)) * cur_extent_v;
+
+    let mut out = cur_extent_v;
+    if grab_from_center.x.abs() > CENTER_DEADZONE {
+        out.x = (cur_from_center.x / grab_from_center.x).abs();
+    }
+
+    if grab_from_center.y.abs() > CENTER_DEADZONE {
+        out.y = (cur_from_center.y / grab_from_center.y).abs();
+    }
+
+    out = out.max(MIN_SIZE);
+
+    [out.x.round() as u32, out.y.round() as u32]
 }

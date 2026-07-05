@@ -10,6 +10,7 @@ use crate::{backend::wayvr::process, gen_id};
 pub struct Window {
     pub min_size: Size<i32, Logical>,
     pub max_size: Size<i32, Logical>,
+    pub bounds: Size<i32, Logical>,
     pub size_x: u32,
     pub size_y: u32,
     pub visible: bool,
@@ -21,10 +22,12 @@ impl Window {
     const fn new(
         toplevel: Rc<ToplevelSurface>,
         process: process::ProcessHandle,
+        bounds: Size<i32, Logical>,
         min_size: Size<i32, Logical>,
         max_size: Size<i32, Logical>,
     ) -> Self {
         Self {
+            bounds,
             min_size,
             max_size,
             size_x: 0,
@@ -39,6 +42,17 @@ impl Window {
         self.min_size != self.max_size
     }
 
+    pub fn checked_configure_size(&mut self, size: Size<i32, Logical>) {
+        let clamped_size = size.clamp(self.min_size, self.max_size);
+
+        self.toplevel.with_pending_state(|state| {
+            state.bounds = Some(self.bounds);
+            state.size = Some(clamped_size);
+        });
+        self.toplevel.send_configure();
+        self.remember_committed_size(size);
+    }
+
     pub fn configure_size(&mut self, size: Option<Size<i32, Logical>>, bounds: Size<i32, Logical>) {
         self.toplevel.with_pending_state(|state| {
             state.bounds = Some(bounds);
@@ -46,6 +60,7 @@ impl Window {
         });
         self.toplevel.send_configure();
 
+        self.bounds = bounds;
         if let Some(size) = size {
             self.remember_committed_size(size);
         }
@@ -106,12 +121,13 @@ impl WindowManager {
         &mut self,
         toplevel: Rc<ToplevelSurface>,
         process: process::ProcessHandle,
+        bounds: Size<i32, Logical>,
         min_size: Size<i32, Logical>,
         max_size: Size<i32, Logical>,
         size_x: u32,
         size_y: u32,
     ) -> WindowHandle {
-        let mut window = Window::new(toplevel, process, min_size, max_size);
+        let mut window = Window::new(toplevel, process, bounds, min_size, max_size);
         window.remember_committed_size(Size::new(size_x as i32, size_y as i32));
         self.windows.add(window)
     }

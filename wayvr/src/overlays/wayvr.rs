@@ -62,6 +62,7 @@ use crate::{
     },
 };
 
+#[derive(Clone)]
 pub enum WvrCommand {
     CloseWindow,
     KillProcess(KillSignal),
@@ -799,6 +800,15 @@ impl OverlayBackend for WvrWindowBackend {
                     return Ok(());
                 };
                 wvr_server.terminate_process(p.process, signal);
+            }
+            OverlayEventData::ResizeRequest(new_size) => {
+                let wvr_server = app.wvr_server.as_mut().unwrap();
+                let Some(win) = wvr_server.wm.windows.get_mut(&self.window) else {
+                    log::warn!("Could not process resize request: window not found");
+                    return Ok(());
+                };
+                let size: Size<i32, Logical> = Size::new(new_size[0] as i32, new_size[1] as i32);
+                win.checked_configure_size(size);
             }
             _ => {}
         }
