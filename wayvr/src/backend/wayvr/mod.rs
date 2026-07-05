@@ -146,7 +146,7 @@ pub enum TickTask {
 
 const KEY_REPEAT_DELAY: i32 = 200;
 const KEY_REPEAT_RATE: i32 = 50;
-const WAYVR_SCREEN_RES: [i32; 2] = [2048, 2048];
+const WAYVR_SCREEN_RES: [i32; 2] = [2560, 2560];
 
 impl WvrServerState {
     pub fn new(
@@ -816,8 +816,8 @@ impl WvrServerState {
             exec_path.ends_with("flatpak") && args.first().is_some_and(|a| *a == "run");
 
         let mut cmd = std::process::Command::new(exec_path);
-        self.configure_env(&mut cmd, auth_key.as_str(), is_flatpak);
-        cmd.args(args);
+        self.configure_env(&mut cmd, auth_key.as_str(), is_flatpak, args);
+
         if let Some(working_dir) = working_dir {
             cmd.current_dir(working_dir);
         }
@@ -854,19 +854,59 @@ impl WvrServerState {
         Ok(handle)
     }
 
-    fn configure_env(&self, cmd: &mut std::process::Command, auth_key: &str, is_flatpak: bool) {
-        cmd.env("DISPLAY", self.manager.wayland_env.display_num_string());
-        cmd.env(
-            "WAYLAND_DISPLAY",
-            self.manager.wayland_env.wayland_display_num_string(),
-        );
+    fn configure_env(
+        &self,
+        cmd: &mut std::process::Command,
+        auth_key: &str,
+        is_flatpak: bool,
+        args: &[&str],
+    ) {
+        let wayland_display = self.manager.wayland_env.wayland_display_num_string();
+        let x11_display = self.manager.wayland_env.display_num_string();
+
+        // these go to env for flatpak as well
+        cmd.env("WAYLAND_DISPLAY", wayland_display);
+        cmd.env("DISPLAY", x11_display);
 
         if is_flatpak {
-            // doesn't seem to work all that well
+            // need to inject --env after "run" because --env is a
+            // "flatpak run" arg, not a global "flatpak" arg
+            let mut iter = args.iter();
+
+            if let Some(first) = iter.next() {
+                // add "run"
+                cmd.arg(first);
+            } else {
+                // idk so let's just bail
+                return;
+            }
+
+            // add args for "flatpak run"
             cmd.arg(format!("--env=WAYVR_DISPLAY_AUTH={auth_key}"));
-        } else {
-            cmd.env("WAYVR_DISPLAY_AUTH", auth_key);
+            cmd.arg("--env=GDK_BACKEND=wayland,x11");
+            cmd.arg("--env=QT_QPA_PLATFORM=wayland;xcb");
+            cmd.arg("--env=SDL_VIDEODRIVER=wayland");
+            cmd.arg("--env=CLUTTER_BACKEND=wayland");
+            cmd.arg("--env=MOZ_ENABLE_WAYLAND=1");
+            cmd.arg("--env=ELECTRON_OZONE_PLATFORM_HINT=wayland");
+
+            // flatpak app id / remaining args
+            for arg in iter {
+                cmd.arg(arg);
+            }
+
+            return;
         }
+
+        cmd.env("WAYVR_DISPLAY_AUTH", auth_key);
+        cmd.env("GDK_BACKEND", "wayland,x11");
+        cmd.env("QT_QPA_PLATFORM", "wayland;xcb");
+        cmd.env("SDL_VIDEODRIVER", "wayland");
+        cmd.env("CLUTTER_BACKEND", "wayland");
+        cmd.env("MOZ_ENABLE_WAYLAND", "1");
+        cmd.env("ELECTRON_OZONE_PLATFORM_HINT", "wayland");
+
+        cmd.args(args);
     }
 }
 
