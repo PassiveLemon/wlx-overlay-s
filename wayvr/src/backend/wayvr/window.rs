@@ -1,16 +1,9 @@
 use std::rc::Rc;
 
-use smithay::{
-    input,
-    utils::{Logical, Point},
-    wayland::shell::xdg::ToplevelSurface,
-};
+use smithay::wayland::shell::xdg::ToplevelSurface;
 use wayvr_ipc::packet_server;
 
-use crate::{
-    backend::wayvr::{client::WayVRCompositor, process},
-    gen_id,
-};
+use crate::{backend::wayvr::process, gen_id};
 
 #[derive(Debug)]
 pub struct Window {
@@ -41,72 +34,6 @@ impl Window {
 
         self.size_x = size_x;
         self.size_y = size_y;
-    }
-
-    pub(super) fn send_mouse_move(&self, manager: &mut WayVRCompositor, x: u32, y: u32) {
-        let surf = self.toplevel.wl_surface().clone();
-        let point = Point::<f64, Logical>::from((f64::from(x as i32), f64::from(y as i32)));
-
-        manager.seat_pointer.motion(
-            &mut manager.state,
-            Some((surf, Point::from((0.0, 0.0)))),
-            &input::pointer::MotionEvent {
-                serial: manager.serial_counter.next_serial(),
-                time: 0,
-                location: point,
-            },
-        );
-
-        manager.seat_pointer.frame(&mut manager.state);
-    }
-
-    const fn get_mouse_index_number(index: super::MouseIndex) -> u32 {
-        match index {
-            super::MouseIndex::Left => 0x110,   /* BTN_LEFT */
-            super::MouseIndex::Center => 0x112, /* BTN_MIDDLE */
-            super::MouseIndex::Right => 0x111,  /* BTN_RIGHT */
-        }
-    }
-
-    pub(super) fn send_mouse_down(
-        &mut self,
-        manager: &mut WayVRCompositor,
-        index: super::MouseIndex,
-    ) {
-        let surf = self.toplevel.wl_surface().clone();
-
-        // Change keyboard focus to pressed window
-        manager.seat_keyboard.set_focus(
-            &mut manager.state,
-            Some(surf),
-            manager.serial_counter.next_serial(),
-        );
-
-        manager.seat_pointer.button(
-            &mut manager.state,
-            &input::pointer::ButtonEvent {
-                button: Self::get_mouse_index_number(index),
-                serial: manager.serial_counter.next_serial(),
-                time: 0,
-                state: smithay::backend::input::ButtonState::Pressed,
-            },
-        );
-
-        manager.seat_pointer.frame(&mut manager.state);
-    }
-
-    pub(super) fn send_mouse_up(manager: &mut WayVRCompositor, index: super::MouseIndex) {
-        manager.seat_pointer.button(
-            &mut manager.state,
-            &input::pointer::ButtonEvent {
-                button: Self::get_mouse_index_number(index),
-                serial: manager.serial_counter.next_serial(),
-                time: 0,
-                state: smithay::backend::input::ButtonState::Released,
-            },
-        );
-
-        manager.seat_pointer.frame(&mut manager.state);
     }
 }
 

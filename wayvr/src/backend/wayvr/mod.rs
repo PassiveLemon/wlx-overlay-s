@@ -63,7 +63,6 @@ use crate::{
         wayvr::{
             image_importer::ImageImporter,
             process::{KillSignal, Process},
-            window::Window,
         },
     },
     graphics::WGfxExtras,
@@ -133,6 +132,12 @@ pub enum MouseIndex {
     Left,
     Center,
     Right,
+}
+
+pub enum PointerFocusTarget {
+    Surface { surface: WlSurface, origin: Vec2 },
+    Toplevel,
+    None,
 }
 
 pub enum TickTask {
@@ -644,19 +649,31 @@ impl WvrServerState {
         self.manager.seat_pointer.is_grabbed()
     }
 
-    pub fn send_mouse_move_to_surface(
+    pub fn send_mouse_move(
         &mut self,
-        surface: WlSurface,
+        target: PointerFocusTarget,
         global_pos: Vec2,
-        surface_origin: Vec2,
         hover_window: window::WindowHandle,
     ) {
         if self.mouse_freeze > Instant::now() {
             return;
         }
 
-        self.manager
-            .send_mouse_move_to_surface(surface, global_pos, surface_origin);
+        let focus = match target {
+            PointerFocusTarget::Surface { surface, origin } => Some((surface, origin)),
+            PointerFocusTarget::Toplevel => {
+                let surface = self
+                    .wm
+                    .windows
+                    .get(&hover_window)
+                    .map(|x| x.toplevel.wl_surface().clone());
+
+                surface.clone().map(|surface| (surface, Vec2::ZERO))
+            }
+            PointerFocusTarget::None => None,
+        };
+
+        self.manager.send_mouse_move(focus, global_pos);
 
         self.mouse_freeze = Instant::now() + Duration::from_millis(1);
 
@@ -667,40 +684,52 @@ impl WvrServerState {
         });
     }
 
-    pub fn send_mouse_button_to_surface(
+    pub fn send_mouse_button(
         &mut self,
-        surface: WlSurface,
+        target: PointerFocusTarget,
         global_pos: Vec2,
-        surface_origin: Vec2,
         hover_window: window::WindowHandle,
         index: MouseIndex,
         pressed: bool,
-    ) {
-        self.manager
-            .send_mouse_move_to_surface(surface, global_pos, surface_origin);
-
-        self.wm.mouse = Some(window::MouseState {
-            hover_window,
-            x: global_pos.x as u32,
-            y: global_pos.y as u32,
-        });
-
-        self.manager.send_pointer_button(index, pressed);
-    }
-
-    pub fn send_mouse_button_to_toplevel(
-        &mut self,
         click_freeze: i32,
-        hover_window: window::WindowHandle,
-        global_pos: Vec2,
-        index: MouseIndex,
-        pressed: bool,
     ) {
         if pressed {
             self.mouse_freeze = Instant::now() + Duration::from_millis(click_freeze.max(0) as u64);
         }
 
-        self.manager.send_mouse_move_unfocused(global_pos);
+        let (focus, focus_keyboard) = match target {
+            PointerFocusTarget::Surface { surface, origin } => (Some((surface, origin)), None),
+            PointerFocusTarget::Toplevel => {
+                let surface = self
+                    .wm
+                    .windows
+                    .get(&hover_window)
+                    .map(|x| x.toplevel.wl_surface().clone());
+
+                (
+                    surface.clone().map(|surface| (surface, Vec2::ZERO)),
+                    pressed.then_some(surface).flatten(),
+                )
+            }
+            PointerFocusTarget::None => {
+                let surface = self
+                    .wm
+                    .windows
+                    .get(&hover_window)
+                    .map(|x| x.toplevel.wl_surface().clone());
+                (None, pressed.then_some(surface).flatten())
+            }
+        };
+
+        if focus_keyboard.is_some() {
+            self.manager.seat_keyboard.set_focus(
+                &mut self.manager.state,
+                focus_keyboard,
+                self.manager.serial_counter.next_serial(),
+            );
+        }
+
+        self.manager.send_mouse_move(focus, global_pos);
 
         self.wm.mouse = Some(window::MouseState {
             hover_window,
@@ -711,10 +740,10 @@ impl WvrServerState {
         self.manager.send_pointer_button(index, pressed);
     }
 
-    pub fn send_mouse_scroll_to_surface(
+    pub fn send_mouse_scroll(
         &mut self,
-        global_pos: Vec2,
         hover_window: window::WindowHandle,
+        global_pos: Vec2,
         delta: WheelDelta,
     ) {
         self.wm.mouse = Some(window::MouseState {
@@ -724,55 +753,6 @@ impl WvrServerState {
         });
 
         self.manager.send_pointer_axis_wheel(delta);
-    }
-
-    pub fn send_mouse_scroll_to_toplevel(
-        &mut self,
-        handle: window::WindowHandle,
-        pos: Vec2,
-        delta: WheelDelta,
-    ) {
-        self.wm.mouse = Some(window::MouseState {
-            hover_window: handle,
-            x: pos.x.max(0.0) as u32,
-            y: pos.y.max(0.0) as u32,
-        });
-
-        self.manager.send_pointer_axis_wheel(delta);
-    }
-
-    pub fn send_mouse_move(&mut self, handle: window::WindowHandle, x: u32, y: u32) {
-        if self.mouse_freeze > Instant::now() {
-            return;
-        }
-        if let Some(window) = self.wm.windows.get_mut(&handle) {
-            window.send_mouse_move(&mut self.manager, x, y);
-        } else {
-            return;
-        }
-        self.mouse_freeze = Instant::now() + Duration::from_millis(1); // prevent other pointer from moving the mouse on the same frame
-        self.wm.mouse = Some(window::MouseState {
-            hover_window: handle,
-            x,
-            y,
-        });
-    }
-
-    pub fn send_mouse_down(
-        &mut self,
-        click_freeze: i32,
-        handle: window::WindowHandle,
-        index: MouseIndex,
-    ) {
-        self.mouse_freeze = Instant::now() + Duration::from_millis(click_freeze as _);
-
-        if let Some(window) = self.wm.windows.get_mut(&handle) {
-            window.send_mouse_down(&mut self.manager, index);
-        }
-    }
-
-    pub fn send_mouse_up(&mut self, index: MouseIndex) {
-        Window::send_mouse_up(&mut self.manager, index);
     }
 
     pub fn send_key(&mut self, virtual_key: u32, down: bool) {

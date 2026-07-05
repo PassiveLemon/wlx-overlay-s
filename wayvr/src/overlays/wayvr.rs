@@ -37,7 +37,10 @@ use crate::{
     backend::{
         XrBackend,
         input::{self, HoverResult},
-        wayvr::{self, SurfaceBufWithImage, process::KillSignal, window::WindowHandle},
+        wayvr::{
+            self, PointerFocusTarget, SurfaceBufWithImage, process::KillSignal,
+            window::WindowHandle,
+        },
     },
     graphics::{ExtentExt, Vert2Uv, upload_quad_vertices},
     gui::panel::{
@@ -131,12 +134,12 @@ enum WvrHitTarget {
     Surface {
         surface: WlSurface,
         global_pos: Vec2,
-        surface_origin: Vec2,
+        origin: Vec2,
     },
     Popup {
         surface: WlSurface,
         global_pos: Vec2,
-        surface_origin: Vec2,
+        origin: Vec2,
     },
 }
 
@@ -358,7 +361,7 @@ impl WvrWindowBackend {
             return Some(WvrHitTarget::Popup {
                 surface,
                 global_pos: client_pos,
-                surface_origin,
+                origin: surface_origin,
             });
         }
 
@@ -376,7 +379,7 @@ impl WvrWindowBackend {
             return Some(WvrHitTarget::Surface {
                 surface: surface.surface.clone(),
                 global_pos: client_pos,
-                surface_origin: surface.pos,
+                origin: surface.pos,
             });
         }
 
@@ -491,8 +494,6 @@ impl OverlayBackend for WvrWindowBackend {
                 continue;
             }
 
-            // Same logic you already use. `point` is the popup tree position;
-            // `geometry().loc` accounts for xdg_surface window geometry offset.
             let popup_origin = point - popup.geometry().loc;
 
             popup_roots.push(PopupRoot {
@@ -716,10 +717,7 @@ impl OverlayBackend for WvrWindowBackend {
     fn on_hover(&mut self, app: &mut state::AppState, hit: &input::PointerHit) -> HoverResult {
         if std::mem::take(&mut self.scrolling) {
             // we scrolled on previous frame so don't send mouse move events in case the user wants to scroll on this frame as well
-            return HoverResult {
-                haptics: None,
-                consume: true,
-            };
+            return HoverResult::consume();
         }
 
         match self.hit_target(hit) {
@@ -730,12 +728,12 @@ impl OverlayBackend for WvrWindowBackend {
             Some(WvrHitTarget::Popup {
                 surface,
                 global_pos,
-                surface_origin,
+                origin,
             })
             | Some(WvrHitTarget::Surface {
                 surface,
                 global_pos,
-                surface_origin,
+                origin,
             }) => {
                 if self.panel_hovered {
                     self.panel.on_left(app, hit.pointer);
@@ -743,18 +741,13 @@ impl OverlayBackend for WvrWindowBackend {
                 }
 
                 let wvr_server = app.wvr_server.as_mut().unwrap();
-
-                wvr_server.send_mouse_move_to_surface(
-                    surface,
+                wvr_server.send_mouse_move(
+                    PointerFocusTarget::Surface { surface, origin },
                     global_pos,
-                    surface_origin,
                     self.window,
                 );
 
-                HoverResult {
-                    haptics: None,
-                    consume: true,
-                }
+                HoverResult::consume()
             }
             Some(WvrHitTarget::Toplevel { pos }) => {
                 if self.panel_hovered {
@@ -763,15 +756,11 @@ impl OverlayBackend for WvrWindowBackend {
                 }
 
                 let wvr_server = app.wvr_server.as_mut().unwrap();
+                wvr_server.send_mouse_move(PointerFocusTarget::Toplevel, pos, self.window);
 
-                wvr_server.send_mouse_move(self.window, pos.x as u32, pos.y as u32);
-
-                HoverResult {
-                    haptics: None,
-                    consume: true,
-                }
+                HoverResult::consume()
             }
-            None => HoverResult::default(),
+            None => HoverResult::default(), // pass
         }
     }
 
@@ -789,22 +778,20 @@ impl OverlayBackend for WvrWindowBackend {
 
         let target = self.hit_target(hit);
         let outside_pos = self.unclamped_client_pos_from_hit(hit);
+        let click_freeze = app.session.config.click_freeze_time_ms;
 
         // if the press was consumed to dismiss a popup, consume the matching release too.
         if !pressed && self.popup_outside_button == Some(index) {
             self.popup_outside_button = None;
 
-            let click_freeze = app.session.config.click_freeze_time_ms;
-            app.wvr_server
-                .as_mut()
-                .unwrap()
-                .send_mouse_button_to_toplevel(
-                    click_freeze,
-                    self.window,
-                    outside_pos,
-                    index,
-                    false,
-                );
+            app.wvr_server.as_mut().unwrap().send_mouse_button(
+                PointerFocusTarget::None,
+                outside_pos,
+                self.window,
+                index,
+                false,
+                click_freeze,
+            );
             return;
         }
 
@@ -823,16 +810,14 @@ impl OverlayBackend for WvrWindowBackend {
             }
 
             let click_freeze = app.session.config.click_freeze_time_ms;
-            app.wvr_server
-                .as_mut()
-                .unwrap()
-                .send_mouse_button_to_toplevel(
-                    click_freeze,
-                    self.window,
-                    outside_pos,
-                    index,
-                    pressed,
-                );
+            app.wvr_server.as_mut().unwrap().send_mouse_button(
+                PointerFocusTarget::None,
+                outside_pos,
+                self.window,
+                index,
+                pressed,
+                click_freeze,
+            );
             return;
         }
 
@@ -845,22 +830,22 @@ impl OverlayBackend for WvrWindowBackend {
             Some(WvrHitTarget::Popup {
                 surface,
                 global_pos,
-                surface_origin,
+                origin,
             })
             | Some(WvrHitTarget::Surface {
                 surface,
                 global_pos,
-                surface_origin,
+                origin,
             }) => {
                 let wvr_server = app.wvr_server.as_mut().unwrap();
 
-                wvr_server.send_mouse_button_to_surface(
-                    surface,
+                wvr_server.send_mouse_button(
+                    PointerFocusTarget::Surface { surface, origin },
                     global_pos,
-                    surface_origin,
                     self.window,
                     index,
                     pressed,
+                    click_freeze,
                 );
             }
 
@@ -868,14 +853,14 @@ impl OverlayBackend for WvrWindowBackend {
                 let click_freeze = app.session.config.click_freeze_time_ms;
                 let wvr_server = app.wvr_server.as_mut().unwrap();
 
-                // normal toplevel click path, only when no popup grab is active.
-                wvr_server.send_mouse_move(self.window, pos.x as u32, pos.y as u32);
-
-                if pressed {
-                    wvr_server.send_mouse_down(click_freeze, self.window, index);
-                } else {
-                    wvr_server.send_mouse_up(index);
-                }
+                wvr_server.send_mouse_button(
+                    PointerFocusTarget::Toplevel,
+                    pos,
+                    self.window,
+                    index,
+                    pressed,
+                    click_freeze,
+                );
             }
 
             None => {}
@@ -895,11 +880,11 @@ impl OverlayBackend for WvrWindowBackend {
             Some(WvrHitTarget::Popup { global_pos, .. })
             | Some(WvrHitTarget::Surface { global_pos, .. }) => {
                 let wvr_server = app.wvr_server.as_mut().unwrap();
-                wvr_server.send_mouse_scroll_to_surface(global_pos, self.window, delta);
+                wvr_server.send_mouse_scroll(self.window, global_pos, delta);
             }
             Some(WvrHitTarget::Toplevel { pos }) => {
                 let wvr_server = app.wvr_server.as_mut().unwrap();
-                wvr_server.send_mouse_scroll_to_toplevel(self.window, pos, delta);
+                wvr_server.send_mouse_scroll(self.window, pos, delta);
             }
             None => {}
         }

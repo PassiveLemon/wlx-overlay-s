@@ -32,6 +32,15 @@ pub struct HoverResult {
     pub consume: bool,
 }
 
+impl HoverResult {
+    pub fn consume() -> Self {
+        HoverResult {
+            consume: true,
+            ..Default::default()
+        }
+    }
+}
+
 pub struct TrackedDevice {
     pub soc: Option<f32>,
     pub charging: bool,

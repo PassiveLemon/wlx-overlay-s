@@ -313,10 +313,7 @@ impl OverlayBackend for ScreenBackend {
             app.hid_provider.inner.mouse_move(pos);
             set_next_move(app.session.config.mouse_move_interval_ms as _);
         }
-        HoverResult {
-            consume: true,
-            ..HoverResult::default()
-        }
+        HoverResult::consume()
     }
     fn on_pointer(&mut self, app: &mut AppState, hit: &PointerHit, pressed: bool) {
         let mut btn = match hit.mode {

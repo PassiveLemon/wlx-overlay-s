@@ -162,10 +162,7 @@ impl OverlayBackend for MirrorBackend {
     }
 
     fn on_hover(&mut self, _: &mut AppState, _: &PointerHit) -> HoverResult {
-        HoverResult {
-            consume: true,
-            ..HoverResult::default()
-        }
+        HoverResult::consume()
     }
     fn on_left(&mut self, _: &mut AppState, _: usize) {}
     fn on_pointer(&mut self, _: &mut AppState, _: &PointerHit, _: bool) {}
