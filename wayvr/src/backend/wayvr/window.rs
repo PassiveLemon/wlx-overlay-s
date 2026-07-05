@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use smithay::utils::{Logical, Size};
 use smithay::wayland::shell::xdg::ToplevelSurface;
 use wayvr_ipc::packet_server;
 
@@ -25,15 +26,33 @@ impl Window {
         }
     }
 
-    pub fn set_size(&mut self, size_x: u32, size_y: u32) {
+    pub fn configure_size(&mut self, size: Option<Size<i32, Logical>>, bounds: Size<i32, Logical>) {
         self.toplevel.with_pending_state(|state| {
-            //state.bounds = Some((size_x as i32, size_y as i32).into());
-            state.size = Some((size_x as i32, size_y as i32).into());
+            state.bounds = Some(bounds);
+            state.size = size;
         });
         self.toplevel.send_configure();
 
+        if let Some(size) = size {
+            self.remember_committed_size(size);
+        }
+    }
+
+    pub fn request_size(&mut self, size: Size<i32, Logical>, bounds: Size<i32, Logical>) {
+        let size = size.clamp(Size::new(1, 1), bounds);
+        self.configure_size(Some(size), bounds);
+    }
+
+    pub fn remember_committed_size(&mut self, size: Size<i32, Logical>) -> bool {
+        let size_x = size.w.max(1) as u32;
+        let size_y = size.h.max(1) as u32;
+
+        let changed = self.size_x != size_x || self.size_y != size_y;
+
         self.size_x = size_x;
         self.size_y = size_y;
+
+        changed
     }
 }
 
@@ -78,7 +97,7 @@ impl WindowManager {
         size_y: u32,
     ) -> WindowHandle {
         let mut window = Window::new(toplevel, process);
-        window.set_size(size_x, size_y);
+        window.remember_committed_size(Size::new(size_x as i32, size_y as i32));
         self.windows.add(window)
     }
 

@@ -343,28 +343,35 @@ impl WvrServerState {
                             continue;
                         };
 
+                        let output_bounds = wvr_server.manager.state.output_logical_size();
+
                         let (min_size, max_size) = with_states(toplevel.wl_surface(), |state| {
                             let mut guard = state.cached_state.get::<SurfaceCachedState>();
-                            let (mut min_size, mut max_size) =
-                                { (guard.current().min_size, guard.current().max_size) };
+                            let current = guard.current();
+
+                            let mut min_size = current.min_size;
+                            let mut max_size = current.max_size;
 
                             if min_size.is_empty() {
                                 min_size = Size::new(1, 1);
                             }
 
                             if max_size.is_empty() {
-                                max_size = Size::new(4096, 4096);
+                                max_size = output_bounds;
+                            } else {
+                                max_size = max_size.clamp(Size::new(1, 1), output_bounds);
                             }
 
                             (min_size, max_size)
                         });
 
                         // Size, icon & fallback title comes from process
-                        let (size, pos, fallback_title, icon, is_cage) =
+                        let (fallback_size, pos, fallback_title, icon, is_cage) =
                             match wvr_server.processes.get(&process_handle) {
                                 Some(Process::Managed(p)) => {
                                     let size: Size<i32, Logical> =
                                         Size::new(p.resolution[0] as _, p.resolution[1] as _);
+
                                     (
                                         size.clamp(min_size, max_size),
                                         p.pos_mode,
@@ -382,6 +389,21 @@ impl WvrServerState {
                                 ),
                             };
 
+                        let window_handle = wvr_server.wm.create_window(
+                            toplevel.clone(),
+                            process_handle,
+                            fallback_size.w as _,
+                            fallback_size.h as _,
+                        );
+
+                        toplevel.with_pending_state(|state| {
+                            state.bounds = Some(output_bounds);
+                            // suggest an initial size but let the app request a different one
+                            state.size = Some(fallback_size);
+                            state.states.set(xdg_toplevel::State::Activated);
+                        });
+                        toplevel.send_configure();
+
                         let mut title: Arc<str> = fallback_title
                             .unwrap_or_else(|| format!("P{}", client.pid))
                             .into();
@@ -391,19 +413,6 @@ impl WvrServerState {
                             .map_or(SpawnPos::Spread, |oid| {
                                 SpawnPos::Parent(OverlaySelector::Id(oid))
                             });
-
-                        let window_handle = wvr_server.wm.create_window(
-                            toplevel.clone(),
-                            process_handle,
-                            size.w as _,
-                            size.h as _,
-                        );
-                        toplevel.with_pending_state(|state| {
-                            state.size = Some(size);
-                            state.states.set(xdg_toplevel::State::Activated);
-                            state.states.set(xdg_toplevel::State::Maximized);
-                        });
-                        toplevel.send_configure();
 
                         let mut icon = icon;
 
@@ -456,7 +465,7 @@ impl WvrServerState {
                                     app,
                                     window_handle,
                                     icon,
-                                    [size.w as _, size.h as _],
+                                    [fallback_size.w as _, fallback_size.h as _],
                                     pos,
                                 )
                                 .context("Could not create WvrWindow overlay")

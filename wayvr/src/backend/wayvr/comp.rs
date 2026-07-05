@@ -168,7 +168,7 @@ impl Application {
         self.redraw_requests.remove(surface_id)
     }
 
-    fn output_logical_size(&self) -> Size<i32, Logical> {
+    pub fn output_logical_size(&self) -> Size<i32, Logical> {
         self.output
             .current_mode()
             .map(|mode| Size::new(mode.size.w, mode.size.h))
@@ -520,36 +520,60 @@ impl XdgShellHandler for Application {
         surface.send_repositioned(token);
     }
 
-    // If the app wants to be fullscreen, make it think that it's fullscreen.
+    // If the app requests fullscreen, make it fill the virtual output
     fn fullscreen_request(
         &mut self,
         surface: ToplevelSurface,
         _output: Option<wl_output::WlOutput>,
     ) {
+        let size = self.output_logical_size();
+
         surface.with_pending_state(|state| {
+            state.bounds = Some(size);
+            state.size = Some(size);
             state.states.set(xdg_toplevel::State::Fullscreen);
         });
+
         surface.send_configure();
     }
-    fn unfullscreen_request(&mut self, surface: ToplevelSurface) {
-        surface.with_pending_state(|state| {
-            state.states.unset(xdg_toplevel::State::Fullscreen);
-        });
-        surface.send_configure();
-    }
-    // If the app wants to be maximized, make it think that it's maximized.
+
+    // If the app requests maximize, make it fill the virtual output
     fn maximize_request(&mut self, surface: ToplevelSurface) {
+        let size = self.output_logical_size();
+
         surface.with_pending_state(|state| {
+            state.bounds = Some(size);
+            state.size = Some(size);
             state.states.set(xdg_toplevel::State::Maximized);
         });
+
         surface.send_configure();
     }
-    fn unmaximize_request(&mut self, surface: ToplevelSurface) {
+
+    fn unfullscreen_request(&mut self, surface: ToplevelSurface) {
+        let bounds = self.output_logical_size();
+
         surface.with_pending_state(|state| {
+            state.bounds = Some(bounds);
+            state.size = None;
+            state.states.unset(xdg_toplevel::State::Fullscreen);
+        });
+
+        surface.send_configure();
+    }
+
+    fn unmaximize_request(&mut self, surface: ToplevelSurface) {
+        let bounds = self.output_logical_size();
+
+        surface.with_pending_state(|state| {
+            state.bounds = Some(bounds);
+            state.size = None;
             state.states.unset(xdg_toplevel::State::Maximized);
         });
+
         surface.send_configure();
     }
+
     // If the app requests minimize, hide its window
     fn minimize_request(&mut self, surface: ToplevelSurface) {
         if let Some(client) = surface.wl_surface().client() {

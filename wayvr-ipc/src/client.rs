@@ -424,12 +424,12 @@ impl WayVRClient {
 
 	pub async fn fn_wlx_handsfree(
 		client: WayVRClientMutex,
-		params: HandsfreeParams
+		params: HandsfreeParams,
 	) -> anyhow::Result<()> {
 		send_only!(client, &PacketClient::WlxHandsfree(params));
 		Ok(())
 	}
-	
+
 	pub async fn fn_wlx_modify_panel(
 		client: WayVRClientMutex,
 		params: packet_client::WlxModifyPanelParams,

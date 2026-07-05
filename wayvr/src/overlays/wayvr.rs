@@ -1,8 +1,9 @@
 use glam::{Affine2, Affine3A, Quat, Vec2, Vec3, vec2, vec3};
+use slotmap::Key;
 use smithay::{
     desktop::PopupManager,
     reexports::wayland_server::{Resource, backend::ObjectId, protocol::wl_surface::WlSurface},
-    utils::{Logical, Point},
+    utils::{Logical, Point, Size},
     wayland::{
         compositor::{
             SUBSURFACE_ROLE, SubsurfaceCachedState, SurfaceAttributes, TraversalAction,
@@ -37,6 +38,7 @@ use crate::{
     backend::{
         XrBackend,
         input::{self, HoverResult},
+        task::{OverlayTask, TaskType},
         wayvr::{
             self, PointerFocusTarget, SurfaceBufWithImage, process::KillSignal,
             window::WindowHandle,
@@ -51,6 +53,7 @@ use crate::{
     state::{self, AppState},
     subsystem::{hid::WheelDelta, input::KeyboardFocus},
     windowing::{
+        OverlayID, OverlaySelector,
         backend::{
             FrameMeta, OverlayBackend, OverlayEventData, RenderResources, ShouldRender,
             ui_transform,
@@ -75,8 +78,7 @@ pub fn create_wl_window_overlay(
     size: [u32; 2],
     pos_mode: PositionMode,
 ) -> anyhow::Result<OverlayWindowConfig> {
-    let scale = size[0].max(size[1]) as f32 / 1920.0;
-    let curve_scale = size[0] as f32 / 1920.0;
+    let (scale, curve_scale) = overlay_scale_from_extent(size);
 
     let z_dist = if matches!(pos_mode, PositionMode::Anchor) {
         0.0
@@ -106,7 +108,11 @@ pub fn create_wl_window_overlay(
         category: OverlayCategory::WayVR,
         show_on_spawn: true,
         ..OverlayWindowConfig::from_backend(Box::new(WvrWindowBackend::new(
-            name, app, window, icon,
+            name,
+            app,
+            window,
+            icon,
+            (scale, curve_scale),
         )?))
     })
 }
@@ -167,6 +173,8 @@ pub struct WvrWindowBackend {
     uv_range: RangeInclusive<f32>,
     panel_hovered: bool,
     scrolling: bool,
+    overlay_id: OverlayID,
+    scale: (f32, f32),
 }
 
 impl WvrWindowBackend {
@@ -175,6 +183,7 @@ impl WvrWindowBackend {
         app: &mut AppState,
         window: wayvr::window::WindowHandle,
         icon: Arc<str>,
+        scale: (f32, f32),
     ) -> anyhow::Result<Self> {
         let subsurface_pipeline = app.gfx.create_pipeline(
             app.gfx_extras.shaders.get("vert_quad").unwrap(), // want panic
@@ -274,10 +283,43 @@ impl WvrWindowBackend {
             uv_range: 0.0..=1.0,
             panel_hovered: false,
             scrolling: false,
+            overlay_id: OverlayID::null(),
+            scale,
         })
     }
 
     fn apply_extent(&mut self, app: &mut AppState, meta: &FrameMeta) -> anyhow::Result<()> {
+        let (old_scale, old_curve_scale) = self.scale;
+        let (new_scale, curve_scale) = overlay_scale_from_extent(meta.extent);
+        self.scale = (new_scale, curve_scale);
+
+        if new_scale.abs() > f32::EPSILON {
+            let scale_delta = new_scale / old_scale;
+            let curve_scale_delta = curve_scale / old_curve_scale;
+
+            if (scale_delta - 1.0).abs() > f32::EPSILON
+                || (curve_scale_delta - 1.0).abs() > f32::EPSILON
+            {
+                app.tasks.enqueue(TaskType::Overlay(OverlayTask::Modify(
+                    OverlaySelector::Id(self.overlay_id),
+                    Box::new(move |_app, owc| {
+                        if let Some(state) = owc.active_state.as_mut() {
+                            if let Some(curvature) = state.curvature.as_mut() {
+                                *curvature = (curve_scale_delta * *curvature).clamp(0.0, 0.5);
+                            }
+
+                            if let Some(saved) = state.saved_transform.as_mut() {
+                                saved.matrix3 = saved.matrix3.mul_scalar(scale_delta);
+                            }
+
+                            state.transform.matrix3 =
+                                state.transform.matrix3.mul_scalar(scale_delta);
+                        }
+                    }),
+                )));
+            }
+        }
+
         self.interaction_transform = Some(ui_transform(meta.extent));
 
         let mut scale = vec2(
@@ -441,6 +483,35 @@ impl WvrWindowBackend {
 
         Ok(())
     }
+
+    fn sync_committed_toplevel_size(
+        &mut self,
+        app: &mut AppState,
+        inner_extent: [u32; 2],
+    ) -> anyhow::Result<()> {
+        let Some(wvr_server) = app.wvr_server.as_mut() else {
+            return Ok(());
+        };
+        let bounds = wvr_server.manager.state.output_logical_size();
+        let requested = Size::new(inner_extent[0].max(1) as i32, inner_extent[1].max(1) as i32);
+        let clamped = requested.clamp(Size::new(1, 1), bounds);
+
+        let Some(window) = wvr_server.wm.windows.get_mut(&self.window) else {
+            return Ok(());
+        };
+
+        if requested == clamped {
+            // client picked a new size that fits
+            window.remember_committed_size(requested);
+        } else {
+            // client committed something outside the output bounds
+            if window.size_x != clamped.w as u32 || window.size_y != clamped.h as u32 {
+                window.request_size(clamped, bounds);
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl OverlayBackend for WvrWindowBackend {
@@ -556,6 +627,8 @@ impl OverlayBackend for WvrWindowBackend {
                 }
 
                 let inner_extent = meta.extent;
+                self.sync_committed_toplevel_size(app, inner_extent)?;
+
                 meta.extent[0] += BORDER_SIZE * 2;
                 meta.extent[1] += BORDER_SIZE * 2 + BAR_SIZE;
 
@@ -695,6 +768,7 @@ impl OverlayBackend for WvrWindowBackend {
     ) -> anyhow::Result<()> {
         match event_data {
             OverlayEventData::IdAssigned(oid) => {
+                self.overlay_id = oid;
                 let wvr_server = app.wvr_server.as_mut().unwrap(); //never None
                 wvr_server.overlay_added(oid, self.window);
             }
@@ -1092,4 +1166,13 @@ fn surface_tree_input_hit_test(
     );
 
     hit
+}
+
+fn overlay_scale_from_extent(size: [u32; 2]) -> (f32, f32) {
+    const RELATIVE_SIZE: f32 = 1440.0; // sqrt(1920 * 1080)
+
+    let w = size[0].max(1) as f32;
+    let h = size[1].max(1) as f32;
+
+    ((w * h).sqrt() / RELATIVE_SIZE, w / 1920.0)
 }
