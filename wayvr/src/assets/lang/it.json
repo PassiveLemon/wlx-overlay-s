@@ -74,7 +74,8 @@
 		"GLOBAL": "Sempre visibile",
 		"ANGLE_FADE": "Dissolvenza angolare",
 		"ANGLE_FADE_HELP": "Sfumatura quando non si guarda l'HMD",
-		"BLOCK_INPUT": "Blocca l'input del gioco"
+		"BLOCK_INPUT": "Blocca l'input del gioco",
+		"RESIZE_CORNER": "Trascina per ridimensionare"
 	},
 	"GRAB": {
 		"ADJUST_DISTANCE": "Regola la distanza",

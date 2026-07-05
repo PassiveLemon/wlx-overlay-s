@@ -86,7 +86,8 @@
 		"GLOBAL": "Siempre visible",
 		"ANGLE_FADE": "Atenuación angular",
 		"ANGLE_FADE_HELP": "Desvanecer cuando no se mira el HMD",
-		"BLOCK_INPUT": "Bloquear entrada del juego"
+		"BLOCK_INPUT": "Bloquear entrada del juego",
+		"RESIZE_CORNER": "Arrastra para cambiar el tamaño"
 	},
 	"DISABLED": "Deshabilitado",
 	"DEFAULT": "Por defecto",

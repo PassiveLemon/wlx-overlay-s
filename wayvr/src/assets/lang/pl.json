@@ -84,7 +84,8 @@
 		},
 		"GLOBAL": "Zawsze widoczne",
 		"ANGLE_FADE": "Zanik kątowy",
-		"ANGLE_FADE_HELP": "Wyblaknij, gdy nie patrzysz na HMD"
+		"ANGLE_FADE_HELP": "Wyblaknij, gdy nie patrzysz na HMD",
+		"RESIZE_CORNER": "Przeciągnij, aby zmienić rozmiar"
 	},
 	"DISABLED": "Wyłączone",
 	"DEFAULT": "Domyślny",

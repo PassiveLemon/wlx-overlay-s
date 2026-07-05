@@ -86,7 +86,8 @@
 		"GLOBAL": "Immer sichtbar",
 		"ANGLE_FADE": "Winkelübergang",
 		"ANGLE_FADE_HELP": "Ausblenden, wenn nicht auf das Headset gerichtet",
-		"BLOCK_INPUT": "Blockiere Spieleingabe"
+		"BLOCK_INPUT": "Blockiere Spieleingabe",
+		"RESIZE_CORNER": "Zum Ändern der Größe ziehen"
 	},
 	"DISABLED": "Deaktiviert",
 	"DEFAULT": "Standard",

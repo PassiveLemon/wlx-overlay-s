@@ -84,7 +84,8 @@
 		"GLOBAL": "常に表示",
 		"ANGLE_FADE": "角度フェード",
 		"ANGLE_FADE_HELP": "HMDに向いていない時にフェード",
-		"BLOCK_INPUT": "ゲーム入力をブロック"
+		"BLOCK_INPUT": "ゲーム入力をブロック",
+		"RESIZE_CORNER": "ドラッグしてサイズ変更"
 	},
 	"DISABLED": "無効",
 	"DEFAULT": "デフォルト",

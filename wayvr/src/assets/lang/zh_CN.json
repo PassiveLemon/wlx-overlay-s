@@ -74,7 +74,8 @@
 		"GLOBAL": "始终可见",
 		"ANGLE_FADE": "角度淡出",
 		"ANGLE_FADE_HELP": "未朝向HMD时淡出",
-		"BLOCK_INPUT": "阻止游戏输入"
+		"BLOCK_INPUT": "阻止游戏输入",
+		"RESIZE_CORNER": "拖动以调整大小"
 	},
 	"GRAB": {
 		"ADJUST_DISTANCE": "调整距离",

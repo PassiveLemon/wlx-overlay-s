@@ -23,13 +23,13 @@ use crate::{
 pub struct DeviceBitmask(pub u8);
 
 impl DeviceBitmask {
-    pub fn from_index(index: usize) -> Self {
-        debug_assert!(index < 8);
-        Self(1u8 << index)
-    }
-    pub fn to_index(self) -> Option<usize> {
-	    (self.0 != 0).then(|| self.0.trailing_zeros() as usize)
-		}
+	pub fn from_index(index: usize) -> Self {
+		debug_assert!(index < 8);
+		Self(1u8 << index)
+	}
+	pub fn to_index(self) -> Option<usize> {
+		(self.0 != 0).then(|| self.0.trailing_zeros() as usize)
+	}
 }
 
 #[derive(Debug, Clone, Copy)]
