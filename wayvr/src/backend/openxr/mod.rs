@@ -13,7 +13,7 @@ use vulkano::{Handle, VulkanObject};
 use wlx_common::overlays::{StereoMode, ToastTopic};
 
 use crate::{
-    FRAME_COUNTER, RUNNING,
+    Args, FRAME_COUNTER, RUNNING,
     backend::{
         BackendError, XrBackend,
         input::interact,
@@ -52,15 +52,13 @@ struct XrState {
 }
 
 #[allow(clippy::too_many_lines, clippy::cognitive_complexity)]
-pub fn openxr_run(
-    show_by_default: bool,
-    headless: bool,
-    no_autostart: bool,
-) -> Result<(), BackendError> {
+pub fn openxr_run(args: &Args) -> Result<(), BackendError> {
     let (xr_instance, system) = match helpers::init_xr() {
         Ok((xr_instance, system)) => (xr_instance, system),
         Err(e) => {
-            log::warn!("Will not use OpenXR: {e}");
+            if !args.wait {
+                log::warn!("Will not use OpenXR: {e}");
+            }
             return Err(BackendError::NotSupported);
         }
     };
@@ -70,11 +68,11 @@ pub fn openxr_run(
         AppState::from_graphics(gfx, gfx_extras, XrBackend::OpenXR)?
     };
 
-    app.session.no_autostart = no_autostart;
+    app.session.no_autostart = args.no_autostart;
 
     let modes = xr_instance.enumerate_environment_blend_modes(system, VIEW_TYPE)?;
 
-    if show_by_default {
+    if args.show {
         app.session.config.tutorial_graduated = true;
         app.tasks.enqueue_at(
             TaskType::Overlay(OverlayTask::ShowHide),
@@ -82,7 +80,7 @@ pub fn openxr_run(
         );
     }
 
-    let mut overlays = OverlayWindowManager::<OpenXrOverlayData>::new(&mut app, headless)?;
+    let mut overlays = OverlayWindowManager::<OpenXrOverlayData>::new(&mut app, args.headless)?;
     let mut lines = LinePool::new(&app)?;
     let mut current_lines = Vec::with_capacity(2);
 

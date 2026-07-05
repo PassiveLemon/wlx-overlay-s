@@ -34,6 +34,7 @@ use std::{
     path::PathBuf,
     process::Command,
     sync::atomic::{AtomicBool, AtomicUsize, Ordering},
+    time::{Duration, Instant},
 };
 
 use clap::Parser;
@@ -67,6 +68,10 @@ struct Args {
     /// Show the working set of overlay on startup. Also skips tutorial.
     #[arg(long)]
     show: bool,
+
+    /// Wait for a runtime to be available instead of exiting
+    #[arg(long)]
+    wait: bool,
 
     /// Uninstall OpenVR manifest and exit
     #[arg(long)]
@@ -150,39 +155,54 @@ fn auto_run(args: Args, used_backend: &mut Option<XrBackend>) {
     let mut tried_xr = false;
     let mut tried_vr = false;
 
-    #[cfg(feature = "openxr")]
-    if !args_get_openvr(&args) {
-        use crate::backend::{BackendError, openxr::openxr_run};
-        tried_xr = true;
-        match openxr_run(args.show, args.headless, args.no_autostart) {
-            Ok(()) => {
-                used_backend.replace(XrBackend::OpenXR);
-                return;
-            }
-            Err(BackendError::NotSupported) => (),
-            Err(e) => {
-                used_backend.replace(XrBackend::OpenXR);
-                log::error!("{e:?}");
-                return;
+    loop {
+        #[cfg(feature = "openxr")]
+        if !args_get_openvr(&args) {
+            use crate::backend::{BackendError, openxr::openxr_run};
+            tried_xr = true;
+            match openxr_run(&args) {
+                Ok(()) => {
+                    used_backend.replace(XrBackend::OpenXR);
+                    return;
+                }
+                Err(BackendError::NotSupported) => (),
+                Err(e) => {
+                    used_backend.replace(XrBackend::OpenXR);
+                    log::error!("{e:?}");
+                    return;
+                }
             }
         }
-    }
 
-    #[cfg(feature = "openvr")]
-    if !args_get_openxr(&args) {
-        use crate::backend::{BackendError, openvr::openvr_run};
-        tried_vr = true;
-        match openvr_run(args.show, args.headless, args.no_autostart) {
-            Ok(()) => {
-                used_backend.replace(XrBackend::OpenVR);
-                return;
+        #[cfg(feature = "openvr")]
+        if !args_get_openxr(&args) {
+            use crate::backend::{BackendError, openvr::openvr_run};
+            tried_vr = true;
+            match openvr_run(&args) {
+                Ok(()) => {
+                    used_backend.replace(XrBackend::OpenVR);
+                    return;
+                }
+                Err(BackendError::NotSupported) => (),
+                Err(e) => {
+                    used_backend.replace(XrBackend::OpenVR);
+                    log::error!("{e:?}");
+                    return;
+                }
             }
-            Err(BackendError::NotSupported) => (),
-            Err(e) => {
-                used_backend.replace(XrBackend::OpenVR);
-                log::error!("{e:?}");
-                return;
+        }
+
+        if args.wait {
+            // wait 5s unless we get signaled
+            let deadline = Instant::now() + Duration::from_secs(5);
+            while Instant::now() < deadline {
+                if !RUNNING.load(Ordering::Relaxed) {
+                    return;
+                }
+                std::thread::sleep(Duration::from_millis(100));
             }
+        } else {
+            break;
         }
     }
 

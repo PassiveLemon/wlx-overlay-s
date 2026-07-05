@@ -15,7 +15,7 @@ use vulkano::{Handle, VulkanObject, device::physical::PhysicalDevice};
 use wlx_common::overlays::ToastTopic;
 
 use crate::{
-    FRAME_COUNTER, RUNNING,
+    Args, FRAME_COUNTER, RUNNING,
     backend::{
         BackendError, XrBackend,
         input::interact,
@@ -57,14 +57,12 @@ pub fn openvr_uninstall() {
 }
 
 #[allow(clippy::too_many_lines, clippy::cognitive_complexity)]
-pub fn openvr_run(
-    show_by_default: bool,
-    headless: bool,
-    no_autostart: bool,
-) -> Result<(), BackendError> {
+pub fn openvr_run(args: &Args) -> Result<(), BackendError> {
     let app_type = EVRApplicationType::VRApplication_Overlay;
     let Ok(context) = ovr_overlay::Context::init(app_type) else {
-        log::warn!("Will not use OpenVR: Context init failed");
+        if !args.wait {
+            log::warn!("Will not use OpenVR: Context init failed");
+        }
         return Err(BackendError::NotSupported);
     };
 
@@ -94,9 +92,9 @@ pub fn openvr_run(
         AppState::from_graphics(gfx, gfx_extras, XrBackend::OpenVR)?
     };
 
-    app.session.no_autostart = no_autostart;
+    app.session.no_autostart = args.no_autostart;
 
-    if show_by_default {
+    if args.show {
         app.session.config.tutorial_graduated = true;
         app.tasks.enqueue_at(
             TaskType::Overlay(OverlayTask::ShowHide),
@@ -116,7 +114,7 @@ pub fn openvr_run(
 
     let _ = install_manifest(&mut app_mgr);
 
-    let mut overlays = OverlayWindowManager::<OpenVrOverlayData>::new(&mut app, headless)?;
+    let mut overlays = OverlayWindowManager::<OpenVrOverlayData>::new(&mut app, args.headless)?;
 
     let mut playspace = playspace::PlayspaceMover::new();
     playspace.playspace_changed(&mut compositor_mgr, &mut chaperone_mgr);
