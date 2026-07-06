@@ -580,7 +580,7 @@ pub fn horiz_cell(layout: &mut Layout, parent: WidgetID) -> anyhow::Result<Widge
 		WidgetDiv::create(),
 		taffy::Style {
 			flex_direction: taffy::FlexDirection::Row,
-			align_items: Some(taffy::AlignItems::Center),
+			align_items: Some(taffy::AlignItems::CENTER),
 			gap: length(8.0),
 			..Default::default()
 		},

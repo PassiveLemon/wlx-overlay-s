@@ -593,8 +593,8 @@ fn mount_slider_handle(
 			height: percent(1.0),
 		},
 		position: taffy::Position::Absolute,
-		align_items: Some(taffy::AlignItems::Center),
-		justify_content: Some(taffy::JustifyContent::Center),
+		align_items: Some(taffy::AlignItems::CENTER),
+		justify_content: Some(taffy::JustifyContent::CENTER),
 		..Default::default()
 	};
 
@@ -671,8 +671,8 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 				height: percent(PAD_PERCENT),
 			},
 			position: taffy::Position::Absolute,
-			align_self: Some(taffy::AlignItems::Center),
-			justify_self: Some(taffy::JustifySelf::Center),
+			align_self: Some(taffy::AlignItems::CENTER),
+			justify_self: Some(taffy::JustifySelf::CENTER),
 			..Default::default()
 		},
 	)?;

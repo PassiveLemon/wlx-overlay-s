@@ -5,7 +5,7 @@ use taffy::{
 
 use crate::{
 	drawing,
-	parser::{AttribPair, ParserContext, is_percent, parse_color_hex, parse_f32},
+	parser::{is_percent, parse_color_hex, parse_f32, AttribPair, ParserContext},
 	renderer_vk::text::{FontWeight, HorizontalAlign, TextStyle},
 	widget::util::WLength,
 };
@@ -315,64 +315,64 @@ pub fn parse_style(ctx: &ParserContext<'_>, attribs: &[AttribPair], tag_name: &s
 				}
 			},
 			"align_self" => match value {
-				"baseline" => style.align_self = Some(AlignSelf::Baseline),
-				"center" => style.align_self = Some(AlignSelf::Center),
-				"end" => style.align_self = Some(AlignSelf::End),
-				"flex_end" => style.align_self = Some(AlignSelf::FlexEnd),
-				"flex_start" => style.align_self = Some(AlignSelf::FlexStart),
-				"start" => style.align_self = Some(AlignSelf::Start),
-				"stretch" => style.align_self = Some(AlignSelf::Stretch),
+				"baseline" => style.align_self = Some(AlignSelf::BASELINE),
+				"center" => style.align_self = Some(AlignSelf::CENTER),
+				"end" => style.align_self = Some(AlignSelf::END),
+				"flex_end" => style.align_self = Some(AlignSelf::FLEX_END),
+				"flex_start" => style.align_self = Some(AlignSelf::FLEX_START),
+				"start" => style.align_self = Some(AlignSelf::START),
+				"stretch" => style.align_self = Some(AlignSelf::STRETCH),
 				_ => {
 					ctx.print_invalid_attrib(tag_name, key, value);
 				}
 			},
 			"justify_self" => match value {
-				"center" => style.justify_self = Some(JustifySelf::Center),
-				"end" => style.justify_self = Some(JustifySelf::End),
-				"flex_end" => style.justify_self = Some(JustifySelf::FlexEnd),
-				"flex_start" => style.justify_self = Some(JustifySelf::FlexStart),
-				"start" => style.justify_self = Some(JustifySelf::Start),
-				"stretch" => style.justify_self = Some(JustifySelf::Stretch),
+				"center" => style.justify_self = Some(JustifySelf::CENTER),
+				"end" => style.justify_self = Some(JustifySelf::END),
+				"flex_end" => style.justify_self = Some(JustifySelf::FLEX_END),
+				"flex_start" => style.justify_self = Some(JustifySelf::FLEX_START),
+				"start" => style.justify_self = Some(JustifySelf::START),
+				"stretch" => style.justify_self = Some(JustifySelf::STRETCH),
 				_ => {
 					ctx.print_invalid_attrib(tag_name, key, value);
 				}
 			},
 			"align_items" => match value {
-				"baseline" => style.align_items = Some(AlignItems::Baseline),
-				"center" => style.align_items = Some(AlignItems::Center),
-				"end" => style.align_items = Some(AlignItems::End),
-				"flex_end" => style.align_items = Some(AlignItems::FlexEnd),
-				"flex_start" => style.align_items = Some(AlignItems::FlexStart),
-				"start" => style.align_items = Some(AlignItems::Start),
-				"stretch" => style.align_items = Some(AlignItems::Stretch),
+				"baseline" => style.align_items = Some(AlignItems::BASELINE),
+				"center" => style.align_items = Some(AlignItems::CENTER),
+				"end" => style.align_items = Some(AlignItems::END),
+				"flex_end" => style.align_items = Some(AlignItems::FLEX_END),
+				"flex_start" => style.align_items = Some(AlignItems::FLEX_START),
+				"start" => style.align_items = Some(AlignItems::START),
+				"stretch" => style.align_items = Some(AlignItems::STRETCH),
 				_ => {
 					ctx.print_invalid_attrib(tag_name, key, value);
 				}
 			},
 			"align_content" => match value {
-				"center" => style.align_content = Some(AlignContent::Center),
-				"end" => style.align_content = Some(AlignContent::End),
-				"flex_end" => style.align_content = Some(AlignContent::FlexEnd),
-				"flex_start" => style.align_content = Some(AlignContent::FlexStart),
-				"space_around" => style.align_content = Some(AlignContent::SpaceAround),
-				"space_between" => style.align_content = Some(AlignContent::SpaceBetween),
-				"space_evenly" => style.align_content = Some(AlignContent::SpaceEvenly),
-				"start" => style.align_content = Some(AlignContent::Start),
-				"stretch" => style.align_content = Some(AlignContent::Stretch),
+				"center" => style.align_content = Some(AlignContent::CENTER),
+				"end" => style.align_content = Some(AlignContent::END),
+				"flex_end" => style.align_content = Some(AlignContent::FLEX_END),
+				"flex_start" => style.align_content = Some(AlignContent::FLEX_START),
+				"space_around" => style.align_content = Some(AlignContent::SPACE_AROUND),
+				"space_between" => style.align_content = Some(AlignContent::SPACE_BETWEEN),
+				"space_evenly" => style.align_content = Some(AlignContent::SPACE_EVENLY),
+				"start" => style.align_content = Some(AlignContent::START),
+				"stretch" => style.align_content = Some(AlignContent::STRETCH),
 				_ => {
 					ctx.print_invalid_attrib(tag_name, key, value);
 				}
 			},
 			"justify_content" => match value {
-				"center" => style.justify_content = Some(JustifyContent::Center),
-				"end" => style.justify_content = Some(JustifyContent::End),
-				"flex_end" => style.justify_content = Some(JustifyContent::FlexEnd),
-				"flex_start" => style.justify_content = Some(JustifyContent::FlexStart),
-				"space_around" => style.justify_content = Some(JustifyContent::SpaceAround),
-				"space_between" => style.justify_content = Some(JustifyContent::SpaceBetween),
-				"space_evenly" => style.justify_content = Some(JustifyContent::SpaceEvenly),
-				"start" => style.justify_content = Some(JustifyContent::Start),
-				"stretch" => style.justify_content = Some(JustifyContent::Stretch),
+				"center" => style.justify_content = Some(JustifyContent::CENTER),
+				"end" => style.justify_content = Some(JustifyContent::END),
+				"flex_end" => style.justify_content = Some(JustifyContent::FLEX_END),
+				"flex_start" => style.justify_content = Some(JustifyContent::FLEX_START),
+				"space_around" => style.justify_content = Some(JustifyContent::SPACE_AROUND),
+				"space_between" => style.justify_content = Some(JustifyContent::SPACE_BETWEEN),
+				"space_evenly" => style.justify_content = Some(JustifyContent::SPACE_EVENLY),
+				"start" => style.justify_content = Some(JustifyContent::START),
+				"stretch" => style.justify_content = Some(JustifyContent::STRETCH),
 				_ => {
 					ctx.print_invalid_attrib(tag_name, key, value);
 				}

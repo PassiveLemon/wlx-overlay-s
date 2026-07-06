@@ -333,7 +333,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 
 	// force-override style
 	style.flex_wrap = taffy::FlexWrap::NoWrap;
-	style.align_items = Some(AlignItems::Center);
+	style.align_items = Some(AlignItems::CENTER);
 
 	// make checkbox interaction box larger by setting padding and negative margin
 	style.padding = taffy::Rect {

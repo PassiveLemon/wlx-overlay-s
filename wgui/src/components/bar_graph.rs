@@ -120,7 +120,7 @@ pub fn construct(
 		root.id,
 		WidgetDiv::create(),
 		taffy::Style {
-			justify_content: Some(JustifyContent::SpaceBetween),
+			justify_content: Some(JustifyContent::SPACE_BETWEEN),
 			flex_direction: FlexDirection::Column,
 			size: taffy::Size {
 				width: auto(),

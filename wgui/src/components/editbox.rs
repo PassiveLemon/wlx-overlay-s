@@ -282,7 +282,7 @@ pub fn construct(
 	}
 
 	// override style
-	params.style.align_items = Some(taffy::AlignItems::Center);
+	params.style.align_items = Some(taffy::AlignItems::CENTER);
 	params.style.position = taffy::Position::Relative;
 	params.style.overflow = taffy::Point {
 		x: taffy::Overflow::Scroll,
@@ -307,8 +307,8 @@ pub fn construct(
 		taffy::Style {
 			position: taffy::Position::Absolute,
 			flex_direction: taffy::FlexDirection::Column,
-			align_content: Some(taffy::AlignContent::Center),
-			align_items: Some(taffy::AlignItems::Center),
+			align_content: Some(taffy::AlignContent::CENTER),
+			align_items: Some(taffy::AlignItems::CENTER),
 			size: taffy::Size {
 				width: percent(1.0),
 				height: percent(1.0),
@@ -364,8 +364,8 @@ pub fn construct(
 			..Default::default()
 		}),
 		taffy::Style {
-			align_self: Some(taffy::AlignSelf::Center),
-			justify_self: Some(taffy::JustifySelf::End),
+			align_self: Some(taffy::AlignSelf::CENTER),
+			justify_self: Some(taffy::JustifySelf::END),
 			min_size: taffy::Size {
 				width: length(2.0),
 				height: length(16.0),

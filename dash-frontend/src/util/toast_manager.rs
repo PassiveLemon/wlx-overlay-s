@@ -69,8 +69,8 @@ impl ToastManager {
 					width: percent(1.0),
 					height: percent(0.8),
 				},
-				align_items: Some(taffy::AlignItems::End),
-				justify_content: Some(taffy::JustifyContent::Center),
+				align_items: Some(taffy::AlignItems::END),
+				justify_content: Some(taffy::JustifyContent::CENTER),
 				..Default::default()
 			},
 		)?;

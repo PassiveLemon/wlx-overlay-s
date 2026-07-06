@@ -125,8 +125,8 @@ impl View {
 			label,
 			taffy::Style {
 				position: taffy::Position::Absolute,
-				align_self: Some(AlignSelf::Baseline),
-				justify_self: Some(JustifySelf::Center),
+				align_self: Some(AlignSelf::BASELINE),
+				justify_self: Some(JustifySelf::CENTER),
 				margin: taffy::Rect {
 					top: length(32.0),
 					bottom: auto(),
@@ -184,8 +184,8 @@ impl View {
 				}),
 				style: taffy::Style {
 					position: taffy::Position::Relative,
-					align_items: Some(taffy::AlignItems::Center),
-					justify_content: Some(taffy::JustifyContent::Center),
+					align_items: Some(AlignItems::CENTER),
+					justify_content: Some(JustifyContent::CENTER),
 					size: taffy::Size {
 						width: length(GAME_COVER_SIZE_X * params.scale),
 						height: length(GAME_COVER_SIZE_Y * params.scale),
@@ -206,8 +206,8 @@ impl View {
 					height: percent(1.0),
 				},
 				padding: taffy::Rect::length(2.0),
-				align_items: Some(AlignItems::Center),
-				justify_content: Some(JustifyContent::Center),
+				align_items: Some(AlignItems::CENTER),
+				justify_content: Some(JustifyContent::CENTER),
 				..Default::default()
 			},
 		)?;
@@ -239,7 +239,7 @@ impl View {
 				drawing::Color::new(1.0, 1.0, 1.0, 0.2),
 				drawing::Color::new(1.0, 1.0, 1.0, 0.02),
 			),
-			rect_gradient_style(taffy::AlignSelf::Baseline, 0.05),
+			rect_gradient_style(taffy::AlignSelf::BASELINE, 0.05),
 		)?;
 
 		// not optimal, this forces us to create a new pass for every created cover art just to overlay various rectangles at the top of the image cover art
@@ -252,7 +252,7 @@ impl View {
 				drawing::Color::new(1.0, 1.0, 1.0, 0.15),
 				drawing::Color::new(1.0, 1.0, 1.0, 0.0),
 			),
-			rect_gradient_style(taffy::AlignSelf::Baseline, 0.5),
+			rect_gradient_style(taffy::AlignSelf::BASELINE, 0.5),
 		)?;
 
 		// bottom black gradient
@@ -262,7 +262,7 @@ impl View {
 				drawing::Color::new(0.0, 0.0, 0.0, 0.0),
 				drawing::Color::new(0.0, 0.0, 0.0, 0.25),
 			),
-			rect_gradient_style(taffy::AlignSelf::End, 0.5),
+			rect_gradient_style(taffy::AlignSelf::END, 0.5),
 		)?;
 
 		// bottom shadow
@@ -272,7 +272,7 @@ impl View {
 				drawing::Color::new(0.0, 0.0, 0.0, 0.1),
 				drawing::Color::new(0.0, 0.0, 0.0, 0.9),
 			),
-			rect_gradient_style(taffy::AlignSelf::End, 0.05),
+			rect_gradient_style(taffy::AlignSelf::END, 0.05),
 		)?;
 
 		let id_loading = wgui_simple::create_loading(wgui_simple::CreateLoadingParams {

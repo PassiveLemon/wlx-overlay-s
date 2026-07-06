@@ -438,10 +438,10 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 	let theme = &ess.layout.state.theme;
 
 	if style.align_items.is_none() {
-		style.align_items = Some(AlignItems::Center);
+		style.align_items = Some(AlignItems::CENTER);
 	}
 	if style.justify_content.is_none() {
-		style.justify_content = Some(JustifyContent::Center);
+		style.justify_content = Some(JustifyContent::CENTER);
 	}
 	style.overflow.x = taffy::Overflow::Hidden;
 	style.overflow.y = taffy::Overflow::Hidden;

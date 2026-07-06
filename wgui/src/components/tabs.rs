@@ -1,18 +1,18 @@
 use crate::{
 	assets::AssetPath,
 	components::{
-		Component, ComponentBase, ComponentTrait, RefreshData,
 		button::{self, ComponentButton},
+		Component, ComponentBase, ComponentTrait, RefreshData,
 	},
 	event::CallbackDataCommon,
 	i18n::Translation,
 	layout::WidgetPair,
-	widget::{ConstructEssentials, div::WidgetDiv},
+	widget::{div::WidgetDiv, ConstructEssentials},
 };
 use std::{cell::RefCell, rc::Rc};
 use taffy::{
-	AlignItems,
 	prelude::{length, percent},
+	AlignItems,
 };
 
 pub struct Entry<'a> {
@@ -113,7 +113,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 	style.overflow.y = taffy::Overflow::Scroll;
 	style.flex_direction = taffy::FlexDirection::Column;
 	style.flex_wrap = taffy::FlexWrap::NoWrap;
-	style.align_items = Some(AlignItems::Center);
+	style.align_items = Some(AlignItems::CENTER);
 	style.gap = length(4.0);
 
 	let (root, _) = ess.layout.add_child(ess.parent, WidgetDiv::create(), style)?;
@@ -135,7 +135,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 						width: percent(1.0),
 						height: length(32.0),
 					},
-					justify_content: Some(taffy::JustifyContent::Start),
+					justify_content: Some(taffy::JustifyContent::START),
 					..Default::default()
 				},
 				..Default::default()

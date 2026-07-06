@@ -183,26 +183,26 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 		TooltipSide::Left => (
 			absolute_boundary.left() - spacing - pin_size,
 			absolute_boundary.top() + absolute_boundary.size.y / 2.0 - pin_size / 2.0,
-			taffy::AlignItems::Center,
-			taffy::JustifyContent::End,
+			taffy::AlignItems::CENTER,
+			taffy::JustifyContent::END,
 		),
 		TooltipSide::Right => (
 			absolute_boundary.left() + absolute_boundary.size.x + spacing,
 			absolute_boundary.top() + absolute_boundary.size.y / 2.0 - pin_size / 2.0,
-			taffy::AlignItems::Center,
-			taffy::JustifyContent::Start,
+			taffy::AlignItems::CENTER,
+			taffy::JustifyContent::START,
 		),
 		TooltipSide::Top => (
 			absolute_boundary.left() + absolute_boundary.size.x / 2.0 - pin_size / 2.0,
 			absolute_boundary.top() - spacing - pin_size,
-			taffy::AlignItems::End,
-			taffy::JustifyContent::Center,
+			taffy::AlignItems::END,
+			taffy::JustifyContent::CENTER,
 		),
 		TooltipSide::Bottom => (
 			absolute_boundary.left() + absolute_boundary.size.x / 2.0 - pin_size / 2.0,
 			absolute_boundary.top() + absolute_boundary.size.y + spacing,
-			taffy::AlignItems::Baseline,
-			taffy::JustifyContent::Center,
+			taffy::AlignItems::BASELINE,
+			taffy::JustifyContent::CENTER,
 		),
 	};
 

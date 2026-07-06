@@ -122,8 +122,8 @@ impl WguiWindow {
 					bottom: length(0.0),
 					right: length(0.0),
 				},
-				taffy::JustifyContent::Start, // x start
-				taffy::AlignItems::Start,     // y start
+				taffy::JustifyContent::START, // x start
+				taffy::AlignItems::START,     // y start
 			),
 			WguiWindowPlacement::BottomLeft => (
 				taffy::Rect {
@@ -132,8 +132,8 @@ impl WguiWindow {
 					bottom: length(params.position.y - window_padding),
 					right: length(0.0),
 				},
-				taffy::JustifyContent::Start, // x start
-				taffy::AlignItems::End,       // y end
+				taffy::JustifyContent::START, // x start
+				taffy::AlignItems::END,       // y end
 			),
 			WguiWindowPlacement::TopRight => (
 				taffy::Rect {
@@ -142,8 +142,8 @@ impl WguiWindow {
 					bottom: length(0.0),
 					right: length(params.position.x - window_padding),
 				},
-				taffy::JustifyContent::End, // x end
-				taffy::AlignItems::Start,   // y start
+				taffy::JustifyContent::END, // x end
+				taffy::AlignItems::START,   // y start
 			),
 			WguiWindowPlacement::BottomRight => (
 				taffy::Rect {
@@ -152,8 +152,8 @@ impl WguiWindow {
 					bottom: length(params.position.y - window_padding),
 					right: length(params.position.x - window_padding),
 				},
-				taffy::JustifyContent::End, // x end
-				taffy::AlignItems::End,     // y end
+				taffy::JustifyContent::END, // x end
+				taffy::AlignItems::END,     // y end
 			),
 		};
 
