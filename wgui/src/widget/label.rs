@@ -77,11 +77,9 @@ impl WidgetLabel {
 
 		self.params.content = translation;
 		let attrs = Attrs::from(&self.params.style);
-		let mut font_system = globals.font_system.system.lock();
 
 		let mut buffer = self.buffer.borrow_mut();
 		buffer.set_rich_text(
-			&mut font_system,
 			[(self.params.content.generate(&mut globals.i18n_builtin).as_ref(), attrs)],
 			&Attrs::new(),
 			Shaping::Advanced,
@@ -120,9 +118,8 @@ impl WidgetObj for WidgetLabel {
 	fn draw(&mut self, state: &mut super::DrawState, _params: &super::DrawParams) {
 		let boundary = drawing::Boundary::construct_relative(state.transform_stack);
 
-		let mut font_system = state.globals.font_system.system.lock();
 		let mut buffer = self.buffer.borrow_mut();
-		buffer.set_size(&mut font_system, Some(boundary.size.x), Some(boundary.size.y));
+		buffer.set_size(Some(boundary.size.x), Some(boundary.size.y));
 
 		state.primitives.push(drawing::RenderPrimitive::Text(
 			PrimitiveExtent {
@@ -136,7 +133,7 @@ impl WidgetObj for WidgetLabel {
 
 	fn measure(
 		&mut self,
-		globals: &Globals,
+		_globals: &Globals,
 		known_dimensions: taffy::Size<Option<f32>>,
 		available_space: taffy::Size<taffy::AvailableSpace>,
 	) -> taffy::Size<f32> {
@@ -147,11 +144,8 @@ impl WidgetObj for WidgetLabel {
 			AvailableSpace::Definite(width) => Some(width),
 		});
 
-		let wgui_font_system = &globals.font_system;
-		let mut font_system = wgui_font_system.system.lock();
 		let mut buffer = self.buffer.borrow_mut();
-
-		buffer.set_size(&mut font_system, width_constraint, None);
+		buffer.set_size(width_constraint, None);
 
 		// Determine measured size of text
 		let (width, total_lines) = buffer.layout_runs().fold((0.0, 0usize), |(width, total_lines), run| {
