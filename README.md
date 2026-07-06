@@ -84,7 +84,9 @@ Show and hide the working set using:
 - Non-vive controller: double-tap B or Y on the left controller.
 - Vive controller: double-tap the menu button on the left controller (for SteamVR, the `showhide` binding must be bound)
 
-See the [bindings](#default-bindings) section on how to grab, move and resize overlay windows.
+Moving overlays: Grab + Joystick
+
+Resizing overlays: Grab + Click + Joystick
 
 ### Pointer Modes AKA Laser Colors
 
@@ -99,19 +101,28 @@ Please see the bindings section below on how to activate these modes.
 
 The guide here uses the colors for ease of getting started.
 
+### Edit mode
+
+Ways to enter Edit mode:
+- Edit mode button on Watch face
+- Taskbar (top of keyboard) hamburger menu
+- Edit mode button on the title bar of WayVR apps (next to X button)
+
+Edit mode lets you grab overlays and reposition them in yourset.
+
+It's also possible to change overlay behavior and tweak your overlays in different way.
+
+While in edit mode, try hovering over various overlays to see their options!
+
 ### The watch
 
 Check your left wrist for the watch. The watch is the primary tool for controlling the app.
 
 The top of the watch shows device batteries, and the bottom shows your overlay controls.
 
-Enter edit mode (the leftmost button at the bottom) to edit your overlay sets.
-
 While in edit mode, the watch can also be grabbed and passed between your hands.
 
 After grabbing, the watch will automatically attach to the hand that's opposite from the one that held it.
-
-In edit mode, try hovering over other overlays to see their advanced options!
 
 ### The screens
 
@@ -125,6 +136,10 @@ The click type depends on the laser color:
 - Stick up/down: Scroll wheel
 
 ### The keyboard
+
+The keyboard sends keys to the screen or WayVR application with the most recent mouse interaction.
+
+On top of the keyboard is the taskbar, which lists WayVR apps as well as screens, mirrors and panels overlays.
 
 Typing
 
@@ -146,12 +161,9 @@ Typing
 
 ### Changing Bindings
 
-SteamVR: Simply change the bindings from the SteamVR bindings section. If WayVR doesn't show up on the list, select any other title and then press back on the top left. (SteamVR is weird like that sometimes)
-
-OpenXR (Monado/WiVRn): See [Docs: OpenXR Bindings](https://wayvr.org/docs/various/openxr-bindings/)
-
-If your controllers are not supported, please reach out. \
-We would like to work with you and include additional bindings.
+- SteamVR: Simply change the bindings from the SteamVR bindings section. 
+  - If WayVR doesn't show up on the list, select any other title and then press back on the top left. (SteamVR bug)
+- Monado/WiVRn: See WayVR Dashboard → Settings → Controls.
 
 ## Customization
 
@@ -171,13 +183,15 @@ Check [here](https://wayvr.org/docs/various/troubleshooting/) for tips.
 
 ## Known Issues
 
-### Mouse is not where it should be
+### Mouse movement is wrong
 
-If the mouse is moving on a completely different screen, the screens were likely selected in the wrong order:
+**If the mouse is moving on a completely different screen**, the screens were likely selected in the wrong order:
 
 - Go to Settings and press `Clear PipeWire tokens` and then `Restart software`
 - Pay attention to your notifications, which tell you in which order to pick the screens.
 - If notifications don't show, try starting WayVR from the terminal and look for instructions in there.
+
+**If the mouse is on the correct screen but moves in weird ways**, enter Edit Mode, hover the screen and under Mouse Fixes, select the mode that works.
 
 COSMIC desktop:
 
@@ -189,19 +203,12 @@ X11 users:
 - DPI scaling is not supported and will mess with the mouse.
 - Upright screens are not supported and will mess with the mouse.
 
-### Screens are blank or black or frozen on SteamVR 2.14+
+### Screens or launched apps don't work when auto-started by SteamVR or WiVRn
 
-As of SteamVR version 2.14.x, PipeWire capture no longer works when using Steam Link.
+SteamVR starts WayVR in the Steam runtime, and systemd/flatpak WiVRn can also start WayVR in a sub-optimal environment.
 
-We're unable to completely troubleshoot how and why SteamVR interferes with PipeWire, so consider the following workarounds for the time being:
-
-- Use another streamer, such as WiVRn or ALVR. Note that SteamVR on Linux is considered experimental by Valve themselves [disclaimer](https://github.com/ValveSoftware/SteamVR-for-Linux?tab=readme-ov-file#steamvr-release-notes-and-known-issues).
-- If your desktop [supports ScreenCopy](https://wayland.app/protocols/wlr-screencopy-unstable-v1#compositor-support), go to Settings and set `Wayland capture method` to `ScreenCopy`
-- If your desktop has an X11 mode, try using that
-
-### Modifiers get stuck
-
-Hiding the keyboard will unpress all of its buttons. Alternatively, go to Settings and use the `Restart software` button.
+The easiest fix is to start WayVR separately. It's possible to start WayVR before starting SteamVR/WiVRn by passing `--wait`:
+- `wayvr --wait` or `/path/to/WayVR.AppImage --wait`
 
 ### X11 limitations
 
