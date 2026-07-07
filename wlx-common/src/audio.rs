@@ -1,4 +1,9 @@
-use std::{collections::HashMap, io::Cursor, rc::Rc};
+use std::{
+	collections::HashMap,
+	io::Cursor,
+	rc::Rc,
+	sync::mpsc::{Receiver, SyncSender, sync_channel},
+};
 
 use rodio::Source;
 use wgui::{assets::AssetProvider, sound::WguiSoundType};
@@ -7,17 +12,40 @@ use std::io::Read;
 
 pub use rodio;
 
-pub struct AudioSystem {
-	audio_stream: Option<rodio::MixerDeviceSink>,
-	first_try: bool,
+enum AudioThreadMessage {
+	PlaySample(AudioSample),
 }
 
+pub struct AudioSystem {
+	receiver: Option<Receiver<AudioThreadMessage>>,
+	sender: SyncSender<AudioThreadMessage>,
+}
+
+#[derive(Clone)]
 pub struct AudioSample {
 	buffer: rodio::buffer::SamplesBuffer,
 }
 
 pub struct SamplePlayer {
 	samples: HashMap<String, AudioSample>,
+}
+
+fn audio_thread(receiver: Receiver<AudioThreadMessage>) {
+	log::debug!("audio_thread starting");
+	let Ok(stream) = rodio::DeviceSinkBuilder::open_default_sink() else {
+		log::error!("Failed to open audio stream. Audio will not work.");
+		return;
+	};
+
+	while let Ok(msg) = receiver.recv() {
+		match msg {
+			AudioThreadMessage::PlaySample(audio_sample) => {
+				stream.mixer().add(audio_sample.buffer.clone());
+			}
+		}
+	}
+
+	log::debug!("audio_thread exiting");
 }
 
 fn get_sample_name_from_wgui_sound_type(sound: WguiSoundType) -> &'static str {
@@ -95,29 +123,26 @@ impl Default for SamplePlayer {
 }
 
 impl AudioSystem {
-	pub const fn new() -> Self {
+	pub fn new() -> Self {
+		let (sender, receiver) = sync_channel::<AudioThreadMessage>(8);
+
 		Self {
-			audio_stream: None,
-			first_try: true,
+			receiver: Some(receiver),
+			sender,
 		}
 	}
 
-	fn get_handle(&mut self) -> Option<&rodio::MixerDeviceSink> {
-		if self.audio_stream.is_none() && self.first_try {
-			self.first_try = false;
-			if let Ok(stream) = rodio::DeviceSinkBuilder::open_default_sink() {
-				self.audio_stream = Some(stream);
-			} else {
-				log::error!("Failed to open audio stream. Audio will not work.");
-				return None;
-			}
-		}
-		self.audio_stream.as_ref()
+	fn lazy_start_thread(&mut self) {
+		let Some(receiver) = self.receiver.take() else {
+			return; // already started
+		};
+
+		std::thread::spawn(move || audio_thread(receiver));
 	}
 
 	pub fn play_sample(&mut self, sample: &AudioSample) -> Option<()> {
-		let handle = self.get_handle()?;
-		handle.mixer().add(sample.buffer.clone());
+		self.lazy_start_thread();
+		let _dont_care = self.sender.try_send(AudioThreadMessage::PlaySample(sample.clone()));
 		Some(())
 	}
 }
