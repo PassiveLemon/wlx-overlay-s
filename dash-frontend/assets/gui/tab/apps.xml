@@ -1,9 +1,11 @@
 <layout>
   <include src="../theme.xml" />
+  <include src="../t_group_box.xml" />
 
+  <!-- tooltip, src, src_ext, name -->
   <template name="AppEntry">
     <Button
-      id="button" width="116" max_width="140" min_height="100" flex_grow="1"
+      id="button" tooltip_side="bottom" tooltip="${tooltip}" width="116" max_width="140" min_height="100" flex_grow="1"
       flex_direction="column" overflow="visible" align_items="center" justify_content="center" gap="4"
       color="#3385FF10"
     >
@@ -39,6 +41,15 @@
       </rectangle>
     </div>
     -->
+    <rectangle macro="group_box">
+      <div align_items="center" gap="8">
+        <sprite src_builtin="dashboard/heart_plus.svg" min_width="24" min_height="24"/>
+        <label translation="PINNED_APPS"/>
+      </div>
+      <div id="pinned_apps_parent" flex_direction="row" flex_wrap="wrap" gap="4">
+        <!-- filled-in at runtime -->
+      </div>
+    </rectangle>
     <div
       id="app_list_parent"
       flex_direction="row"
