@@ -8,7 +8,7 @@ use wgui::{
     event::{self, EventCallback},
     i18n::Translation,
     layout::Layout,
-    parser::{CustomAttribsInfoOwned, ParserState, parse_color_hex},
+    parser::{CustomAttribsInfoOwned, ParserState},
     widget::{EventResult, label::WidgetLabel},
 };
 
@@ -46,15 +46,15 @@ pub(super) fn setup_custom_label<S: 'static>(
             let state = BatteryLabelState {
                 low_color: attribs
                     .get_value("_low_color")
-                    .and_then(parse_color_hex)
+                    .and_then(drawing::Color::from_hex)
                     .unwrap_or(BAT_LOW),
                 normal_color: attribs
                     .get_value("_normal_color")
-                    .and_then(parse_color_hex)
+                    .and_then(drawing::Color::from_hex)
                     .unwrap_or(BAT_NORMAL),
                 charging_color: attribs
                     .get_value("_charging_color")
-                    .and_then(parse_color_hex)
+                    .and_then(drawing::Color::from_hex)
                     .unwrap_or(BAT_CHARGING),
                 low_threshold: attribs
                     .get_value("_low_threshold")

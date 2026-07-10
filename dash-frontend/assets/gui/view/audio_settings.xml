@@ -58,7 +58,7 @@
           sprite_src_builtin="dashboard/magic_wand.svg"
           min_width="32"
           tooltip="AUDIO.AUTO_SWITCH_TO_VR_AUDIO"
-          color="~color_accent"
+          color="primary"
           tooltip_side="right" />
 
         <BottomButton id="btn_sinks" src_builtin="dashboard/volume.svg" translation="AUDIO.SPEAKERS" />

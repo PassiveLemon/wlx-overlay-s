@@ -3,6 +3,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use slotmap::Key;
 
 use crate::{
+	color::WguiColor,
 	drawing::{self, ImagePrimitive, PrimitiveExtent},
 	event::EventAlterables,
 	globals::Globals,
@@ -20,7 +21,7 @@ pub struct WidgetImageParams {
 	pub glyph_data: Option<CustomGlyphData>,
 
 	pub border: f32,
-	pub border_color: drawing::Color,
+	pub border_color: WguiColor,
 
 	pub round: WLength,
 }
@@ -84,7 +85,7 @@ impl WidgetObj for WidgetImage {
 				content_key: self.content_key,
 				skip_cache: self.dirty,
 				border: self.params.border,
-				border_color: self.params.border_color,
+				border_color: self.params.border_color.resolve(&state.globals.palette),
 				round_units,
 			},
 		));
@@ -112,7 +113,7 @@ impl WidgetObj for WidgetImage {
 		super::WidgetType::Sprite
 	}
 
-	fn debug_print(&self) -> String {
+	fn debug_print(&self, _globals: &Globals) -> String {
 		String::default()
 	}
 }

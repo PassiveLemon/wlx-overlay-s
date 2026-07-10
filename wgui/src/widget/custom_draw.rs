@@ -2,6 +2,7 @@ use slotmap::Key;
 
 use crate::{
 	drawing::{self},
+	globals::Globals,
 	layout::WidgetID,
 	stack,
 	widget::WidgetStateFlags,
@@ -59,7 +60,7 @@ impl WidgetObj for WidgetCustomDraw {
 		super::WidgetType::Rectangle
 	}
 
-	fn debug_print(&self) -> String {
+	fn debug_print(&self, _globals: &Globals) -> String {
 		String::default()
 	}
 }

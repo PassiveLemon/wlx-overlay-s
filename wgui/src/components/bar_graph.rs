@@ -134,10 +134,10 @@ pub fn construct(
 		root.id,
 		WidgetRectangle::create(WidgetRectangleParams {
 			border: 2.0,
-			border_color: drawing::Color::new(1.0, 1.0, 1.0, 0.5),
+			border_color: drawing::Color::new(1.0, 1.0, 1.0, 0.5).into(),
 			round: WLength::Units(3.0),
 			gradient: GradientMode::Vertical,
-			color: drawing::Color::new(0.0, 0.0, 0.0, 0.6),
+			color: drawing::Color::new(0.0, 0.0, 0.0, 0.6).into(),
 			..Default::default()
 		}),
 		taffy::Style {

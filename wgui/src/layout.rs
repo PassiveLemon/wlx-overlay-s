@@ -930,7 +930,7 @@ impl Layout {
 			layout.location.y,
 			layout.content_size.width,
 			layout.content_size.height,
-			state.obj.debug_print()
+			state.obj.debug_print(&self.state.globals.get())
 		);
 
 		buf.append(&mut line.into_bytes());

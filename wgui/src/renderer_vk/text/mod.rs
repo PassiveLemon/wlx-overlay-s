@@ -11,7 +11,10 @@ use etagere::AllocId;
 use glam::Mat4;
 use parking_lot::Mutex;
 
-use crate::drawing::{self};
+use crate::{
+	color::{WguiColor, WguiColorPalette},
+	drawing::{self},
+};
 
 pub static SWASH_CACHE: LazyLock<Mutex<SwashCache>> = LazyLock::new(|| Mutex::new(SwashCache::new()));
 
@@ -45,7 +48,7 @@ impl Default for TextShadow {
 pub struct TextStyle {
 	pub size: Option<f32>,
 	pub line_height: Option<f32>,
-	pub color: Option<drawing::Color>,
+	pub color: Option<WguiColor>,
 	pub style: Option<FontStyle>,
 	pub weight: Option<FontWeight>,
 	pub align: Option<HorizontalAlign>,
@@ -53,12 +56,12 @@ pub struct TextStyle {
 	pub shadow: Option<TextShadow>,
 }
 
-impl From<&TextStyle> for Attrs<'_> {
-	fn from(style: &TextStyle) -> Self {
+impl TextStyle {
+	pub fn to_attrs(&self, palette: &WguiColorPalette) -> Attrs<'_> {
 		Attrs::new()
-			.color(style.color.unwrap_or_default().into())
-			.style(style.style.unwrap_or_default().into())
-			.weight(style.weight.unwrap_or_default().into())
+			.color(self.color.unwrap_or_default().resolve(palette).into())
+			.style(self.style.unwrap_or_default().into())
+			.weight(self.weight.unwrap_or_default().into())
 	}
 }
 

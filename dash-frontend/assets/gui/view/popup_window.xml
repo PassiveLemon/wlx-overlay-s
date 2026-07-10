@@ -1,6 +1,4 @@
 <layout>
-  <include src="../theme.xml" />
-
   <elements>
     <div
       consume_mouse_events="1"

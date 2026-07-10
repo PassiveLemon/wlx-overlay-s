@@ -21,6 +21,7 @@ use wgui::{
         button::ComponentButton, checkbox::ComponentCheckbox, radio_group::ComponentRadioGroup,
         slider::ComponentSlider,
     },
+    drawing,
     event::{
         DeviceBitmask, Event as WguiEvent, EventCallback, EventListenerID, EventListenerKind,
         InternalStateChangeEvent, MouseButtonEvent, MouseButtonIndex, MouseLeaveEvent,
@@ -29,9 +30,7 @@ use wgui::{
     gfx::cmd::WGfxClearMode,
     i18n::Translation,
     layout::{Layout, LayoutParams, LayoutUpdateParams, WidgetID},
-    parser::{
-        self, CustomAttribsInfoOwned, Fetchable, ParseDocumentExtra, ParserState, parse_color_hex,
-    },
+    parser::{self, CustomAttribsInfoOwned, Fetchable, ParseDocumentExtra, ParserState},
     renderer_vk::{context::Context as WguiContext, text::custom_glyph::CustomGlyphData},
     widget::{
         EventResult, image::WidgetImage, label::WidgetLabel, rectangle::WidgetRectangle,
@@ -532,7 +531,7 @@ pub fn apply_custom_command<T>(
             }
         }
         ModifyPanelCommand::SetColor(color) => {
-            let color = parse_color_hex(color)
+            let color = drawing::Color::from_hex(color)
                 .context("Invalid color format, must be a html hex color!")?;
 
             if let Ok(pair) = panel.parser_state.fetch_widget(com.state, element) {

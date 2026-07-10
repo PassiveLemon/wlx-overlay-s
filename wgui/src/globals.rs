@@ -12,6 +12,7 @@ use regex::Regex;
 use crate::{
 	assets::{AssetPath, AssetProvider, LangProvider},
 	assets_internal,
+	color::WguiColorPalette,
 	font_config::{WguiFontConfig, WguiFontSystem},
 	i18n::I18n,
 	renderer_vk::text::custom_glyph::CustomGlyphCache,
@@ -24,6 +25,7 @@ pub struct Globals {
 	pub i18n_builtin: I18n,
 	pub font_system: WguiFontSystem,
 	pub custom_glyph_cache: CustomGlyphCache,
+	pub palette: WguiColorPalette,
 }
 
 #[derive(Clone)]
@@ -46,6 +48,7 @@ impl WguiGlobals {
 			font_system: WguiFontSystem::new(font_config, i18n_builtin.get_locale()),
 			i18n_builtin,
 			custom_glyph_cache: CustomGlyphCache::new(),
+			palette: Default::default(),
 		}))))
 	}
 

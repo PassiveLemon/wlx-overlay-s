@@ -4,6 +4,7 @@ use cosmic_text::{Attrs, Buffer, Color, Shaping, Weight};
 use slotmap::Key;
 
 use crate::{
+	color::WguiColor,
 	drawing::{self, PrimitiveExtent},
 	event::{CallbackDataCommon, EventAlterables},
 	globals::Globals,
@@ -20,7 +21,7 @@ use super::{WidgetObj, WidgetState};
 #[derive(Debug, Default)]
 pub struct WidgetSpriteParams {
 	pub glyph_data: Option<CustomGlyphData>,
-	pub color: Option<drawing::Color>,
+	pub color: Option<WguiColor>,
 }
 
 #[derive(Debug, Default)]
@@ -40,12 +41,12 @@ impl WidgetSprite {
 		)
 	}
 
-	pub fn set_color(&mut self, common: &mut CallbackDataCommon, color: drawing::Color) {
+	pub fn set_color(&mut self, common: &mut CallbackDataCommon, color: WguiColor) {
 		self.params.color = Some(color);
 		common.mark_widget_dirty(self.id);
 	}
 
-	pub const fn get_color(&self) -> Option<drawing::Color> {
+	pub const fn get_color(&self) -> Option<WguiColor> {
 		self.params.color
 	}
 
@@ -74,12 +75,9 @@ impl WidgetObj for WidgetSprite {
 				top: 0.0,
 				width: boundary.size.x,
 				height: boundary.size.y,
-				color: Some(
-					self
-						.params
-						.color
-						.map_or(cosmic_text::Color::rgb(255, 255, 255), Into::into),
-				),
+				color: Some(self.params.color.map_or(cosmic_text::Color::rgb(255, 255, 255), |c| {
+					c.resolve(&state.globals.palette).into()
+				})),
 				snap_to_physical_pixel: true,
 			};
 
@@ -135,7 +133,7 @@ impl WidgetObj for WidgetSprite {
 		super::WidgetType::Sprite
 	}
 
-	fn debug_print(&self) -> String {
+	fn debug_print(&self, _globals: &Globals) -> String {
 		String::default()
 	}
 }

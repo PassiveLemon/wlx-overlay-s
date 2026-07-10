@@ -9,7 +9,7 @@ use std::sync::Arc;
 use wgui::log::LogErr;
 use wgui::theme::WguiTheme;
 use wgui::{
-    drawing, font_config::WguiFontConfig, gfx::WGfx, globals::WguiGlobals, parser::parse_color_hex,
+    drawing, font_config::WguiFontConfig, gfx::WGfx, globals::WguiGlobals,
     renderer_vk::context::SharedContext as WSharedContext,
 };
 #[cfg(feature = "pipewire")]
@@ -150,7 +150,7 @@ impl AppState {
         {
             #[allow(clippy::ref_option)]
             fn apply_color(default: &mut drawing::Color, value: &Option<String>) {
-                if let Some(parsed) = value.as_ref().and_then(|c| parse_color_hex(c)) {
+                if let Some(parsed) = value.as_ref().and_then(|c| drawing::Color::from_hex(c)) {
                     *default = parsed;
                 }
             }

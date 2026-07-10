@@ -2,8 +2,8 @@ use glam::{Mat4, Vec2};
 use wgui::{
 	animation::{Animation, AnimationEasing},
 	assets::AssetPath,
+	color::WguiColorName,
 	components::{self, button::ButtonClickCallback},
-	drawing,
 	i18n::Translation,
 	layout::{Layout, LayoutTask, WidgetID},
 	parser::{Fetchable, ParseDocumentParams},
@@ -70,7 +70,7 @@ pub fn create_label_error(layout: &mut Layout, parent: WidgetID, content: String
 			content: Translation::from_raw_text_string(content),
 			style: TextStyle {
 				wrap: true,
-				color: Some(drawing::Color::new(1.0, 0.5, 0.0, 1.0)),
+				color: Some(WguiColorName::Danger.into()),
 				weight: Some(FontWeight::Bold),
 				..Default::default()
 			},

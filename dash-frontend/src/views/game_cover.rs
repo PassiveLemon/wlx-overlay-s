@@ -173,9 +173,9 @@ impl View {
 		let (widget_button, button) = components::button::construct(
 			params.ess,
 			components::button::Params {
-				color: Some(drawing::Color::new(1.0, 1.0, 1.0, 0.0)),
-				border_color: Some(BORDER_COLOR_DEFAULT),
-				hover_border_color: Some(BORDER_COLOR_HOVERED),
+				color: Some(drawing::Color::new(1.0, 1.0, 1.0, 0.0).into()),
+				border_color: Some(BORDER_COLOR_DEFAULT.into()),
+				hover_border_color: Some(BORDER_COLOR_HOVERED.into()),
 				round: WLength::Units(12.0),
 				border: 2.0,
 				tooltip: Some(TooltipInfo {
@@ -214,8 +214,8 @@ impl View {
 
 		let rect_gradient = |color: drawing::Color, color2: drawing::Color| {
 			rectangle::WidgetRectangle::create(rectangle::WidgetRectangleParams {
-				color,
-				color2,
+				color: color.into(),
+				color2: color2.into(),
 				round: WLength::Units(12.0),
 				gradient: GradientMode::Vertical,
 				..Default::default()

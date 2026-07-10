@@ -352,8 +352,8 @@ impl<T: 'static> Frontend<T> {
 			(0.8666, 0.9333)
 		};
 
-		rect.params.color.a = alpha1;
-		rect.params.color2.a = alpha2;
+		rect.params.color = rect.params.color.with_alpha(alpha1);
+		rect.params.color2 = rect.params.color2.with_alpha(alpha2);
 
 		Ok(())
 	}

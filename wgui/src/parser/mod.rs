@@ -21,7 +21,6 @@ mod widget_sprite;
 use crate::{
 	assets::{AssetPath, AssetPathOwned, normalize_path},
 	components::{Component, ComponentWeak},
-	drawing::{self},
 	globals::WguiGlobals,
 	i18n::Translation,
 	layout::{Layout, LayoutParams, LayoutState, Widget, WidgetID, WidgetMap, WidgetPair},
@@ -529,31 +528,6 @@ impl ParserContext<'_> {
 		}
 	}
 
-	fn populate_theme_variables(&mut self) {
-		let theme = self.layout.state.theme.clone();
-
-		macro_rules! insert_color_vars {
-			($self:expr, $name:literal, $field:expr, $alpha:expr) => {
-				$self.insert_var(concat!("color_", $name), &$field.to_hex());
-				$self.insert_var(
-					concat!("color_", $name, "_translucent"),
-					&$field.with_alpha($alpha).to_hex(),
-				);
-				$self.insert_var(concat!("color_", $name, "_50"), &$field.mult_rgb(0.50).to_hex());
-				$self.insert_var(concat!("color_", $name, "_40"), &$field.mult_rgb(0.40).to_hex());
-				$self.insert_var(concat!("color_", $name, "_30"), &$field.mult_rgb(0.30).to_hex());
-				$self.insert_var(concat!("color_", $name, "_20"), &$field.mult_rgb(0.20).to_hex());
-				$self.insert_var(concat!("color_", $name, "_10"), &$field.mult_rgb(0.10).to_hex());
-			};
-		}
-
-		insert_color_vars!(self, "text", theme.text_color, theme.translucent_alpha);
-		insert_color_vars!(self, "accent", theme.accent_color, theme.translucent_alpha);
-		insert_color_vars!(self, "danger", theme.danger_color, theme.translucent_alpha);
-		insert_color_vars!(self, "faded", theme.faded_color, theme.translucent_alpha);
-		insert_color_vars!(self, "bg", theme.bg_color, theme.translucent_alpha);
-	}
-
 	fn print_invalid_attrib(&self, tag_name: &str, key: &str, value: &str) {
 		log::warn!(
 			"{}: <{tag_name}> value for \"{key}\" is invalid: \"{value}\"",
@@ -642,38 +616,6 @@ fn parse_f32(value: &str) -> Option<f32> {
 
 fn is_percent(value: &str) -> bool {
 	value.ends_with('%')
-}
-
-// Parses a color from a HTML hex string
-pub fn parse_color_hex(html_hex: &str) -> Option<drawing::Color> {
-	if html_hex.len() == 7 {
-		if let (Ok(r), Ok(g), Ok(b)) = (
-			u8::from_str_radix(&html_hex[1..3], 16),
-			u8::from_str_radix(&html_hex[3..5], 16),
-			u8::from_str_radix(&html_hex[5..7], 16),
-		) {
-			return Some(drawing::Color::new(
-				f32::from(r) / 255.,
-				f32::from(g) / 255.,
-				f32::from(b) / 255.,
-				1.,
-			));
-		}
-	} else if html_hex.len() == 9
-		&& let (Ok(r), Ok(g), Ok(b), Ok(a)) = (
-			u8::from_str_radix(&html_hex[1..3], 16),
-			u8::from_str_radix(&html_hex[3..5], 16),
-			u8::from_str_radix(&html_hex[5..7], 16),
-			u8::from_str_radix(&html_hex[7..9], 16),
-		) {
-		return Some(drawing::Color::new(
-			f32::from(r) / 255.,
-			f32::from(g) / 255.,
-			f32::from(b) / 255.,
-			f32::from(a) / 255.,
-		));
-	}
-	None
 }
 
 fn get_tag_by_name<'a>(node: &roxmltree::Node<'a, 'a>, name: &str) -> Option<roxmltree::Node<'a, 'a>> {
@@ -864,7 +806,7 @@ fn process_attrib(template_parameters: &TemplateParams, ctx: &ParserContext, key
 			Some(name) => AttribPair::new(key, name),
 			None => {
 				log::warn!("{}: undefined variable \"{value}\"", ctx.doc_params.path.get_str());
-				AttribPair::new(key, "undefined")
+				AttribPair::new(key, format!("undefined_{}", value))
 			}
 		}
 	} else {
@@ -1298,7 +1240,6 @@ pub fn parse_from_assets(
 ) -> anyhow::Result<ParserState> {
 	let parser_data = ParserData::default();
 	let mut ctx = create_default_context(doc_params, layout, &parser_data);
-	ctx.populate_theme_variables();
 	ctx.populate_extra_variables(&doc_params.extra.extra_vars);
 
 	let (file, node_layout) = get_doc_from_asset_path(&ctx, doc_params.path)?;

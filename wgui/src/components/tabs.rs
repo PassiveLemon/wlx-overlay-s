@@ -1,5 +1,6 @@
 use crate::{
 	assets::AssetPath,
+	color::WguiColorName,
 	components::{
 		Component, ComponentBase, ComponentTrait, RefreshData,
 		button::{self, ComponentButton},
@@ -66,16 +67,11 @@ impl ComponentTrait for ComponentTabs {
 
 impl State {
 	fn select_entry(&mut self, common: &mut CallbackDataCommon, name: &Rc<str>) {
-		let (color_accent, color_button) = {
-			let theme = &common.state.theme;
-			(theme.accent_color, theme.button_color)
-		};
-
 		for entry in &self.mounted_entries {
 			if *entry.name == **name {
-				entry.button.set_color(common, color_accent);
+				entry.button.set_color(common, WguiColorName::Primary.into());
 			} else {
-				entry.button.set_color(common, color_button);
+				entry.button.set_color(common, WguiColorName::BackgroundVariant.into());
 			}
 		}
 		self.selected_entry_name = name.clone();

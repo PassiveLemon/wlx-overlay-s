@@ -1,5 +1,4 @@
 <layout>
-  <include src="../theme.xml" />
   <include src="../t_group_box.xml" />
 
   <!-- tooltip, src, src_ext, name -->
@@ -21,7 +20,7 @@
   <template name="CategoryText">
     <rectangle width="100%" flex_direction="column" round="8" border="2" gradient="vertical" color2="#4477FF09" color="#5588FF10" border_color="#FFFFFF00">
       <label margin="8" text="${text}" weight="bold" size="22" />
-      <rectangle height="2" color="~color_accent" margin_left="4" margin_right="4" />
+      <rectangle height="2" color="primary" margin_left="4" margin_right="4" />
     </rectangle>
   </template>
 

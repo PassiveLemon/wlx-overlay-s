@@ -189,7 +189,7 @@ impl WguiWindow {
 				AnimationEasing::OutQuad,
 				Box::new(|common, data| {
 					let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap() /* should always succeed */;
-					rect.params.color = drawing::Color::new(0.0, 0.0, 0.0, data.pos * 0.3);
+					rect.params.color = drawing::Color::new(0.0, 0.0, 0.0, data.pos * 0.3).into();
 					common.alterables.mark_redraw();
 				}),
 			));

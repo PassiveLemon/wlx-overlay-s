@@ -119,7 +119,7 @@ impl Color {
 	}
 
 	#[must_use]
-	pub fn add_rgb(&self, n: f32) -> Self {
+	pub const fn add_rgb(&self, n: f32) -> Self {
 		Self {
 			r: self.r + n,
 			g: self.g + n,
@@ -129,7 +129,7 @@ impl Color {
 	}
 
 	#[must_use]
-	pub fn mult_rgb(&self, n: f32) -> Self {
+	pub const fn mult_rgb(&self, n: f32) -> Self {
 		Self {
 			r: self.r * n,
 			g: self.g * n,
@@ -139,7 +139,7 @@ impl Color {
 	}
 
 	#[must_use]
-	pub fn lerp(&self, other: &Self, n: f32) -> Self {
+	pub const fn lerp(&self, other: &Self, n: f32) -> Self {
 		Self {
 			r: self.r * (1.0 - n) + other.r * n,
 			g: self.g * (1.0 - n) + other.g * n,
@@ -190,6 +190,46 @@ impl Color {
 	#[must_use]
 	pub const fn as_arr(&self) -> [f32; 4] {
 		[self.r, self.b, self.g, self.a]
+	}
+
+	// expects strings like "#424242" or "#424242FF"
+	pub fn from_hex(html_hex: &str) -> Option<drawing::Color> {
+		let Some(ch) = html_hex.chars().next() else {
+			return None;
+		};
+
+		if ch != '#' {
+			return None;
+		}
+
+		if html_hex.len() == 7 {
+			if let (Ok(r), Ok(g), Ok(b)) = (
+				u8::from_str_radix(&html_hex[1..3], 16),
+				u8::from_str_radix(&html_hex[3..5], 16),
+				u8::from_str_radix(&html_hex[5..7], 16),
+			) {
+				return Some(drawing::Color::new(
+					f32::from(r) / 255.,
+					f32::from(g) / 255.,
+					f32::from(b) / 255.,
+					1.,
+				));
+			}
+		} else if html_hex.len() == 9
+			&& let (Ok(r), Ok(g), Ok(b), Ok(a)) = (
+				u8::from_str_radix(&html_hex[1..3], 16),
+				u8::from_str_radix(&html_hex[3..5], 16),
+				u8::from_str_radix(&html_hex[5..7], 16),
+				u8::from_str_radix(&html_hex[7..9], 16),
+			) {
+			return Some(drawing::Color::new(
+				f32::from(r) / 255.,
+				f32::from(g) / 255.,
+				f32::from(b) / 255.,
+				f32::from(a) / 255.,
+			));
+		}
+		None
 	}
 }
 

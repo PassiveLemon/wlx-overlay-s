@@ -1,7 +1,7 @@
 use crate::{
 	assets::AssetPath,
+	color::WguiColor,
 	components::{Component, button},
-	drawing::Color,
 	i18n::Translation,
 	layout::WidgetID,
 	parser::{
@@ -21,11 +21,11 @@ pub fn parse_component_button<'a>(
 	attribs: &[AttribPair],
 	tag_name: &str,
 ) -> anyhow::Result<WidgetID> {
-	let mut color: Option<Color> = None;
+	let mut color: Option<WguiColor> = None;
 	let mut border = 2.0;
-	let mut border_color: Option<Color> = None;
-	let mut hover_color: Option<Color> = None;
-	let mut hover_border_color: Option<Color> = None;
+	let mut border_color: Option<WguiColor> = None;
+	let mut hover_color: Option<WguiColor> = None;
+	let mut hover_border_color: Option<WguiColor> = None;
 	let mut round = WLength::Units(4.0);
 	let mut tooltip = TooltipAttribs::default();
 	let mut sticky: bool = false;

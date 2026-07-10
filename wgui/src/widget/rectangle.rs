@@ -1,8 +1,10 @@
 use slotmap::Key;
 
 use crate::{
+	color::WguiColor,
 	drawing::{self, GradientMode, PrimitiveExtent},
 	event::CallbackDataCommon,
+	globals::Globals,
 	layout::WidgetID,
 	widget::{WidgetStateFlags, util::WLength},
 };
@@ -11,12 +13,12 @@ use super::{WidgetObj, WidgetState};
 
 #[derive(Debug, Default)]
 pub struct WidgetRectangleParams {
-	pub color: drawing::Color,
-	pub color2: drawing::Color,
+	pub color: WguiColor,
+	pub color2: WguiColor,
 	pub gradient: GradientMode,
 
 	pub border: f32,
-	pub border_color: drawing::Color,
+	pub border_color: WguiColor,
 
 	pub round: WLength,
 }
@@ -36,7 +38,8 @@ impl WidgetRectangle {
 			}),
 		)
 	}
-	pub fn set_color(&mut self, common: &mut CallbackDataCommon, color: drawing::Color) {
+
+	pub fn set_color(&mut self, common: &mut CallbackDataCommon, color: WguiColor) {
 		self.params.color = color;
 		common.mark_widget_dirty(self.id);
 	}
@@ -51,17 +54,21 @@ impl WidgetObj for WidgetRectangle {
 			WLength::Percent(percent) => (f32::min(boundary.size.x, boundary.size.y) * percent / 2.0) as u8,
 		};
 
+		let color = self.params.color.resolve(&state.globals.palette);
+		let color2 = self.params.color2.resolve(&state.globals.palette);
+		let border_color = self.params.border_color.resolve(&state.globals.palette);
+
 		state.primitives.push(drawing::RenderPrimitive::Rectangle(
 			PrimitiveExtent {
 				boundary,
 				transform: state.transform_stack.get().transform,
 			},
 			drawing::Rectangle {
-				color: self.params.color,
-				color2: self.params.color2,
+				color,
+				color2,
+				border_color,
 				gradient: self.params.gradient,
 				border: self.params.border,
-				border_color: self.params.border_color,
 				round_units,
 			},
 		));
@@ -79,11 +86,11 @@ impl WidgetObj for WidgetRectangle {
 		super::WidgetType::Rectangle
 	}
 
-	fn debug_print(&self) -> String {
+	fn debug_print(&self, globals: &Globals) -> String {
 		format!(
 			"[color: {}][color2: {}][gradient: {:?}]",
-			self.params.color.debug_ansi_block(),
-			self.params.color2.debug_ansi_block(),
+			self.params.color.resolve(&globals.palette).debug_ansi_block(),
+			self.params.color2.resolve(&globals.palette).debug_ansi_block(),
 			self.params.gradient,
 		)
 	}

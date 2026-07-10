@@ -4,8 +4,8 @@ use taffy::prelude::percent;
 use crate::{
 	animation::Animation,
 	assets::AssetPath,
+	color::WguiColorName,
 	components::{Component, ComponentBase, ComponentTrait, RefreshData},
-	drawing::Color,
 	event::EventAlterables,
 	globals::WguiGlobals,
 	layout::{Layout, WidgetID, WidgetPair},
@@ -227,7 +227,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 	let (root, _) = ess.layout.add_child(
 		ess.parent,
 		WidgetRectangle::create(WidgetRectangleParams {
-			color: Color::new(0.1, 0.1, 0.1, 1.0),
+			color: WguiColorName::Background.into(),
 			..Default::default()
 		}),
 		style,

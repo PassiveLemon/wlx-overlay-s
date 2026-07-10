@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use wgui::{
 	assets::AssetPath,
+	color::{WguiColor, WguiColorName},
 	components::{
 		self,
 		button::{ButtonClickCallback, ComponentButton},
@@ -110,11 +111,13 @@ struct MultiSelectorParams<'a> {
 }
 
 fn mount_multi_selector(params: MultiSelectorParams) -> anyhow::Result<()> {
-	let accent_color = params.ess.layout.state.theme.accent_color;
-
 	for cell in params.cells {
 		let highlighted = cell.key == params.def_cell;
-		let color = if highlighted { Some(accent_color) } else { None };
+		let color = if highlighted {
+			Some(WguiColor::from(WguiColorName::Primary))
+		} else {
+			None
+		};
 
 		// button
 		let (_, button) = components::button::construct(
@@ -664,11 +667,11 @@ impl View {
 
 		let mut perform = |btn_num: u8, btn: &Rc<ComponentButton>| {
 			let color = if num == btn_num {
-				com.state.theme.accent_color
+				WguiColorName::Primary
 			} else {
-				com.state.theme.button_color
+				WguiColorName::BackgroundVariant
 			};
-			btn.set_color(&mut com, color);
+			btn.set_color(&mut com, color.into());
 		};
 
 		perform(0, &self.btn_sinks);

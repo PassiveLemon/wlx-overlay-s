@@ -96,7 +96,10 @@ impl ComponentTrait for ComponentColorSelector {
 			Translation::from_raw_text_string(state.color.to_hex_rgb()),
 		);
 
-		self.data.button.set_color(&mut data.layout.common(), state.color);
+		self
+			.data
+			.button
+			.set_color(&mut data.layout.common(), state.color.into());
 	}
 }
 
@@ -210,7 +213,7 @@ impl ComponentColorSelector {
 				.widgets
 				.get_as::<WidgetRectangle>(popup_state.id_rect_color)
 			{
-				rect.set_color(common, new_color);
+				rect.set_color(common, new_color.into());
 			}
 			set_color_internal(&mut state, common, new_color);
 		})
@@ -240,10 +243,10 @@ pub fn construct(
 	let (widget_button, button) = button::construct(
 		ess,
 		button::Params {
-			color: Some(params.color),
+			color: Some(params.color.into()),
 			round: WLength::Percent(1.0),
 			border: 2.0,
-			border_color: Some(drawing::Color::new(0.0, 0.0, 0.0, 1.0)),
+			border_color: Some(drawing::Color::new(0.0, 0.0, 0.0, 1.0).into()),
 			style,
 			..Default::default()
 		},

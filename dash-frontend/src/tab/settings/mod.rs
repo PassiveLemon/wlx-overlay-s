@@ -3,8 +3,8 @@ use std::{marker::PhantomData, rc::Rc, str::FromStr};
 use strum::{AsRefStr, EnumProperty, EnumString};
 use wgui::{
 	assets::AssetPath,
+	color::WguiColorName,
 	components::tabs::ComponentTabs,
-	drawing,
 	event::StyleSetRequest,
 	globals::WguiGlobals,
 	i18n::Translation,
@@ -597,7 +597,7 @@ fn mount_requires_restart(layout: &mut Layout, parent: WidgetID) -> anyhow::Resu
 			content,
 			style: TextStyle {
 				wrap: false,
-				color: Some(drawing::Color::new(1.0, 0.5, 0.5, 1.0)),
+				color: Some(WguiColorName::Danger.into()),
 				weight: Some(FontWeight::Bold),
 				size: Some(10.0),
 				..Default::default()

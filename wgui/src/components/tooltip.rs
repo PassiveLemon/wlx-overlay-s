@@ -4,8 +4,8 @@ use taffy::prelude::length;
 
 use crate::{
 	animation::{Animation, AnimationEasing},
+	color::{WguiColor, WguiColorName},
 	components::{self, Component, ComponentBase, ComponentTrait, RefreshData},
-	drawing::Color,
 	event::CallbackDataCommon,
 	i18n::Translation,
 	layout::{self, LayoutTask, LayoutTasks, WidgetID, WidgetPair},
@@ -153,8 +153,8 @@ impl Drop for ComponentTooltip {
 	}
 }
 
-pub const TOOLTIP_COLOR: Color = Color::new(0.02, 0.02, 0.02, 0.95);
-pub const TOOLTIP_BORDER_COLOR: Color = Color::new(0.4, 0.4, 0.4, 1.0);
+pub const TOOLTIP_COLOR: WguiColorName = WguiColorName::BackgroundVariant;
+pub const TOOLTIP_BORDER_COLOR: WguiColorName = WguiColorName::Outline;
 
 pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Result<(WidgetPair, Rc<ComponentTooltip>)> {
 	let absolute_boundary = {
@@ -233,8 +233,8 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 	let (rect, _) = ess.layout.add_child(
 		div.id,
 		WidgetRectangle::create(WidgetRectangleParams {
-			color: TOOLTIP_COLOR,
-			border_color: TOOLTIP_BORDER_COLOR,
+			color: TOOLTIP_COLOR.into(),
+			border_color: TOOLTIP_BORDER_COLOR.into(),
 			border: 2.0,
 			round: WLength::Units(24.0),
 			..Default::default()
@@ -300,8 +300,8 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 			Box::new(move |common, data| {
 				let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap(); /* safe */
 				let alpha = data.pos;
-				rect.params.color.a = alpha;
-				rect.params.border_color.a = alpha;
+				rect.params.color = rect.params.color.with_alpha(alpha);
+				rect.params.border_color = rect.params.border_color.with_alpha(alpha);
 
 				let position_shift = state.borrow().position_shift;
 
@@ -313,7 +313,11 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 				));
 
 				if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(label.id) {
-					label.set_color(common, Color::new(1.0, 1.0, 1.0, alpha), true);
+					label.set_color(
+						common,
+						WguiColor::from(WguiColorName::OnBackground).with_alpha(alpha),
+						true,
+					);
 				}
 
 				common.alterables.mark_redraw();

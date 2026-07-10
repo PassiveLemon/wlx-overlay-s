@@ -1,6 +1,6 @@
 use slotmap::Key;
 
-use crate::{layout::WidgetID, widget::WidgetStateFlags};
+use crate::{globals::Globals, layout::WidgetID, widget::WidgetStateFlags};
 
 use super::{WidgetObj, WidgetState};
 
@@ -31,7 +31,7 @@ impl WidgetObj for WidgetDiv {
 		super::WidgetType::Div
 	}
 
-	fn debug_print(&self) -> String {
+	fn debug_print(&self, _globals: &Globals) -> String {
 		String::default()
 	}
 }

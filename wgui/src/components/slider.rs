@@ -5,11 +5,11 @@ use taffy::prelude::{length, percent};
 
 use crate::{
 	animation::{Animation, AnimationEasing},
+	color::{WguiColor, WguiColorName, WguiColorPalette},
 	components::{
 		Component, ComponentBase, ComponentTrait, RefreshData,
 		tooltip::{self, ComponentTooltip, TooltipTrait},
 	},
-	drawing::{self},
 	event::{
 		self, CallbackDataCommon, CallbackMetadata, DeviceBitmask, EventAlterables, EventListenerCollection,
 		EventListenerKind, StyleSetRequest,
@@ -346,12 +346,12 @@ impl State {
 	}
 }
 
-const BODY_COLOR: drawing::Color = drawing::Color::new(0.6, 0.65, 0.7, 0.1);
-const BODY_BORDER_COLOR: drawing::Color = drawing::Color::new(0.4, 0.45, 0.5, 0.6);
-const HANDLE_BORDER_COLOR: drawing::Color = drawing::Color::new(0.85, 0.85, 0.85, 1.0);
-const HANDLE_BORDER_COLOR_HOVERED: drawing::Color = drawing::Color::new(0.0, 0.0, 0.0, 1.0);
-const HANDLE_COLOR: drawing::Color = drawing::Color::new(1.0, 1.0, 1.0, 1.0);
-const HANDLE_COLOR_HOVERED: drawing::Color = drawing::Color::new(0.9, 0.9, 0.9, 1.0);
+const BODY_COLOR: WguiColor = WguiColorName::BackgroundVariant.to_wgui_color();
+const BODY_BORDER_COLOR: WguiColor = WguiColorName::Outline.to_wgui_color();
+const HANDLE_COLOR: WguiColorName = WguiColorName::Secondary;
+const HANDLE_COLOR_HOVERED: WguiColor = WguiColorName::Secondary.to_wgui_color().add_rgb(0.1);
+const HANDLE_BORDER_COLOR: WguiColor = WguiColorName::Primary.to_wgui_color();
+const HANDLE_BORDER_COLOR_HOVERED: WguiColor = WguiColorName::Primary.to_wgui_color().mult_rgb(1.25);
 
 const SLIDER_HOVER_SCALE: f32 = 0.25;
 fn get_anim_transform(pos: f32, widget_size: Vec2) -> Mat4 {
@@ -361,9 +361,9 @@ fn get_anim_transform(pos: f32, widget_size: Vec2) -> Mat4 {
 	)
 }
 
-fn anim_rect(rect: &mut WidgetRectangle, pos: f32) {
-	rect.params.color = drawing::Color::lerp(&HANDLE_COLOR, &HANDLE_COLOR_HOVERED, pos);
-	rect.params.border_color = drawing::Color::lerp(&HANDLE_BORDER_COLOR, &HANDLE_BORDER_COLOR_HOVERED, pos);
+fn anim_rect(rect: &mut WidgetRectangle, palette: &WguiColorPalette, pos: f32) {
+	rect.params.color = WguiColor::lerp(&HANDLE_COLOR.into(), palette, &HANDLE_COLOR_HOVERED, pos);
+	rect.params.border_color = WguiColor::lerp(&HANDLE_BORDER_COLOR, palette, &HANDLE_BORDER_COLOR_HOVERED, pos);
 }
 
 fn on_enter_anim(common: &mut event::CallbackDataCommon, handle_id: WidgetID, anim_mult: f32) {
@@ -374,7 +374,7 @@ fn on_enter_anim(common: &mut event::CallbackDataCommon, handle_id: WidgetID, an
 		Box::new(move |common, data| {
 			let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap();
 			data.data.transform = get_anim_transform(data.pos, data.widget_boundary.size);
-			anim_rect(rect, data.pos);
+			anim_rect(rect, &common.globals().palette, data.pos);
 			common.alterables.mark_redraw();
 		}),
 	));
@@ -388,7 +388,7 @@ fn on_leave_anim(common: &mut event::CallbackDataCommon, handle_id: WidgetID, an
 		Box::new(move |common, data| {
 			let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap();
 			data.data.transform = get_anim_transform(1.0 - data.pos, data.widget_boundary.size);
-			anim_rect(rect, 1.0 - data.pos);
+			anim_rect(rect, &common.globals().palette, 1.0 - data.pos);
 			common.alterables.mark_redraw();
 		}),
 	));
@@ -606,7 +606,7 @@ fn mount_slider_handle(
 	let (slider_handle_rect, _) = ess.layout.add_child(
 		slider_handle.id,
 		WidgetRectangle::create(WidgetRectangleParams {
-			color: HANDLE_COLOR,
+			color: HANDLE_COLOR.into(),
 			border_color: HANDLE_BORDER_COLOR,
 			border: 2.0,
 			round: WLength::Percent(1.0),
@@ -628,7 +628,7 @@ fn mount_slider_handle(
 			WidgetLabelParams {
 				content: Translation::default(),
 				style: TextStyle {
-					color: Some(drawing::Color::new(0.0, 0.0, 0.0, 1.0)), // always black
+					color: Some(WguiColorName::OnPrimary.into()),
 					weight: Some(FontWeight::Bold),
 					align: Some(HorizontalAlign::Center),
 					..Default::default()

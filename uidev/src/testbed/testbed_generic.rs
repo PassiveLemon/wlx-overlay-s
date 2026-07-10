@@ -116,9 +116,9 @@ impl TestbedGeneric {
 				color = color.mult_rgb(mult_f32);
 
 				let mut rect = par.get_widget_as::<WidgetRectangle>().unwrap();
-				rect.params.color = color;
+				rect.params.color = color.into();
 			})),
-			dev_mode: false,
+			..Default::default()
 		};
 
 		let (layout, parser_state) = wgui::parser::new_layout_from_assets(

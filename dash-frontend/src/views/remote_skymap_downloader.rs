@@ -11,8 +11,8 @@ use crate::{
 use anyhow::Context;
 use wgui::{
 	assets::AssetPath,
+	color::WguiColorName,
 	components::button::ComponentButton,
-	drawing::Color,
 	globals::WguiGlobals,
 	i18n::Translation,
 	layout::{Layout, WidgetID},
@@ -86,7 +86,7 @@ fn mount_resolution_button(
 	let button = data.fetch_component_as::<ComponentButton>("button")?;
 
 	if already_downloaded {
-		button.set_color(&mut layout.common(), Color::new(0.0, 0.4, 0.0, 1.0)); // green
+		button.set_color(&mut layout.common(), WguiColorName::Tertiary.into()); // green
 	}
 	tasks.handle_button(&button, Task::ResolutionClicked(res));
 	Ok(())

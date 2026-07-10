@@ -9,12 +9,13 @@ use taffy::{
 
 use crate::{
 	animation::{Animation, AnimationEasing},
+	color::{WguiColor, WguiColorName},
 	components::{
 		Component, ComponentBase, ComponentTrait, RefreshData,
 		radio_group::ComponentRadioGroup,
 		tooltip::{self, ComponentTooltip, TooltipTrait},
 	},
-	drawing::Color,
+	drawing,
 	event::{CallbackDataCommon, EventListenerCollection, EventListenerID, EventListenerKind},
 	i18n::Translation,
 	layout::{self, WidgetID, WidgetPair},
@@ -31,7 +32,7 @@ use crate::{
 pub struct Params {
 	pub text: Translation,
 	pub style: taffy::Style,
-	pub color_checked: Option<Color>,
+	pub color_checked: Option<WguiColor>,
 	pub box_size: f32,
 	pub checked: bool,
 	pub radio_group: Option<Rc<ComponentRadioGroup>>,
@@ -87,7 +88,7 @@ struct Data {
 	value: Option<Rc<str>>, // arbitrary value assigned to the element
 	radio_group: Option<Weak<ComponentRadioGroup>>,
 
-	color_checked: Color,
+	color_checked: WguiColor,
 }
 
 pub struct ComponentCheckbox {
@@ -96,7 +97,7 @@ pub struct ComponentCheckbox {
 	state: Rc<RefCell<State>>,
 }
 
-const COLOR_UNCHECKED: Color = Color::new(0.0, 0.0, 0.0, 0.0);
+const COLOR_UNCHECKED: drawing::Color = drawing::Color::new(0.0, 0.0, 0.0, 0.0);
 
 impl ComponentTrait for ComponentCheckbox {
 	fn base(&self) -> &ComponentBase {
@@ -114,7 +115,11 @@ impl ComponentTrait for ComponentCheckbox {
 
 fn set_box_checked(widgets: &layout::WidgetMap, data: &Data, checked: bool) {
 	widgets.call(data.id_inner_box, |rect: &mut WidgetRectangle| {
-		rect.params.color = if checked { data.color_checked } else { COLOR_UNCHECKED }
+		rect.params.color = if checked {
+			data.color_checked
+		} else {
+			COLOR_UNCHECKED.into()
+		}
 	});
 }
 
@@ -159,13 +164,13 @@ impl ComponentCheckbox {
 }
 
 fn anim_hover(rect: &mut WidgetRectangle, pos: f32, pressed: bool) {
-	let brightness = pos * if pressed { 0.6 } else { 0.4 };
+	let mut brightness = pos * if pressed { 0.6 } else { 0.4 };
 	rect.params.border = 2.0;
-	rect.params.color.a = brightness;
-	rect.params.border_color.a = rect.params.color.a;
+	rect.params.color = rect.params.color.with_alpha(brightness);
 	if pressed {
-		rect.params.border_color.a += 0.4;
+		brightness += 0.4;
 	}
+	rect.params.border_color = rect.params.border_color.with_alpha(brightness);
 }
 
 fn anim_hover_in(state: Rc<RefCell<State>>, widget_id: WidgetID, anim_mult: f32) -> Animation {
@@ -329,7 +334,6 @@ fn register_event_mouse_release(
 
 pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Result<(WidgetPair, Rc<ComponentCheckbox>)> {
 	let mut style = params.style;
-	let theme = &ess.layout.state.theme;
 
 	// force-override style
 	style.flex_wrap = taffy::FlexWrap::NoWrap;
@@ -358,13 +362,12 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 		(WLength::Units(5.0), WLength::Units(8.0))
 	};
 
-	let color_checked = params.color_checked.unwrap_or(theme.accent_color);
+	let color_checked = params.color_checked.unwrap_or(WguiColorName::Primary.into());
 
 	let (root, _) = ess.layout.add_child(
 		ess.parent,
 		WidgetRectangle::create(WidgetRectangleParams {
-			color: Color::new(1.0, 1.0, 1.0, 0.0),
-			border_color: Color::new(1.0, 1.0, 1.0, 0.0),
+			color: WguiColor::from(WguiColorName::OnPrimary).with_alpha(0.0),
 			round: round_5,
 			..Default::default()
 		}),
@@ -382,9 +385,9 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 		id_container,
 		WidgetRectangle::create(WidgetRectangleParams {
 			border: 2.0,
-			border_color: Color::new(1.0, 1.0, 1.0, 1.0),
+			border_color: WguiColorName::OnPrimary.into(),
 			round: round_8,
-			color: Color::new(1.0, 1.0, 1.0, 0.0),
+			color: WguiColor::from(WguiColorName::OnPrimary).with_alpha(0.0),
 			..Default::default()
 		}),
 		taffy::Style {
@@ -400,7 +403,11 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 		outer_box.id,
 		WidgetRectangle::create(WidgetRectangleParams {
 			round: round_5,
-			color: if params.checked { color_checked } else { COLOR_UNCHECKED },
+			color: if params.checked {
+				color_checked
+			} else {
+				COLOR_UNCHECKED.into()
+			},
 			..Default::default()
 		}),
 		taffy::Style {

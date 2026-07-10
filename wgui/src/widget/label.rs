@@ -5,13 +5,13 @@ use slotmap::Key;
 use taffy::AvailableSpace;
 
 use crate::{
+	color::{WguiColor, WguiColorName, WguiColorPalette},
 	drawing::{self, PrimitiveExtent},
 	event::CallbackDataCommon,
 	globals::Globals,
 	i18n::Translation,
 	layout::{LayoutState, WidgetID},
 	renderer_vk::text::TextStyle,
-	theme::WguiTheme,
 	widget::WidgetStateFlags,
 };
 
@@ -32,16 +32,16 @@ pub struct WidgetLabel {
 
 impl WidgetLabel {
 	pub fn create(state: &mut LayoutState, params: WidgetLabelParams) -> WidgetState {
-		WidgetLabel::create_ex(&mut state.globals.get(), &state.theme, params)
+		WidgetLabel::create_ex(&mut state.globals.get(), params)
 	}
 
-	pub fn create_ex(globals: &mut Globals, theme: &WguiTheme, mut params: WidgetLabelParams) -> WidgetState {
+	pub fn create_ex(globals: &mut Globals, mut params: WidgetLabelParams) -> WidgetState {
 		if params.style.color.is_none() {
-			params.style.color = Some(theme.text_color);
+			params.style.color = Some(WguiColorName::OnPrimary.into());
 		}
 
 		let metrics = Metrics::from(&params.style);
-		let attrs = Attrs::from(&params.style);
+		let attrs = params.style.to_attrs(&globals.palette);
 		let wrap = Wrap::from(&params.style);
 
 		let mut buffer = Buffer::new_empty(metrics);
@@ -86,7 +86,7 @@ impl WidgetLabel {
 		}
 
 		self.params.content = translation;
-		let attrs = Attrs::from(&self.params.style);
+		let attrs = self.params.style.to_attrs(&globals.palette);
 
 		let text = self.params.content.generate(&mut globals.i18n_builtin);
 
@@ -101,8 +101,8 @@ impl WidgetLabel {
 		true
 	}
 
-	fn update_attrs(&mut self) {
-		let attrs = Attrs::from(&self.params.style);
+	fn update_attrs(&mut self, palette: &WguiColorPalette) {
+		let attrs = self.params.style.to_attrs(palette);
 		for line in &mut self.buffer.borrow_mut().lines {
 			line.set_attrs_list(AttrsList::new(&attrs));
 		}
@@ -117,10 +117,10 @@ impl WidgetLabel {
 		}
 	}
 
-	pub fn set_color(&mut self, common: &mut CallbackDataCommon, color: drawing::Color, apply_to_existing_text: bool) {
+	pub fn set_color(&mut self, common: &mut CallbackDataCommon, color: WguiColor, apply_to_existing_text: bool) {
 		self.params.style.color = Some(color);
 		if apply_to_existing_text {
-			self.update_attrs();
+			self.update_attrs(&common.globals().palette);
 			common.mark_widget_dirty(self.id);
 		}
 	}
@@ -183,9 +183,9 @@ impl WidgetObj for WidgetLabel {
 		super::WidgetType::Label
 	}
 
-	fn debug_print(&self) -> String {
+	fn debug_print(&self, globals: &Globals) -> String {
 		let color = if let Some(color) = self.params.style.color {
-			format!("[color: {}]", color.debug_ansi_block())
+			format!("[color: {}]", color.resolve(&globals.palette).debug_ansi_block())
 		} else {
 			String::default()
 		};

@@ -4,8 +4,9 @@ use taffy::{
 };
 
 use crate::{
+	color::WguiColor,
 	drawing,
-	parser::{AttribPair, ParserContext, is_percent, parse_color_hex, parse_f32},
+	parser::{AttribPair, ParserContext, is_percent, parse_f32},
 	renderer_vk::text::{FontWeight, HorizontalAlign, TextStyle},
 	widget::util::WLength,
 };
@@ -31,12 +32,19 @@ pub fn parse_round(
 	}
 }
 
-pub fn parse_color(ctx: &ParserContext<'_>, tag_name: &str, key: &str, value: &str, color: &mut drawing::Color) {
-	if let Some(res_color) = parse_color_hex(value) {
-		*color = res_color;
-	} else {
-		ctx.print_invalid_attrib(tag_name, key, value);
+pub fn parse_color(ctx: &ParserContext<'_>, tag_name: &str, key: &str, value: &str, out_color: &mut WguiColor) -> bool {
+	if let Some(color) = drawing::Color::from_hex(value) {
+		*out_color = color.into();
+		return true;
 	}
+
+	if let Some(color) = ctx.layout.state.globals.get().palette.find(value) {
+		*out_color = color;
+		return true;
+	}
+
+	ctx.print_invalid_attrib(tag_name, key, value);
+	false
 }
 
 pub fn parse_color_opt(
@@ -44,12 +52,11 @@ pub fn parse_color_opt(
 	tag_name: &str,
 	key: &str,
 	value: &str,
-	color: &mut Option<drawing::Color>,
+	out_color: &mut Option<WguiColor>,
 ) {
-	if let Some(res_color) = parse_color_hex(value) {
-		*color = Some(res_color);
-	} else {
-		ctx.print_invalid_attrib(tag_name, key, value);
+	let mut color = WguiColor::default();
+	if parse_color(ctx, tag_name, key, value, &mut color) {
+		*out_color = Some(color);
 	}
 }
 
@@ -60,9 +67,7 @@ pub fn parse_text_style(ctx: &ParserContext<'_>, attribs: &[AttribPair], tag_nam
 		let (key, value) = (pair.attrib.as_ref(), pair.value.as_ref());
 		match key {
 			"color" => {
-				if let Some(color) = parse_color_hex(value) {
-					style.color = Some(color);
-				}
+				parse_color_opt(ctx, tag_name, key, value, &mut style.color);
 			}
 			"align" => match value {
 				"left" => style.align = Some(HorizontalAlign::Left),
@@ -90,7 +95,7 @@ pub fn parse_text_style(ctx: &ParserContext<'_>, attribs: &[AttribPair], tag_nam
 				}
 			}
 			"shadow" => {
-				if let Some(color) = parse_color_hex(value) {
+				if let Some(color) = drawing::Color::from_hex(value) {
 					style.shadow.get_or_insert_default().color = color;
 				}
 			}

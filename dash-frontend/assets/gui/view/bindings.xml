@@ -15,7 +15,7 @@
       <!-- top row -->
       <div flex_direction="row" gap="8" align_items="center">
         <sprite src_builtin="dashboard/controller.svg" width="24" height="24"/>
-        <label translation="${translation}" color="~color_accent" weight="bold" size="14" />
+        <label translation="${translation}" color="primary" weight="bold" size="14" />
       </div>
       <!-- filled-in at runtime -->
     </rectangle>

@@ -20,7 +20,7 @@
         <div id="resolution_buttons" gap="8" flex_direction="row">
           <!-- filled-in at runtime -->
         </div>
-        <image id="image" width="400" height="200" round="8" border="2" border_color="~color_accent"/>
+        <image id="image" width="400" height="200" round="8" border="2" border_color="primary"/>
         <label id="label_author" weight="bold"/>
         <label id="label_description" wrap="1"/>
         <Separator/>

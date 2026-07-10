@@ -1,11 +1,12 @@
 use crate::{
 	animation::{Animation, AnimationEasing},
 	assets::AssetPath,
+	color::{WguiColor, WguiColorName},
 	components::{
 		self, Component, ComponentBase, ComponentTrait, RefreshData,
 		tooltip::{ComponentTooltip, TooltipTrait},
 	},
-	drawing::{self, Boundary, Color},
+	drawing::{self, Boundary},
 	event::{CallbackDataCommon, EventListenerCollection, EventListenerID, EventListenerKind},
 	i18n::Translation,
 	layout::{WidgetID, WidgetPair},
@@ -33,11 +34,11 @@ use taffy::{AlignItems, JustifyContent, prelude::length};
 pub struct Params<'a> {
 	pub text: Option<Translation>, // if unset, label will not be populated
 	pub sprite_src: Option<AssetPath<'a>>,
-	pub color: Option<drawing::Color>,
+	pub color: Option<WguiColor>,
 	pub border: f32,
-	pub border_color: Option<drawing::Color>,
-	pub hover_border_color: Option<drawing::Color>,
-	pub hover_color: Option<drawing::Color>,
+	pub border_color: Option<WguiColor>,
+	pub hover_border_color: Option<WguiColor>,
+	pub hover_color: Option<WguiColor>,
 	pub round: WLength,
 	pub style: taffy::Style,
 	pub text_style: TextStyle,
@@ -77,10 +78,10 @@ pub struct ButtonClickEvent {
 pub type ButtonClickCallback = Rc<dyn Fn(&mut CallbackDataCommon, ButtonClickEvent) -> anyhow::Result<()>>;
 
 pub struct Colors {
-	pub color: drawing::Color,
-	pub border_color: drawing::Color,
-	pub hover_color: drawing::Color,
-	pub hover_border_color: drawing::Color,
+	pub color: WguiColor,
+	pub border_color: WguiColor,
+	pub hover_color: WguiColor,
+	pub hover_border_color: WguiColor,
 }
 
 struct State {
@@ -136,12 +137,8 @@ impl ComponentTrait for ComponentButton {
 	}
 }
 
-fn get_color2(color: &drawing::Color, gradient_intensity: f32) -> drawing::Color {
-	color.lerp(&Color::new(0.0, 0.0, 0.0, color.a), gradient_intensity)
-}
-
-fn get_hover_color(color: &drawing::Color) -> drawing::Color {
-	Color::new(color.r + 0.25, color.g + 0.25, color.g + 0.25, color.a + 0.15)
+fn get_color2(color: &WguiColor, gradient_intensity: f32) -> WguiColor {
+	color.mult_rgb(1.0 - gradient_intensity)
 }
 
 impl ComponentButton {
@@ -161,18 +158,17 @@ impl ComponentButton {
 		label.set_text(common, text);
 	}
 
-	pub fn set_color(&self, common: &mut CallbackDataCommon, color: Color) {
+	pub fn set_color(&self, common: &mut CallbackDataCommon, color: WguiColor) {
 		let gradient_intensity = common.state.theme.gradient_intensity;
 
 		let Some(mut rect) = common.state.widgets.get_as::<WidgetRectangle>(self.data.id_rect) else {
 			return;
 		};
+		rect.params.color = color;
+		rect.params.color2 = get_color2(&color, gradient_intensity);
 
 		let mut state = self.state.borrow_mut();
 		state.colors.color = color;
-		state.colors.hover_color = get_hover_color(&color);
-		rect.params.color = color;
-		rect.params.color2 = get_color2(&color, gradient_intensity);
 	}
 
 	pub fn get_time_since_last_pressed(&self) -> Duration {
@@ -220,10 +216,15 @@ impl ComponentButton {
 
 				let state = state.borrow();
 				let colors = &state.colors;
-				let bgcolor = colors.color.lerp(&colors.hover_color, mult * 0.5);
-				rect.params.color = bgcolor;
-				rect.params.color2 = get_color2(&bgcolor, gradient_intensity);
-				rect.params.border_color = colors.border_color.lerp(&colors.hover_border_color, mult);
+
+				{
+					let globals = common.globals();
+					let palette = &globals.palette;
+					let bgcolor = colors.color.lerp(palette, &colors.hover_color, mult * 0.5);
+					rect.params.color = bgcolor;
+					rect.params.color2 = get_color2(&bgcolor, gradient_intensity);
+					rect.params.border_color = colors.border_color.lerp(palette, &colors.hover_border_color, mult);
+				}
 				common.alterables.mark_redraw();
 			}),
 		);
@@ -245,13 +246,18 @@ fn anim_hover(
 ) {
 	let mult = pos * if pressed { 1.5 } else { 1.0 };
 
+	let globals = common.globals();
+
 	let (init_border_color, init_color) = if sticky_down {
-		(colors.hover_border_color, colors.color.lerp(&colors.hover_color, 0.5))
+		(
+			colors.hover_border_color,
+			colors.color.lerp(&globals.palette, &colors.hover_color, 0.5),
+		)
 	} else {
 		(colors.border_color, colors.color)
 	};
 
-	let bgcolor = init_color.lerp(&colors.hover_color, mult);
+	let bgcolor = init_color.lerp(&globals.palette, &colors.hover_color, mult);
 
 	let gradient_intensity = common.state.theme.gradient_intensity;
 
@@ -263,7 +269,7 @@ fn anim_hover(
 	rect.params.color = bgcolor;
 	rect.params.color2 = get_color2(&bgcolor, gradient_intensity);
 
-	rect.params.border_color = init_border_color.lerp(&colors.hover_border_color, mult);
+	rect.params.border_color = init_border_color.lerp(&globals.palette, &colors.hover_border_color, mult);
 }
 
 fn anim_hover_create(state: Rc<RefCell<State>>, widget_id: WidgetID, fade_in: bool, anim_mult: f32) -> Animation {
@@ -446,25 +452,26 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 	style.overflow.x = taffy::Overflow::Hidden;
 	style.overflow.y = taffy::Overflow::Hidden;
 
+	let globals = ess.layout.state.globals.get();
+
 	// update colors to default ones if they are not specified
-	let color = params.color.unwrap_or(theme.button_color);
+	let color = params.color.unwrap_or_else(|| WguiColorName::BackgroundVariant.into());
 
 	let border_color = params
 		.border_color
-		.unwrap_or_else(|| Color::new(color.r, color.g, color.b, color.a + 0.25));
+		.unwrap_or_else(|| WguiColor::from(WguiColorName::Outline));
 
-	let hover_color = params.hover_color.unwrap_or_else(|| get_hover_color(&color));
+	let hover_color = params
+		.hover_color
+		.unwrap_or_else(|| color.add_rgb(0.25).add_alpha(0.15));
 
 	let hover_border_color = params
 		.hover_border_color
-		.unwrap_or_else(|| Color::new(color.r + 0.5, color.g + 0.5, color.g + 0.5, color.a + 0.5));
+		.unwrap_or_else(|| border_color.add_rgb(0.5).add_alpha(0.5));
 
 	let gradient_intensity = theme.gradient_intensity;
 
-	let light_text = {
-		let mult = if theme.dark_mode { color.a } else { 1.0 - color.a };
-		(color.r + color.g + color.b) * mult < 1.5
-	};
+	drop(globals);
 
 	let (root, _) = ess.layout.add_child(
 		ess.parent,
@@ -515,11 +522,6 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 				content,
 				style: TextStyle {
 					weight: Some(FontWeight::Bold),
-					color: Some(if light_text {
-						Color::new(1.0, 1.0, 1.0, 1.0)
-					} else {
-						Color::new(0.0, 0.0, 0.0, 1.0)
-					}),
 					..params.text_style
 				},
 			},

@@ -187,7 +187,7 @@ pub trait WidgetObj: AnyTrait {
 	fn get_id(&self) -> WidgetID;
 	fn set_id(&mut self, id: WidgetID); // always set at insertion
 	fn get_type(&self) -> WidgetType;
-	fn debug_print(&self) -> String;
+	fn debug_print(&self, _globals: &Globals) -> String;
 
 	fn draw(&mut self, state: &mut DrawState, params: &DrawParams);
 
