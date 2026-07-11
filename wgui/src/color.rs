@@ -17,9 +17,13 @@ pub enum WguiColorName {
 	OnDanger,
 	Background,
 	OnBackground,
-	Outline,
 	BackgroundVariant,
 	OnBackgroundVariant,
+	BackgroundContrast,
+	OnBackgroundContrast,
+	Outline,
+	Shadow,
+	Highlight,
 }
 
 pub struct WguiColorPalette {
@@ -50,33 +54,69 @@ impl WguiColorPalette {
 		colors[WguiColorName::OnPrimary as usize] = (drawing::Color::from_hex("#eaf7ff").unwrap(), "on_primary");
 		colors[WguiColorName::Secondary as usize] = (drawing::Color::from_hex("#424b56").unwrap(), "secondary");
 		colors[WguiColorName::OnSecondary as usize] = (drawing::Color::from_hex("#d2e6ff").unwrap(), "on_secondary");
-		colors[WguiColorName::Tertiary as usize] = (drawing::Color::from_hex("#1aedcd").unwrap(), "tertiary");
+		colors[WguiColorName::Tertiary as usize] = (drawing::Color::from_hex("#10d0b3").unwrap(), "tertiary");
 		colors[WguiColorName::OnTertiary as usize] = (drawing::Color::from_hex("#d1fff8").unwrap(), "on_tertiary");
-		colors[WguiColorName::Danger as usize] = (drawing::Color::from_hex("#ea0c76").unwrap(), "danger");
+		colors[WguiColorName::Danger as usize] = (drawing::Color::from_hex("#f7469a").unwrap(), "danger");
 		colors[WguiColorName::OnDanger as usize] = (drawing::Color::from_hex("#ffebf5").unwrap(), "on_danger");
-		colors[WguiColorName::Background as usize] = (drawing::Color::from_hex("#00121a").unwrap(), "background");
+		colors[WguiColorName::Background as usize] = (drawing::Color::from_hex("#002e43").unwrap(), "background");
 		colors[WguiColorName::OnBackground as usize] = (drawing::Color::from_hex("#e4f5f6").unwrap(), "on_background");
-		colors[WguiColorName::Outline as usize] = (drawing::Color::from_hex("#204353").unwrap(), "outline");
 		colors[WguiColorName::BackgroundVariant as usize] =
-			(drawing::Color::from_hex("#031e2a").unwrap(), "background_variant");
+			(drawing::Color::from_hex("#0c5170").unwrap(), "background_variant");
 		colors[WguiColorName::OnBackgroundVariant as usize] =
 			(drawing::Color::from_hex("#e2fdff").unwrap(), "on_background_variant");
+		colors[WguiColorName::BackgroundContrast as usize] =
+			(drawing::Color::from_hex("#00131c").unwrap(), "background_contrast");
+		colors[WguiColorName::OnBackgroundContrast as usize] =
+			(drawing::Color::from_hex("#e4edf6").unwrap(), "on_background_contrast");
+		colors[WguiColorName::Outline as usize] = (drawing::Color::from_hex("#1c6788").unwrap(), "outline");
+		colors[WguiColorName::Shadow as usize] = (drawing::Color::from_hex("#000000").unwrap(), "shadow");
+		colors[WguiColorName::Highlight as usize] = (drawing::Color::from_hex("#ffffff").unwrap(), "highlight");
 
 		WguiColorPalette { colors }
 	}
 
-	pub fn find(&self, in_name: &str) -> Option<WguiColor> {
+	fn resolve_name(&self, in_name: &str) -> Option<WguiColorName> {
 		for (idx, (_, name)) in self.colors.iter().enumerate() {
 			if in_name == *name {
-				return Some(
-					WguiColorName::try_from(idx as u8)
-						.unwrap() /* this never fails */
-						.into(),
-				);
+				return WguiColorName::try_from(idx as u8).ok();
 			}
 		}
-
 		None
+	}
+
+	fn apply_modifier(color: WguiColor, modifier: &str) -> Option<WguiColor> {
+		match modifier {
+			"transparent" => Some(color.with_alpha(0.0)),
+			"opaque" => Some(color.with_alpha(1.0)),
+			other => {
+				let (prefix, val_str) = other.rsplit_once('-')?;
+				let val = val_str.parse::<f32>().ok()?;
+				match prefix {
+					"opacity" => Some(color.with_alpha(val)),
+					"rgb-mult" => Some(color.mult_rgb(val)),
+					"rgb-add" => Some(color.add_rgb(val)),
+					_ => None,
+				}
+			}
+		}
+	}
+
+	pub fn find(&self, in_name: &str) -> Option<WguiColor> {
+		if let Some((base, modifiers_str)) = in_name.split_once('(') {
+			let base_name = base.trim();
+			let modifiers = modifiers_str.trim_end_matches(')');
+
+			let name = self.resolve_name(base_name)?;
+			let mut color = name.to_wgui_color();
+
+			for mod_str in modifiers.split(',') {
+				color = WguiColorPalette::apply_modifier(color, mod_str.trim())?;
+			}
+
+			Some(color)
+		} else {
+			self.resolve_name(in_name).map(|n| n.to_wgui_color())
+		}
 	}
 }
 

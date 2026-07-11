@@ -11,7 +11,7 @@ use wgui::{
 	globals::WguiGlobals,
 	i18n::Translation,
 	layout::{Layout, WidgetID},
-	renderer_vk::text::{FontWeight, HorizontalAlign, TextShadow, TextStyle, custom_glyph::CustomGlyphData},
+	renderer_vk::text::{FontWeight, HorizontalAlign, TextStyle, WguiTextShadow, custom_glyph::CustomGlyphData},
 	taffy::{
 		self, AlignItems, AlignSelf, JustifyContent, JustifySelf,
 		prelude::{auto, length, percent},
@@ -110,11 +110,7 @@ impl View {
 					wrap: true,
 					size: Some(16.0),
 					align: Some(HorizontalAlign::Center),
-					shadow: Some(TextShadow {
-						color: drawing::Color::new(0.0, 0.0, 0.0, 1.0),
-						x: 2.0,
-						y: 2.0,
-					}),
+					shadow: Some(WguiTextShadow::default()),
 					..Default::default()
 				},
 			},

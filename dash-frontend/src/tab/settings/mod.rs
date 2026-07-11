@@ -11,7 +11,7 @@ use wgui::{
 	layout::{Layout, WidgetID},
 	log::LogErr,
 	parser::{Fetchable, ParseDocumentParams, ParserState},
-	renderer_vk::text::{FontWeight, TextStyle},
+	renderer_vk::text::{FontWeight, TextStyle, WguiTextShadow},
 	taffy::{self, prelude::length},
 	task::Tasks,
 	widget::{
@@ -600,6 +600,11 @@ fn mount_requires_restart(layout: &mut Layout, parent: WidgetID) -> anyhow::Resu
 				color: Some(WguiColorName::Danger.into()),
 				weight: Some(FontWeight::Bold),
 				size: Some(10.0),
+				shadow: Some(WguiTextShadow {
+					x: 2.0,
+					y: 2.0,
+					..Default::default()
+				}),
 				..Default::default()
 			},
 		},

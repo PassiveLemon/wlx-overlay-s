@@ -9,7 +9,7 @@
           <label weight="bold" id="label_author" text="Unknown" />
         </div>
         <label id="label_description" wrap="1" text="No description available" />
-        <Button id="btn_launch" align_self="baseline" color="#44ce22FF" padding_top="4" padding_bottom="4" round="8" padding_right="12" min_width="200" min_height="40">
+        <Button id="btn_launch" align_self="baseline" color="#44ce22ff" border_color="#44ce22ff" padding_top="4" padding_bottom="4" round="8" padding_right="12" min_width="200" min_height="40">
           <sprite src_builtin="dashboard/play.svg" width="32" height="32" />
           <label text="Launch" weight="bold" size="17" shadow="#00000099" />
         </Button>

@@ -4,7 +4,7 @@ use glam::{Mat4, Vec2, Vec3};
 use taffy::prelude::{length, percent};
 
 use crate::{
-	animation::{Animation, AnimationEasing},
+	animation::{Animation, AnimationCallback, AnimationEasing},
 	color::{WguiColor, WguiColorName, WguiColorPalette},
 	components::{
 		Component, ComponentBase, ComponentTrait, RefreshData,
@@ -115,8 +115,8 @@ impl TooltipTrait for State {
 
 #[allow(clippy::struct_field_names)]
 struct SliderHandleData {
-	id_handle_rect: WidgetID,  // Rectangle
-	id_text: Option<WidgetID>, // Text
+	id_handle_rect: WidgetID,   // Rectangle
+	id_label: Option<WidgetID>, // Label
 	id_handle: WidgetID,
 }
 
@@ -328,8 +328,8 @@ impl State {
 		common.alterables.mark_dirty(handle_data.id_handle);
 		common.alterables.mark_redraw();
 
-		if let Some(id_text) = handle_data.id_text
-			&& let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(id_text)
+		if let Some(id_label) = handle_data.id_label
+			&& let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(id_label)
 		{
 			Self::update_text(common, &mut label, value.get());
 		}
@@ -346,52 +346,104 @@ impl State {
 	}
 }
 
-const BODY_COLOR: WguiColor = WguiColorName::BackgroundVariant.to_wgui_color();
+const BODY_COLOR: WguiColor = WguiColorName::Background.to_wgui_color();
 const BODY_BORDER_COLOR: WguiColor = WguiColorName::Outline.to_wgui_color();
-const HANDLE_COLOR: WguiColorName = WguiColorName::Secondary;
-const HANDLE_COLOR_HOVERED: WguiColor = WguiColorName::Secondary.to_wgui_color().add_rgb(0.1);
-const HANDLE_BORDER_COLOR: WguiColor = WguiColorName::Primary.to_wgui_color();
+const HANDLE_COLOR: WguiColorName = WguiColorName::BackgroundVariant;
+const HANDLE_COLOR_HOVERED: WguiColor = WguiColorName::Secondary.to_wgui_color();
+const HANDLE_BORDER_COLOR: WguiColor = WguiColorName::Outline.to_wgui_color();
 const HANDLE_BORDER_COLOR_HOVERED: WguiColor = WguiColorName::Primary.to_wgui_color().mult_rgb(1.25);
+const HANDLE_TEXT_COLOR: WguiColorName = WguiColorName::OnBackgroundVariant;
+const HANDLE_TEXT_COLOR_HOVERED: WguiColorName = WguiColorName::OnSecondary;
 
 const SLIDER_HOVER_SCALE: f32 = 0.25;
-fn get_anim_transform(pos: f32, widget_size: Vec2) -> Mat4 {
-	util::centered_matrix(
-		widget_size,
-		&Mat4::from_scale(Vec3::splat(SLIDER_HOVER_SCALE.mul_add(pos, 1.0))),
-	)
-}
 
 fn anim_rect(rect: &mut WidgetRectangle, palette: &WguiColorPalette, pos: f32) {
 	rect.params.color = WguiColor::lerp(&HANDLE_COLOR.into(), palette, &HANDLE_COLOR_HOVERED, pos);
 	rect.params.border_color = WguiColor::lerp(&HANDLE_BORDER_COLOR, palette, &HANDLE_BORDER_COLOR_HOVERED, pos);
 }
 
-fn on_enter_anim(common: &mut event::CallbackDataCommon, handle_id: WidgetID, anim_mult: f32) {
-	common.alterables.animate(Animation::new(
-		handle_id,
-		(20. * anim_mult) as _,
-		AnimationEasing::OutBack,
-		Box::new(move |common, data| {
-			let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap();
-			data.data.transform = get_anim_transform(data.pos, data.widget_boundary.size);
-			anim_rect(rect, &common.globals().palette, data.pos);
-			common.alterables.mark_redraw();
-		}),
-	));
+fn get_callback_rect(inverse: bool) -> AnimationCallback {
+	Box::new(move |common, data| {
+		let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap();
+		let pos = if inverse { 1.0 - data.pos } else { data.pos };
+		data.data.transform = util::centered_matrix(
+			data.widget_boundary.size,
+			&Mat4::from_scale(Vec3::splat(SLIDER_HOVER_SCALE.mul_add(pos, 1.0))),
+		);
+		anim_rect(rect, &common.globals().palette, pos);
+		common.alterables.mark_redraw();
+	})
 }
 
-fn on_leave_anim(common: &mut event::CallbackDataCommon, handle_id: WidgetID, anim_mult: f32) {
+fn get_callback_label(inverse: bool) -> AnimationCallback {
+	Box::new(move |common, data| {
+		let label = data.obj.get_as_mut::<WidgetLabel>().unwrap();
+		let pos = if inverse { 1.0 - data.pos } else { data.pos };
+		data.data.transform = util::centered_matrix(
+			data.widget_boundary.size,
+			&Mat4::from_scale(Vec3::splat(1.0 + pos * 0.25)),
+		);
+
+		let text_color = HANDLE_TEXT_COLOR.to_wgui_color().lerp(
+			&common.globals().palette,
+			&HANDLE_TEXT_COLOR_HOVERED.to_wgui_color(),
+			pos,
+		);
+
+		label.set_color(common, text_color, true);
+
+		common.alterables.mark_redraw();
+	})
+}
+
+fn on_enter_anim(
+	common: &mut event::CallbackDataCommon,
+	id_handle: WidgetID,
+	id_label: Option<WidgetID>,
+	anim_mult: f32,
+) {
+	let duration = 20. * anim_mult;
+
 	common.alterables.animate(Animation::new(
-		handle_id,
-		(10. * anim_mult) as _,
-		AnimationEasing::OutQuad,
-		Box::new(move |common, data| {
-			let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap();
-			data.data.transform = get_anim_transform(1.0 - data.pos, data.widget_boundary.size);
-			anim_rect(rect, &common.globals().palette, 1.0 - data.pos);
-			common.alterables.mark_redraw();
-		}),
+		id_handle,
+		duration as _,
+		AnimationEasing::OutBack,
+		get_callback_rect(false),
 	));
+
+	if let Some(id_label) = id_label {
+		common.alterables.animate(Animation::new(
+			id_label,
+			duration as _,
+			AnimationEasing::OutBack,
+			get_callback_label(false),
+		));
+	}
+}
+
+fn on_leave_anim(
+	common: &mut event::CallbackDataCommon,
+	id_handle: WidgetID,
+	id_label: Option<WidgetID>,
+	anim_mult: f32,
+) {
+	let duration = 10. * anim_mult;
+
+	common.alterables.animate(Animation::new(
+		id_handle,
+		duration as _,
+		AnimationEasing::OutQuad,
+		get_callback_rect(true),
+	));
+
+	if let Some(id_label) = id_label {
+		common.alterables.animate(Animation::new(
+			id_label,
+			duration as _,
+			AnimationEasing::OutQuad,
+			get_callback_label(true),
+		));
+	}
 }
 
 fn register_event_mouse_enter(
@@ -476,9 +528,9 @@ fn update_handle_hovers(
 	// hover state changed, run animations
 	if state.hovered1 != hovered1_prev {
 		if state.hovered1 && !hovered1_prev {
-			on_enter_anim(common, data.handle1.id_handle_rect, anim_mult);
+			on_enter_anim(common, data.handle1.id_handle_rect, data.handle1.id_label, anim_mult);
 		} else {
-			on_leave_anim(common, data.handle1.id_handle_rect, anim_mult);
+			on_leave_anim(common, data.handle1.id_handle_rect, data.handle1.id_label, anim_mult);
 		}
 	}
 
@@ -486,9 +538,9 @@ fn update_handle_hovers(
 		&& let Some(handle2) = data.handle2.as_ref()
 	{
 		if state.hovered2 && !hovered2_prev {
-			on_enter_anim(common, handle2.id_handle_rect, anim_mult);
+			on_enter_anim(common, handle2.id_handle_rect, handle2.id_label, anim_mult);
 		} else {
-			on_leave_anim(common, handle2.id_handle_rect, anim_mult);
+			on_leave_anim(common, handle2.id_handle_rect, handle2.id_label, anim_mult);
 		}
 	}
 }
@@ -628,7 +680,7 @@ fn mount_slider_handle(
 			WidgetLabelParams {
 				content: Translation::default(),
 				style: TextStyle {
-					color: Some(WguiColorName::OnPrimary.into()),
+					color: Some(HANDLE_TEXT_COLOR.into()),
 					weight: Some(FontWeight::Bold),
 					align: Some(HorizontalAlign::Center),
 					..Default::default()
@@ -642,7 +694,7 @@ fn mount_slider_handle(
 
 	Ok(SliderHandleData {
 		id_handle_rect: slider_handle_rect.id,
-		id_text: slider_text.map(|s| s.0.id),
+		id_label: slider_text.map(|s| s.0.id),
 		id_handle: slider_handle.id,
 	})
 }

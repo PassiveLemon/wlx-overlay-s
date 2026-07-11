@@ -140,7 +140,12 @@ impl WidgetObj for WidgetLabel {
 				transform: state.transform_stack.get().transform,
 			},
 			self.buffer.clone(),
-			self.params.style.shadow.clone(),
+			self
+				.params
+				.style
+				.shadow
+				.clone()
+				.map(|s| s.to_text_shadow(&state.globals.palette)),
 		));
 	}
 

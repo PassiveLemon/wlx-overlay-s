@@ -31,7 +31,7 @@ use glam::{Affine3A, Quat, Vec3, vec3};
 use regex::Regex;
 use slotmap::{SlotMap, new_key_type};
 use wgui::{
-    drawing,
+    color::WguiColor,
     event::{InternalStateChangeEvent, MouseButtonEvent, MouseButtonIndex},
 };
 use wlx_common::windowing::{OverlayWindowState, Positioning};
@@ -357,10 +357,10 @@ fn play_key_click(app: &mut AppState) {
 
 struct KeyState {
     button_state: KeyButtonData,
-    color: drawing::Color,
-    color2: drawing::Color,
-    base_border_color: drawing::Color,
-    cur_border_color: Cell<drawing::Color>,
+    color: WguiColor,
+    color2: WguiColor,
+    base_border_color: WguiColor,
+    cur_border_color: Cell<WguiColor>,
     border: f32,
     drawn_state: Cell<bool>,
 }

@@ -60,67 +60,71 @@ pub fn parse_color_opt(
 	}
 }
 
-pub fn parse_text_style(ctx: &ParserContext<'_>, attribs: &[AttribPair], tag_name: &str) -> TextStyle {
+pub fn parse_text_style(ctx: &ParserContext<'_>, attribs: &[AttribPair], tag_name: &str, prefix: &str) -> TextStyle {
 	let mut style = TextStyle::default();
 
 	for pair in attribs {
 		let (key, value) = (pair.attrib.as_ref(), pair.value.as_ref());
-		match key {
-			"color" => {
-				parse_color_opt(ctx, tag_name, key, value, &mut style.color);
+		if key.starts_with(prefix) {
+			let suffix = &key[prefix.len()..];
+			match suffix {
+				"color" => {
+					parse_color_opt(ctx, tag_name, key, value, &mut style.color);
+				}
+				"align" => match value {
+					"left" => style.align = Some(HorizontalAlign::Left),
+					"right" => style.align = Some(HorizontalAlign::Right),
+					"center" => style.align = Some(HorizontalAlign::Center),
+					"justified" => style.align = Some(HorizontalAlign::Justified),
+					"end" => style.align = Some(HorizontalAlign::End),
+					_ => {
+						ctx.print_invalid_attrib(tag_name, key, value);
+					}
+				},
+				"weight" => match value {
+					"light" => style.weight = Some(FontWeight::Light),
+					"normal" => style.weight = Some(FontWeight::Normal),
+					"bold" => style.weight = Some(FontWeight::Bold),
+					_ => {
+						ctx.print_invalid_attrib(tag_name, key, value);
+					}
+				},
+				"size" => {
+					if let Ok(size) = value.parse::<f32>() {
+						style.size = Some(size);
+					} else {
+						ctx.print_invalid_attrib(tag_name, key, value);
+					}
+				}
+				"shadow" => {
+					let mut color = WguiColor::default();
+					if parse_color(ctx, tag_name, key, value, &mut color) {
+						style.shadow.get_or_insert_default().color = color;
+					}
+				}
+				"shadow_x" => {
+					if let Ok(x) = value.parse::<f32>() {
+						style.shadow.get_or_insert_default().x = x;
+					} else {
+						ctx.print_invalid_attrib(tag_name, key, value);
+					}
+				}
+				"shadow_y" => {
+					if let Ok(y) = value.parse::<f32>() {
+						style.shadow.get_or_insert_default().y = y;
+					} else {
+						ctx.print_invalid_attrib(tag_name, key, value);
+					}
+				}
+				"wrap" => {
+					if let Ok(y) = value.parse::<i32>() {
+						style.wrap = y == 1;
+					} else {
+						ctx.print_invalid_attrib(tag_name, key, value);
+					}
+				}
+				_ => {}
 			}
-			"align" => match value {
-				"left" => style.align = Some(HorizontalAlign::Left),
-				"right" => style.align = Some(HorizontalAlign::Right),
-				"center" => style.align = Some(HorizontalAlign::Center),
-				"justified" => style.align = Some(HorizontalAlign::Justified),
-				"end" => style.align = Some(HorizontalAlign::End),
-				_ => {
-					ctx.print_invalid_attrib(tag_name, key, value);
-				}
-			},
-			"weight" => match value {
-				"light" => style.weight = Some(FontWeight::Light),
-				"normal" => style.weight = Some(FontWeight::Normal),
-				"bold" => style.weight = Some(FontWeight::Bold),
-				_ => {
-					ctx.print_invalid_attrib(tag_name, key, value);
-				}
-			},
-			"size" => {
-				if let Ok(size) = value.parse::<f32>() {
-					style.size = Some(size);
-				} else {
-					ctx.print_invalid_attrib(tag_name, key, value);
-				}
-			}
-			"shadow" => {
-				if let Some(color) = drawing::Color::from_hex(value) {
-					style.shadow.get_or_insert_default().color = color;
-				}
-			}
-			"shadow_x" => {
-				if let Ok(x) = value.parse::<f32>() {
-					style.shadow.get_or_insert_default().x = x;
-				} else {
-					ctx.print_invalid_attrib(tag_name, key, value);
-				}
-			}
-			"shadow_y" => {
-				if let Ok(y) = value.parse::<f32>() {
-					style.shadow.get_or_insert_default().y = y;
-				} else {
-					ctx.print_invalid_attrib(tag_name, key, value);
-				}
-			}
-			"wrap" => {
-				if let Ok(y) = value.parse::<i32>() {
-					style.wrap = y == 1;
-				} else {
-					ctx.print_invalid_attrib(tag_name, key, value);
-				}
-			}
-			_ => {}
 		}
 	}
 

@@ -34,7 +34,7 @@ pub fn parse_component_button<'a>(
 
 	let mut translation: Option<Translation> = None;
 
-	let text_style = parse_text_style(ctx, attribs, tag_name);
+	let text_style = parse_text_style(ctx, attribs, tag_name, "text_");
 	let style = parse_style(ctx, attribs, tag_name);
 
 	for pair in attribs {

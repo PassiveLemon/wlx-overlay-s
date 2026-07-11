@@ -19,7 +19,7 @@ pub fn parse_widget_label<'a>(
 	let mut params = WidgetLabelParams::default();
 
 	let style = parse_style(ctx, attribs, tag_name);
-	params.style = parse_text_style(ctx, attribs, tag_name);
+	params.style = parse_text_style(ctx, attribs, tag_name, "");
 
 	for pair in attribs {
 		let (key, value) = (pair.attrib.as_ref(), pair.value.as_ref());

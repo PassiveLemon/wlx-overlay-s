@@ -153,7 +153,7 @@ impl Drop for ComponentTooltip {
 	}
 }
 
-pub const TOOLTIP_COLOR: WguiColorName = WguiColorName::BackgroundVariant;
+pub const TOOLTIP_COLOR: WguiColorName = WguiColorName::BackgroundContrast;
 pub const TOOLTIP_BORDER_COLOR: WguiColorName = WguiColorName::Outline;
 
 pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Result<(WidgetPair, Rc<ComponentTooltip>)> {

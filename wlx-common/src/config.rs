@@ -262,12 +262,6 @@ pub struct GeneralConfig {
 	#[serde(default = "def_theme_path")]
 	pub theme_path: Arc<str>,
 
-	pub color_text: Option<String>,
-	pub color_accent: Option<String>,
-	pub color_danger: Option<String>,
-	pub color_faded: Option<String>,
-	pub color_background: Option<String>,
-
 	pub language: Option<locale::Language>, // auto-detected at runtime if unset
 
 	#[serde(default = "def_one")]

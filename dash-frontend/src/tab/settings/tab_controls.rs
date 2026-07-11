@@ -4,6 +4,7 @@ use wgui::{
 	components::button::ComponentButton, globals::WguiGlobals, layout::WidgetID, parser::Fetchable, task::Tasks,
 };
 
+use crate::tab::settings::{horiz_cell, mount_requires_restart};
 use crate::util::popup_manager::PopupHolder;
 
 use crate::{
@@ -56,13 +57,15 @@ fn create_input_profiles_button(
 	let id = mp.idx.to_string();
 	mp.idx += 1;
 
+	let id_cell = horiz_cell(mp.layout, parent)?;
+
 	let mut params = TemplateParams::new();
 	params.insert("id", &id);
 	params.insert("translation", "APP_SETTINGS.INPUT_PROFILES");
 	params.insert("icon", "dashboard/controller.svg");
 
 	mp.parser_state
-		.instantiate_template(mp.doc_params, "ButtonText", mp.layout, parent, params)?;
+		.instantiate_template(mp.doc_params, "ButtonText", mp.layout, id_cell, params)?;
 
 	let btn = mp.parser_state.fetch_component_as::<ComponentButton>(&id)?;
 	btn.on_click(Rc::new({
@@ -72,6 +75,8 @@ fn create_input_profiles_button(
 			Ok(())
 		}
 	}));
+
+	mount_requires_restart(mp.layout, id_cell)?;
 
 	Ok(())
 }

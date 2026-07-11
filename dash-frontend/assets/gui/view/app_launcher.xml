@@ -15,7 +15,7 @@
 
   <elements>
     <div flex_direction="row" gap="16" flex_grow="1">
-      <rectangle macro="group_box" id="icon_parent" padding="16" color="#0033aa66" color2="#00000022" gradient="vertical" justify_content="center"/>
+      <rectangle macro="group_box" id="icon_parent" padding="16" color="background_variant(opacity-0.5)" color2="background(opacity-0.5)" gradient="vertical" justify_content="center"/>
       <div flex_direction="column" gap="8" flex_grow="1">
         <label id="label_title" weight="bold" size="32" overflow="hidden" />
         <Subtext label_id="label_exec"/>
@@ -55,11 +55,11 @@
             <sprite src_builtin="dashboard/heart_minus.svg" width="32" height="32" />
             <label translation="REMOVE_FROM_FAVOURITES" weight="bold" size="17" shadow="#00000099" />
           </Button>
-          <Button id="btn_pin" color="#ce4477" padding_left="8" padding_right="8" round="8" min_height="40" tooltip="ADD_TO_FAVOURITES_HINT">
+          <Button id="btn_pin" color="#ce4477" border_color="#ce4477" padding_left="8" padding_right="8" round="8" min_height="40" tooltip="ADD_TO_FAVOURITES_HINT">
             <sprite src_builtin="dashboard/heart_plus.svg" width="32" height="32" />
             <label translation="ADD_TO_FAVOURITES" weight="bold" size="17" shadow="#00000099" />
           </Button>
-          <Button id="btn_launch" color="#44ce22" padding_left="8" padding_right="8" round="8" min_width="200" min_height="40">
+          <Button id="btn_launch" color="#44ce22" border_color="#44ce22" padding_left="8" padding_right="8" round="8" min_width="200" min_height="40">
             <sprite src_builtin="dashboard/play.svg" width="32" height="32" />
             <label translation="APP_LAUNCHER.LAUNCH" weight="bold" size="17" shadow="#00000099" />
           </Button>

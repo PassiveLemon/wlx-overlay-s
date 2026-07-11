@@ -1,5 +1,5 @@
 <layout>
-  <macro name="home_button" round="8" color="#00000033" border_color="#FFFFFF77" hover_color="primary" hover_border_color="#FFFFFF" />
+  <macro name="home_button" round="8" hover_color="primary" hover_border_color="on_primary" />
 
   <template name="MenuButton">
     <Button

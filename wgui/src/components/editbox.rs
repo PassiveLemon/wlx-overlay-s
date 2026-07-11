@@ -10,11 +10,10 @@ use crate::{
 	animation::{Animation, AnimationEasing},
 	color::{WguiColor, WguiColorName},
 	components::{Component, ComponentBase, ComponentTrait, FocusChangeData, RefreshData},
-	drawing::Color,
 	event::{self, CallbackDataCommon, CallbackMetadata, EventListenerCollection, EventListenerKind, StyleSetRequest},
 	i18n::Translation,
 	layout::{WidgetID, WidgetPair},
-	renderer_vk::text::{TextShadow, TextStyle},
+	renderer_vk::text::{TextStyle, WguiTextShadow},
 	widget::{
 		ConstructEssentials, EventResult,
 		div::WidgetDiv,
@@ -342,10 +341,10 @@ pub fn construct(
 		WidgetLabelParams {
 			content: Translation::from_raw_text(&params.initial_text),
 			style: TextStyle {
-				shadow: Some(TextShadow {
+				shadow: Some(WguiTextShadow {
 					x: 1.0,
 					y: 1.0,
-					color: Color::new(0.0, 0.0, 0.0, 1.0),
+					..Default::default()
 				}),
 				..Default::default()
 			},

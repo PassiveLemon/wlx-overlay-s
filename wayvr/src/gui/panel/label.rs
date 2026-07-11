@@ -211,7 +211,7 @@ fn battery_on_tick(
         } else {
             state.normal_color
         };
-        label.set_color(common, color, false);
+        label.set_color(common, color.into(), false);
         label.set_text(common, Translation::from_raw_text(&text));
         return;
     }

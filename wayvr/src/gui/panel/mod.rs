@@ -536,11 +536,11 @@ pub fn apply_custom_command<T>(
 
             if let Ok(pair) = panel.parser_state.fetch_widget(com.state, element) {
                 if let Some(mut rect) = pair.widget.get_as::<WidgetRectangle>() {
-                    rect.set_color(&mut com, color);
+                    rect.set_color(&mut com, color.into());
                 } else if let Some(mut label) = pair.widget.get_as::<WidgetLabel>() {
-                    label.set_color(&mut com, color, true);
+                    label.set_color(&mut com, color.into(), true);
                 } else if let Some(mut sprite) = pair.widget.get_as::<WidgetSprite>() {
-                    sprite.set_color(&mut com, color);
+                    sprite.set_color(&mut com, color.into());
                 } else {
                     anyhow::bail!("No <rectangle> or <label> or <sprite> with such id.");
                 }

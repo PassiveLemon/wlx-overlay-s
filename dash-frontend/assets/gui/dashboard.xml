@@ -12,10 +12,8 @@
       round="100%"
       width="~side_button_size"
       height="~side_button_size"
-      color="#44444400"
-      hover_color="#333333ff"
-      border_color="#00000000"
-      hover_border_color="#555555ff"
+      color="background_contrast"
+      border_color="background_contrast"
       tooltip="${tooltip}"
       tooltip_side="${tooltip_side}"
     >
@@ -37,7 +35,7 @@
         <rectangle
           width="100%"
           round="100%"
-          color="background"
+          color="background_contrast"
           flex_direction="column"
           justify_content="center"
           align_items="center"
@@ -63,13 +61,13 @@
         <div position="relative" width="100%" height="~top_size" min_height="~top_size" max_height="~top_size" justify_content="end">
           <!-- Title bar -->
           <div width="100%" align_items="center" justify_content="center">
-            <rectangle min_width="300" height="100%" consume_mouse_events="1" round="100%" color="background" align_items="center" justify_content="center" gap="8">
+            <rectangle min_width="300" height="100%" consume_mouse_events="1" round="100%" color="background_contrast" align_items="center" justify_content="center" gap="8">
               <sprite id="sprite_titlebar_icon" width="24" height="24" />
               <label id="label_titlebar_title" weight="bold" size="16" text="Title" />
             </rectangle>
           </div>
           <!-- Close button -->
-          <Button position="absolute" id="btn_close" color="background" round="100%" width="~top_size" height="~top_size" tooltip="CLOSE_WINDOW" tooltip_side="left">
+          <Button position="absolute" id="btn_close" color="background_contrast" border_color="background_contrast" round="100%" width="~top_size" height="~top_size" tooltip="CLOSE_WINDOW" tooltip_side="left">
             <sprite src_builtin="dashboard/close.svg" width="32" height="32" />
           </Button>
         </div>
@@ -78,8 +76,8 @@
         <!-- color and color2 alpha will be modified at runtime -->
         <rectangle
           id="rect_content"
-          color2="#0d131a00"
-          color="#252f5300"
+          color2="background_contrast"
+          color="background"
           gradient="vertical"
           round="8"
           flex_grow="1"
@@ -90,7 +88,7 @@
           <!-- radial gradient -->
           <rectangle
             position="absolute" width="100%" height="100%"
-            gradient="radial" color="#44BBFF11" color2="#00000000" />
+            gradient="radial" color="background_variant(opacity-0.5)" color2="background_variant(transparent)" />
 
           <div overflow_x="scroll" overflow_y="scroll" width="100%" height="100%">
             <div
@@ -118,16 +116,16 @@
           flex_direction="row"
           align_items="center"
           justify_content="space_between"
-          color="background_variant"
+          color="background"
         >
           <!-- left gradient -->
           <div position="absolute" width="100%" height="100%" justify_content="start">
-            <rectangle position="absolute" width="40%" height="100%" color="#0a0a0a" color2="#0a0a0a00" round="8" gradient="horizontal" />
+            <rectangle position="absolute" width="40%" height="100%" color="shadow" color2="shadow(transparent)" round="8" gradient="horizontal" />
           </div>
 
           <!-- right gradient -->
           <div position="absolute" width="100%" height="100%" justify_content="end">
-            <rectangle position="absolute" width="40%" height="100%" color2="#0a0a0a" color="#0a0a0a00" round="8" gradient="horizontal" />
+            <rectangle position="absolute" width="40%" height="100%" color2="shadow" color="shadow(transparent)" round="8" gradient="horizontal" />
           </div>
 
           <!-- top shine -->

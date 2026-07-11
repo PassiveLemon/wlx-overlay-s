@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
 use anyhow::Context;
-use glam::FloatExt;
 use wgui::{
     animation::{Animation, AnimationEasing},
+    color::{WguiColor, WguiColorName, WguiColorPalette},
     components::button::ComponentButton,
     event::CallbackDataCommon,
     layout::WidgetID,
@@ -16,7 +16,7 @@ use crate::{backend::task::ModifyOverlayTask, overlays::edit::EditModeWrapPanel}
 #[derive(Default)]
 pub(super) struct InteractLockHandler {
     id: WidgetID,
-    color: wgui::drawing::Color,
+    color: WguiColor,
     interactable: bool,
     button: Option<Rc<ComponentButton>>,
 }
@@ -53,10 +53,25 @@ impl InteractLockHandler {
             button.set_sticky_state(common, !interactable);
         }
 
+        let globals = common.globals();
+        let palette = &globals.palette;
+
         if interactable {
-            set_anim_color(&mut rect, 0.0, self.color, common.state.theme.danger_color);
+            set_anim_color(
+                palette,
+                &mut rect,
+                0.0,
+                self.color,
+                WguiColorName::Danger.into(),
+            );
         } else {
-            set_anim_color(&mut rect, 0.2, self.color, common.state.theme.danger_color);
+            set_anim_color(
+                palette,
+                &mut rect,
+                0.2,
+                self.color,
+                WguiColorName::Danger.into(),
+            );
         }
     }
 
@@ -80,10 +95,11 @@ impl InteractLockHandler {
                 Box::new(move |common, data| {
                     let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap();
                     set_anim_color(
+                        &common.globals().palette,
                         rect,
                         0.2 - (data.pos * 0.2),
                         rect_color,
-                        common.state.theme.danger_color,
+                        WguiColorName::Danger.into(),
                     );
                     common.alterables.mark_redraw();
                 }),
@@ -96,10 +112,11 @@ impl InteractLockHandler {
                 Box::new(move |common, data| {
                     let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap();
                     set_anim_color(
+                        &common.globals().palette,
                         rect,
                         data.pos * 0.2,
                         rect_color,
-                        common.state.theme.danger_color,
+                        WguiColorName::Danger.into(),
                     );
                     common.alterables.mark_redraw();
                 }),
@@ -117,13 +134,12 @@ impl InteractLockHandler {
 }
 
 fn set_anim_color(
+    palette: &WguiColorPalette,
     rect: &mut WidgetRectangle,
     pos: f32,
-    rect_color: wgui::drawing::Color,
-    target_color: wgui::drawing::Color,
+    rect_color: WguiColor,
+    target_color: WguiColor,
 ) {
     // rect to target_color
-    rect.params.color.r = rect_color.r.lerp(target_color.r, pos);
-    rect.params.color.g = rect_color.g.lerp(target_color.g, pos);
-    rect.params.color.b = rect_color.b.lerp(target_color.b, pos);
+    rect.params.color = rect_color.lerp(palette, &target_color, pos);
 }

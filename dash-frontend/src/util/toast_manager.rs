@@ -137,7 +137,7 @@ impl ToastManager {
 				let mut label = common.state.widgets.get_as::<WidgetLabel>(label.id).unwrap();
 				label.set_color(
 					common,
-					WguiColor::from(WguiColorName::BackgroundVariant).with_alpha(opacity),
+					WguiColor::from(WguiColorName::OnBackgroundVariant).with_alpha(opacity),
 					true,
 				);
 				common.alterables.mark_redraw();

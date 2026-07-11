@@ -9,7 +9,7 @@ use std::sync::Arc;
 use wgui::log::LogErr;
 use wgui::theme::WguiTheme;
 use wgui::{
-    drawing, font_config::WguiFontConfig, gfx::WGfx, globals::WguiGlobals,
+    font_config::WguiFontConfig, gfx::WGfx, globals::WguiGlobals,
     renderer_vk::context::SharedContext as WSharedContext,
 };
 #[cfg(feature = "pipewire")]
@@ -146,21 +146,6 @@ impl AppState {
         audio_sample_player.register_wgui_samples(assets.as_mut())?;
 
         let mut theme = WguiTheme::default();
-
-        {
-            #[allow(clippy::ref_option)]
-            fn apply_color(default: &mut drawing::Color, value: &Option<String>) {
-                if let Some(parsed) = value.as_ref().and_then(|c| drawing::Color::from_hex(c)) {
-                    *default = parsed;
-                }
-            }
-
-            apply_color(&mut theme.text_color, &session.config.color_text);
-            apply_color(&mut theme.accent_color, &session.config.color_accent);
-            apply_color(&mut theme.danger_color, &session.config.color_danger);
-            apply_color(&mut theme.faded_color, &session.config.color_faded);
-            apply_color(&mut theme.bg_color, &session.config.color_background);
-        }
 
         theme.animation_mult = 1. / session.config.ui_animation_speed;
         theme.rounding_mult = session.config.ui_round_multiplier;
