@@ -1,11 +1,11 @@
 <layout>
-  <macro name="button_style" border="2" border_color="~color_accent_translucent" color="~color_bg" round="6"
+  <macro name="button_style" border="2" round="6"
     align_items="center" justify_content="center" padding="6" width="60" height="60" overflow="visible"/>
 
-  <macro name="bg_rect" width="100%" color="~color_bg" round="10" border="2" border_color="~color_accent" />
+  <macro name="bg_rect" width="100%" color="background" border_color="outline" round="10" border="2" />
 
   <template name="VerticalSeparator">
-    <rectangle width="2" height="100%" color="~color_accent" />
+    <rectangle width="2" height="100%" color="outline" />
   </template>
 
   <elements>
@@ -13,27 +13,27 @@
       <rectangle macro="bg_rect" padding="10" align_items="center" justify_content="space_between">
         <div gap="10">
           <Button macro="button_style" _press="::WhisperTranscribeStart" _release="::WhisperTranscribeStop" tooltip="WHISPER.TRANSCRIBE" tooltip_side="right">
-            <sprite width="38" height="38" color="~color_text" src="icons/mic.svg"  />
+            <sprite width="38" height="38" src="icons/mic.svg"  />
           </Button>
           <VerticalSeparator />
           <Button macro="button_style" _press="::WhisperPaste" tooltip="WHISPER.PASTE" tooltip_side="right">
-            <sprite width="38" height="38" color="~color_text" src_builtin="icons/paste.svg" />
+            <sprite width="38" height="38" src_builtin="icons/paste.svg" />
           </Button>
           <Button macro="button_style" _press="::WhisperPasteAndGo" tooltip="WHISPER.PASTE_AND_GO" tooltip_side="right">
-            <sprite width="38" height="38" color="~color_text" src_builtin="icons/paste-go.svg" />
+            <sprite width="38" height="38" src_builtin="icons/paste-go.svg" />
           </Button>
           <VerticalSeparator />
           <Button macro="button_style" _press="::SendKey Return down" _release="::SendKey Return up" tooltip="WHISPER.ENTER_KEY" tooltip_side="right">
-            <sprite width="38" height="38" color="~color_text" src_builtin="keyboard/return.svg" />
+            <sprite width="38" height="38" src_builtin="keyboard/return.svg" />
           </Button>
           <VerticalSeparator />
           <Button macro="button_style" _press="::WhisperSendOSC" tooltip="WHISPER.SEND_OSC" id="btn_osc_send" tooltip_side="right">
-            <sprite width="38" height="38" color="~color_text" src_builtin="icons/chat.svg" />
+            <sprite width="38" height="38" src_builtin="icons/chat.svg" />
           </Button>
         </div>
         <div gap="10">
           <Button macro="button_style" _press="::WhisperUnloadAndClose" tooltip="WHISPER.UNLOAD_AND_CLOSE" tooltip_side="left">
-            <sprite width="38" height="38" color="~color_text" src_builtin="edit/close.svg" />
+            <sprite width="38" height="38" src_builtin="edit/close.svg" />
           </Button>
         </div>
       </rectangle>

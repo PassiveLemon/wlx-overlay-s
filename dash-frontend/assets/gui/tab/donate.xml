@@ -25,7 +25,7 @@
         <Button id="btn_donate" tooltip="DONATE.BUTTON_TOOLTIP" align_self="baseline">
           <image src_builtin="dashboard/opencollective_logo.svg" width="252" height="42" margin="8" margin_left="16" margin_right="16"/>
         </Button>
-        <label text="opencollective.com/wayvr-org" color="~color-accent"/>
+        <label text="opencollective.com/wayvr-org"/>
       </div>
 
       <label weight="bold" size="24" translation="DONATE.THANK_YOU_WAYVR"/>

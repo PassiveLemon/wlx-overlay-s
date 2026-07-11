@@ -1,33 +1,28 @@
 <layout>
   <macro name="button_style"
-    margin="2" overflow="hidden" box_sizing="border_box"
-    border_color="~color_accent" border="2" round="8" color="~color_accent_50" color2="~color_accent_10" gradient="vertical"
-    align_items="center" justify_content="center" />
-
-  <macro name="button_style"
     margin="2" overflow="hidden" box_sizing="border_box" align_items="center" justify_content="center"
     border="2" round="50%" padding="8" gradient="vertical" tooltip_side="bottom" />
 
   <template name="TopButton">
-    <Button id="${id}" macro="button_style" tooltip="${tooltip}" _press="${press}" _release="${release}" sticky="${sticky}" border_color="~color_accent_translucent" color="~color_accent_50" color2="~color_accent_10">
+    <Button id="${id}" macro="button_style" tooltip="${tooltip}" _press="${press}" _release="${release}" sticky="${sticky}">
       <sprite id="${id}_sprite" width="48" height="48" src="${src}" />
     </Button>
   </template>
 
   <template name="TopButtonDanger">
-    <Button macro="button_style" tooltip="${tooltip}" _release="${release}" border_color="~color_danger_translucent" color="~color_danger_50" color2="~color_danger_10">
+    <Button macro="button_style" tooltip="${tooltip}" _release="${release}" border_color="danger" color="danger">
       <sprite width="48" height="48" src="${src}" />
     </Button>
   </template>
 
-  <template name="TopButtonFaded">
-    <Button macro="button_style" tooltip="${tooltip}" _press="${press}" _release="${release}" border_color="~color_faded_translucent" color="~color_faded_50" color2="~color_faded_10">
-      <sprite width="48" height="48" src="${src}" />
+  <template name="TopButtonTertiary">
+    <Button macro="button_style" tooltip="${tooltip}" _press="${press}" _release="${release}" color="tertiary" border_color="tertiary">
+      <sprite color="on_tertiary" width="48" height="48" src="${src}" />
     </Button>
   </template>
 
   <template name="PosButton">
-    <Button id="${id}" macro="button_style" tooltip="${tooltip}" _press="${press}" _release="${release}" border_color="~color_accent_translucent" color="~color_accent_50" color2="~color_accent_10">
+    <Button id="${id}" macro="button_style" tooltip="${tooltip}" _press="${press}" _release="${release}" >
       <sprite id="${id}_sprite" width="40" height="40" src="${src}" />
     </Button>
   </template>
@@ -37,7 +32,7 @@
       <rectangle id="shadow" width="100%" height="100%" padding="4" gap="4" align_items="center" justify_content="space_between" color="#000000c0" flex_direction="column">
         <div />
         <div flex_direction="column">
-          <rectangle padding="16" gap="8" round="32" color="~color_bg" border="2" border_color="~color_accent" justify_content="center">
+          <rectangle padding="16" gap="8" round="32" color="background(opacity-0.9)" border="2" border_color="outline" justify_content="center">
             <div flex_direction="column" gap="8">
               <div flex_direction="row" gap="4">
                 <TopButton sticky="0" id="top_lock" src="edit/lock_open.svg" tooltip="EDIT_MODE.LOCK_INTERACTION" press="::EditModeToggleLock" />
@@ -51,7 +46,7 @@
                 <!-- TopButton sticky="0" id="top_resize" src="edit/resize.svg" tooltip="EDIT_MODE.RESIZE_PRESS_AND_DRAG" / -->
                 <TopButtonDanger src="edit/delete.svg" tooltip="EDIT_MODE.DELETE" release="::EditModeDelete" />
                 <div width="8" height="100%" />
-                <TopButtonFaded src="watch/edit.svg" tooltip="EDIT_MODE.LEAVE" press="::EditToggle" />
+                <TopButtonTertiary src="edit/check.svg" tooltip="EDIT_MODE.LEAVE" press="::EditToggle" />
               </div>
               <div id="tab_none" display="none" height="100">
                 <label align="center" translation="EDIT_MODE.HINT_POINT_WINDOW" />
@@ -129,7 +124,7 @@
         </div>
         <div width="100%" justify_content="end" flex_direction="row">
           <div>
-            <Button id="resize_corner" macro="button_style" tooltip="EDIT_MODE.RESIZE_CORNER" tooltip_side="left" _press="::EditModeResizeStart" _release="::EditModeResizeStop" border_color="~color_accent_translucent" color="~color_accent_50" color2="~color_accent_10">
+            <Button id="resize_corner" macro="button_style" tooltip="EDIT_MODE.RESIZE_CORNER" tooltip_side="left" _press="::EditModeResizeStart" _release="::EditModeResizeStop">
               <sprite width="48" height="48" src="edit/resize-corner.svg" />
             </Button>
           </div>

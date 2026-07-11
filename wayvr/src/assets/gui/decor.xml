@@ -10,18 +10,17 @@
         round="8"
         align_items="center"
         justify_content="space_between"
-        color="~color_bg"
-        border_color="~color_accent"
+        color="background"
+        border_color="outline"
       >
-        <label id="label_title" margin_left="8" color="~color_text" size="22" weight="bold" />
+        <label id="label_title" margin_left="8" color="on_background" size="22" weight="bold" />
         <div gap="4">
-          <Button macro="window_button" _release="::EditToggle"
-            border_color="~color_faded_translucent" color="~color_faded_50" color2="~color_faded_10">
+          <Button macro="window_button" _release="::EditToggle">
             <sprite macro="window_button_icon" src="watch/edit.svg" />
           </Button>
 
           <Button macro="window_button" _release="::DecorCloseWindow"
-            border_color="~color_danger_translucent" color="~color_danger_50" color2="~color_danger_10">
+            border_color="danger" color="danger">
             <sprite macro="window_button_icon" src="edit/close.svg" />
           </Button>
         </div>

@@ -1,20 +1,24 @@
 <layout>
   <macro name="keycap_rect"
     margin="2" width="100%" overflow="hidden" box_sizing="border_box"
-    border_color="~color_accent_translucent" border="2" round="6" color="~color_accent_40" color2="~color_accent_10" gradient="vertical"
+    border_color="outline" border="2" round="6" color="background_variant" color2="background" gradient="vertical"
     align_items="center" justify_content="center" />
 
   <macro name="tray_rect"
     margin="2" width="100%" overflow="hidden" box_sizing="border_box"
-    border_color="~color_accent_translucent" border="2" round="6" color="~color_bg" color2="~color_accent_10" gradient="vertical"
+    border_color="outline" border="2" round="6" color="background" color2="background_variant" gradient="vertical"
     align_items="center" justify_content="center" />
 
   <macro name="keycap_div"
     width="${width}" height="${height}" min_width="${width}" min_height="${height}" max_width="${width}" max_height="${height}"
   />
 
+  <theme>
+    <var key="text_size" value="20" />
+  </theme>
+
   <template name="VerticalSeparator">
-    <rectangle width="2" height="100%" color="~color_accent" />
+    <rectangle width="2" height="100%" color="primary" />
   </template>
 
   <!-- The keyboard is build from the xkb keymap. This file is for customizing the keycaps. -->
@@ -24,7 +28,7 @@
   <template name="KeySpecial">
     <div macro="keycap_div">
       <rectangle id="${id}" macro="keycap_rect">
-        <sprite color="~color_text" width="24" height="24" src="keyboard/${text}.svg" />
+        <sprite color="on_background" width="24" height="24" src="keyboard/${text}.svg" />
       </rectangle>
     </div>
   </template>
@@ -34,7 +38,7 @@
   <template name="KeyLetter">
     <div macro="keycap_div">
       <rectangle id="${id}" macro="keycap_rect">
-        <label text="${text}" size="18" />
+        <label text="${text}" size="~text_size" />
       </rectangle>
     </div>
   </template>
@@ -44,8 +48,8 @@
   <template name="KeyLetterAltGr">
     <div macro="keycap_div">
       <rectangle id="${id}" macro="keycap_rect" gap="3">
-        <label text="${text}" size="18" />
-        <label color="~color_text_translucent" text="${text_altgr}" size="18" />
+        <label text="${text}" size="~text_size" />
+        <label color="on_background(opacity-0.5)" text="${text_altgr}" size="~text_size" />
       </rectangle>
     </div>
   </template>
@@ -55,8 +59,8 @@
   <template name="KeySymbol">
     <div macro="keycap_div">
       <rectangle id="${id}" macro="keycap_rect" gap="3">
-        <label color="~color_text_translucent" text="${text_shift}" size="18" />
-        <label text="${text}" size="18" />
+        <label color="on_background(opacity-0.5)" text="${text_shift}" size="~text_size" />
+        <label text="${text}" size="~text_size" />
       </rectangle>
     </div>
   </template>
@@ -67,14 +71,14 @@
     <div macro="keycap_div">
       <rectangle id="${id}" macro="keycap_rect" flex_direction="row" flex_wrap="wrap" padding="4">
         <div width="50%" height="50%" align_items="center" justify_content="center">
-          <label color="~color_text_translucent" text="${text_shift}" size="18" />
+          <label color="on_background(opacity-0.5)" text="${text_shift}" size="~text_size" />
         </div>
         <div width="50%" height="50%" align_items="center" justify_content="center" />
         <div width="50%" height="50%" align_items="center" justify_content="center">
-          <label text="${text}" size="18" />
+          <label text="${text}" size="~text_size" />
         </div>
         <div width="50%" height="50%" align_items="center" justify_content="center">
-          <label color="~color_text_translucent" text="${text_altgr}" size="18" />
+          <label color="on_background(opacity-0.5)" text="${text_altgr}" size="~text_size" />
         </div>
       </rectangle>
     </div>
@@ -90,10 +94,10 @@
     </div>
   </template>
 
-  <macro name="button_style" border="2" border_color="~color_accent_translucent" color="~color_bg" round="6"
+  <macro name="button_style" border="2" round="6"
     align_items="center" justify_content="center" padding="6" width="60" height="60" overflow="visible"/>
 
-  <macro name="bg_rect" width="100%" color="~color_bg" round="10" border="2" border_color="~color_accent" />
+  <macro name="bg_rect" width="100%" color="background_contrast" round="10" border="2" border_color="primary" />
 
   <blueprint name="menu_app">
     <context_menu >
@@ -108,7 +112,7 @@
   <!-- An app with a single icon. -->
   <template name="App">
     <Button macro="button_style" id="overlay_${idx}" tooltip_str="${name}" _context_name="${name}" _press_left="::ContextMenuOpen menu_app" _press_right="::OverlayToggle ${name}">  
-      <sprite width="38" height="38" color="~color_text" src_ext="${icon}" />
+      <sprite width="38" height="38" color="on_background" src_ext="${icon}" />
     </Button>
   </template>
 
@@ -123,9 +127,9 @@
   <!-- A screen with a shortened connector name, e.g. "H1" for HDMI-A-1 or "D2" for DP-2 -->
   <template name="Screen">
     <Button macro="button_style" id="overlay_${idx}" tooltip_str="${name}" _context_name="${name}" _press_left="::ContextMenuOpen menu_screen" _press_right="::OverlayToggle ${name}">
-      <sprite width="38" height="38" color="~color_text" src_builtin="edit/screen.svg" />
+      <sprite width="38" height="38" color="on_background_variant" src_builtin="edit/screen.svg" />
       <div position="absolute" margin_top="-7" margin_left="-1">
-        <label text="${display}" size="18" color="~color_faded_20" weight="bold" />
+        <label text="${display}" size="~text_size" color="on_background_variant(opacity-0.2)" weight="bold" />
       </div>
     </Button>
   </template>
@@ -141,7 +145,7 @@
 
   <template name="Panel">
     <Button macro="button_style" id="overlay_${idx}" tooltip_str="${name}" _context_name="${name}" _press_left="::ContextMenuOpen menu_panel" _press_right="::OverlayToggle ${name}">
-      <sprite width="38" height="38" color="~color_text" src="${icon}" />
+      <sprite width="38" height="38" color="on_background_variant" src="${icon}" />
     </Button>
   </template>
 
@@ -156,9 +160,9 @@
 
   <template name="Mirror">
     <Button macro="button_style" id="overlay_${idx}" tooltip_str="${name}" _context_name="${name}" _press_left="::ContextMenuOpen menu_mirror" _press_right="::OverlayToggle ${name}">
-      <sprite width="38" height="38" color="~color_text" src_builtin="edit/mirror.svg" />
+      <sprite width="38" height="38" color="on_background_variant" src_builtin="edit/mirror.svg" />
       <div position="absolute" margin_top="5" margin_left="13">
-        <label text="${display}" size="20" color="~color_faded_20" weight="bold" />
+        <label text="${display}" size="20" color="on_background(opacity-0.2)" weight="bold" />
       </div>
     </Button>
   </template>
@@ -185,9 +189,9 @@
 
   <template name="Set">
     <Button macro="button_style" id="set_${idx}" _press="::SetSwitch ${idx}" tooltip="WATCH.SWITCH_TO_SET" tooltip_side="bottom">
-      <sprite width="38" height="38" color="~color_text" src_builtin="watch/set2.svg" />
+      <sprite width="38" height="38" color="on_background_variant" src_builtin="watch/set2.svg" />
       <div position="absolute" margin_top="10" margin_left="-7">
-        <label text="${display}" size="20" color="~color_faded_20" weight="bold" />
+        <label text="${display}" size="20" color="on_background(opacity-0.2)" weight="bold" />
       </div>
     </Button>
   </template>
@@ -205,7 +209,7 @@
       <rectangle macro="bg_rect" padding="10" align_items="center" justify_content="space_between">
         <div gap="10">
           <Button macro="button_style" id="btn_dashboard" _press="::DashToggle">
-            <sprite width="38" height="38" color="~color_text" src="watch/wayvr_dashboard_mono.svg"  />
+            <sprite width="38" height="38" color="on_background_variant" src="watch/wayvr_dashboard_mono.svg"  />
           </Button>
           <VerticalSeparator />
           <div id="panels_root" gap="6">
@@ -216,7 +220,7 @@
         </div>
         <div id="tray_root" flex_direction="row" gap="10">
           <Button macro="button_style" _press="::ContextMenuOpen menu_burger">
-            <sprite width="38" height="38" color="~color_text" src_builtin="keyboard/burger.svg" />
+            <sprite width="38" height="38" color="on_background_variant" src_builtin="keyboard/burger.svg" />
           </Button>
 
           <VerticalSeparator />
