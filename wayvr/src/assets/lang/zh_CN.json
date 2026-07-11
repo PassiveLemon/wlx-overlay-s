@@ -99,7 +99,8 @@
 		"EMPTY_SET": "空集合！",
 		"LETS_ADD_OVERLAYS": "让我们从手表添加一些覆盖层吧！",
 		"ONE_CONTROLLER_ON_FLOOR": "请将一个控制器放在地面上！",
-		"FIXING_FLOOR_IN_X_SECS": "{SECONDS}秒内固定地面..."
+		"FIXING_FLOOR_IN_X_SECS": "{SECONDS}秒内固定地面...",
+		"TITLE_SCREENCAST_FAIL": "无法启动屏幕投影源！"
 	},
 	"WATCH": {
 		"ADD_NEW_SET": "添加新集合",
@@ -125,5 +126,12 @@
 		"INITIAL_TEXT": "按住麦克风按钮开始转录...",
 		"INIT_ERROR": "启动 Whisper 引擎时出错",
 		"ENTER_KEY": "回车键"
+	},
+	"SCREENCAST": {
+		"PENDING": "请稍候...",
+		"QUEUED": "等待另一个覆盖层的屏幕投射确认弹窗。",
+		"WAITING_FOR_USER_DESC": "请检查桌面上的屏幕投射弹出窗口。\n选择以下选项：",
+		"WAITING_FOR_USER": "请检查桌面上的屏幕投射弹出窗口。",
+		"FAIL": "无法初始化屏幕镜像源。"
 	}
 }

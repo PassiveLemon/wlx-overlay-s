@@ -1,17 +1,8 @@
 use std::any::Any;
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::sync::atomic::AtomicU32;
-use std::sync::atomic::Ordering;
 use std::sync::mpsc;
 use std::thread::JoinHandle;
-
-use ashpd::desktop::{
-    PersistMode,
-    screencast::{CursorMode, Screencast, SourceType},
-};
-
-pub use ashpd::Error as AshpdError;
 
 use drm_fourcc::DrmFormat;
 use drm_fourcc::DrmFourcc;
@@ -45,93 +36,6 @@ use crate::frame::MouseMeta;
 use crate::frame::Transform;
 use crate::frame::WlxFrame;
 use crate::frame::{DmabufFrame, FramePlane, MemFdFrame, MemPtrFrame};
-
-#[derive(Debug, Clone)]
-pub struct PipewireStream {
-    pub node_id: u32,
-    pub position: Option<(i32, i32)>,
-    pub size: Option<(i32, i32)>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PipewireSelectScreenResult {
-    pub streams: Vec<PipewireStream>,
-    pub restore_token: Option<String>,
-}
-
-pub async fn pipewire_select_screen(
-    token: Option<&str>,
-    embed_mouse: bool,
-    screens_only: bool,
-    persist: bool,
-    multiple: bool,
-) -> Result<PipewireSelectScreenResult, AshpdError> {
-    static CURSOR_MODES: AtomicU32 = AtomicU32::new(0);
-
-    let proxy = Screencast::new().await?;
-    let session = proxy.create_session().await?;
-
-    let mut cursor_modes = CURSOR_MODES.load(Ordering::Relaxed);
-    if cursor_modes == 0 {
-        cursor_modes = proxy.get_property::<u32>("AvailableCursorModes").await?;
-
-        log::debug!("Available cursor modes: {cursor_modes:#x}");
-
-        // properly will be same system-wide, so race condition not a concern
-        CURSOR_MODES.store(cursor_modes, Ordering::Relaxed);
-    }
-
-    let cursor_mode = match embed_mouse {
-        true if cursor_modes & (CursorMode::Embedded as u32) != 0 => CursorMode::Embedded,
-        _ if cursor_modes & (CursorMode::Metadata as u32) != 0 => CursorMode::Metadata,
-        _ => CursorMode::Hidden,
-    };
-
-    log::debug!("Selected cursor mode: {cursor_mode:?}");
-
-    let source_type = if screens_only {
-        SourceType::Monitor.into()
-    } else {
-        SourceType::Monitor | SourceType::Window | SourceType::Virtual
-    };
-
-    let persist_mode = if persist {
-        PersistMode::ExplicitlyRevoked
-    } else {
-        PersistMode::DoNot
-    };
-
-    proxy
-        .select_sources(
-            &session,
-            cursor_mode,
-            source_type,
-            multiple,
-            token,
-            persist_mode,
-        )
-        .await?;
-
-    let response = proxy.start(&session, None).await?.response()?;
-
-    let streams: Vec<_> = response
-        .streams()
-        .iter()
-        .map(|stream| PipewireStream {
-            node_id: stream.pipe_wire_node_id(),
-            position: stream.position(),
-            size: stream.size(),
-        })
-        .collect();
-    if !streams.is_empty() {
-        return Ok(PipewireSelectScreenResult {
-            streams,
-            restore_token: response.restore_token().map(String::from),
-        });
-    }
-
-    Err(ashpd::Error::NoResponse)
-}
 
 #[derive(Default)]
 struct StreamData {

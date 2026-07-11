@@ -539,10 +539,9 @@ pub(super) fn setup_custom_button<S: 'static>(
                         OverlaySelector::Name(name.clone()),
                         SpawnPos::Spread,
                         Box::new(move |app| {
-                            Some(crate::overlays::screen::mirror::new_mirror(
-                                name,
-                                &app.session,
-                            ))
+                            crate::overlays::screen::mirror::new_mirror(name, app)
+                                .log_err("Could not create mirror")
+                                .ok()
                         }),
                     )));
                     Ok(EventResult::Consumed)

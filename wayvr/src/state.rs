@@ -1,6 +1,9 @@
 use glam::Affine3A;
 use idmap::IdMap;
+#[cfg(feature = "pipewire")]
+use serde::{Deserialize, Serialize};
 use smallvec::{SmallVec, smallvec};
+use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
 use wgui::log::LogErr;
@@ -9,6 +12,9 @@ use wgui::{
     drawing, font_config::WguiFontConfig, gfx::WGfx, globals::WguiGlobals, parser::parse_color_hex,
     renderer_vk::context::SharedContext as WSharedContext,
 };
+#[cfg(feature = "pipewire")]
+use wlx_capture::pipewire::ScreenCastManager;
+use wlx_common::config::PwTokenMap;
 use wlx_common::locale::WayVRLangProvider;
 use wlx_common::{
     audio,
@@ -79,6 +85,9 @@ pub struct AppState {
 
     #[cfg(feature = "openxr")]
     pub monado_state: Option<backend::openxr::monado_state::MonadoState>,
+
+    #[cfg(feature = "pipewire")]
+    pub screencast_manager: Option<ScreenCastManager>,
 
     pub delta_time: f32,
 }
@@ -165,6 +174,14 @@ impl AppState {
 
         let lang_provider = WayVRLangProvider::from_config(&session.config);
 
+        #[cfg(feature = "pipewire")]
+        let screencast_manager = ScreenCastManager::new()
+            .log_err(
+                // would only fail if session D-bus is unreachable
+                "Could not initialize ScreenCastManager. PipeWire screen capture will not work. Check your D-bus setup.",
+            )
+            .ok();
+
         let mut app_state = Self {
             session,
             tasks,
@@ -201,6 +218,9 @@ impl AppState {
 
             #[cfg(feature = "openxr")]
             monado_state: None,
+
+            #[cfg(feature = "pipewire")]
+            screencast_manager,
 
             delta_time: 1.0 / 120.0,
         };
@@ -254,6 +274,9 @@ pub struct AppSession {
     pub config: GeneralConfig,
     pub config_dirty: bool,
 
+    #[cfg(feature = "pipewire")]
+    pub pw_tokens: PwTokenMap,
+
     pub no_autostart: bool,
 
     pub toast_topics: IdMap<ToastTopic, ToastDisplayMethod>,
@@ -275,11 +298,18 @@ impl AppSession {
             toast_topics.insert(*k, *v);
         });
 
+        #[cfg(feature = "pipewire")]
+        let pw_tokens = load_pw_token_config()
+            .log_err("Could not load PipeWire tokens")
+            .unwrap_or_default();
+
         Self {
             config,
             toast_topics,
             no_autostart: false,
             config_dirty: false,
+            #[cfg(feature = "pipewire")]
+            pw_tokens,
         }
     }
 }
@@ -288,4 +318,32 @@ pub struct ScreenMeta {
     pub name: Arc<str>,
     #[allow(dead_code)]
     pub native_handle: u32,
+}
+
+#[cfg(feature = "pipewire")]
+#[derive(Deserialize, Serialize, Default)]
+struct TokenConf {
+    pub pw_tokens: PwTokenMap,
+}
+
+#[cfg(feature = "pipewire")]
+fn get_pw_token_path() -> PathBuf {
+    let mut path = config_io::ConfigRoot::Generic.get_conf_d_path();
+    path.push("pw_tokens.yaml");
+    path
+}
+
+#[cfg(feature = "pipewire")]
+pub fn save_pw_token_config(tokens: PwTokenMap) -> anyhow::Result<()> {
+    let conf = TokenConf { pw_tokens: tokens };
+    let yaml = serde_yaml::to_string(&conf)?;
+    std::fs::write(get_pw_token_path(), yaml)?;
+    Ok(())
+}
+
+#[cfg(feature = "pipewire")]
+pub fn load_pw_token_config() -> anyhow::Result<PwTokenMap> {
+    let yaml = std::fs::read_to_string(get_pw_token_path())?;
+    let conf: TokenConf = serde_yaml::from_str(yaml.as_str())?;
+    Ok(conf.pw_tokens)
 }

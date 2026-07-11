@@ -99,7 +99,8 @@
 		"EMPTY_SET": "Set vuoto!",
 		"LETS_ADD_OVERLAYS": "Aggiungiamo degli overlay dal Watch!",
 		"ONE_CONTROLLER_ON_FLOOR": "Posiziona un controller a terra!",
-		"FIXING_FLOOR_IN_X_SECS": "Correzione del pavimento in {SECONDS} secondo/i..."
+		"FIXING_FLOOR_IN_X_SECS": "Correzione del pavimento in {SECONDS} secondo/i...",
+		"TITLE_SCREENCAST_FAIL": "Impossibile avviare la sorgente dello screen cast!"
 	},
 	"WATCH": {
 		"ADD_NEW_SET": "Aggiungi un nuovo set",
@@ -125,5 +126,12 @@
 		"INITIAL_TEXT": "Tieni premuto il tasto del microfono per iniziare la trascrizione...",
 		"INIT_ERROR": "Errore durante l'avvio del motore Whisper",
 		"ENTER_KEY": "Tasto Invio"
+	},
+	"SCREENCAST": {
+		"PENDING": "Attendi prego...",
+		"QUEUED": "In attesa dell'approvazione del pop-up di screen cast di un altro overlay.",
+		"WAITING_FOR_USER_DESC": "Controlla il desktop per un pop-up di condivisione schermo.\nSeleziona quanto segue:",
+		"WAITING_FOR_USER": "Controlla il desktop per un pop-up di condivisione schermo.",
+		"FAIL": "Impossibile inizializzare la sorgente di trasmissione dello schermo."
 	}
 }

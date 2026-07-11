@@ -113,7 +113,8 @@
 		"ONE_CONTROLLER_ON_FLOOR": "Lege einen Controller auf den Boden!",
 		"CANNOT_ADD_SET": "Satz kann nicht hinzugefügt werden!",
 		"MAXIMUM_SETS_REACHED": "Maximale Anzahl an Sets erreicht.",
-		"FIXING_FLOOR_IN_X_SECS": "Boden wird in {SECONDS} Sekunde(n) repariert..."
+		"FIXING_FLOOR_IN_X_SECS": "Boden wird in {SECONDS} Sekunde(n) repariert...",
+		"TITLE_SCREENCAST_FAIL": "Bildschirmübertragungsquelle konnte nicht gestartet werden!"
 	},
 	"DONE": "Erledigt",
 	"WHISPER": {
@@ -127,5 +128,12 @@
 		"INITIAL_TEXT": "Halten Sie die Mikrofontaste gedrückt, um mit der Transkription zu beginnen...",
 		"INIT_ERROR": "Fehler beim Starten der Whisper-Engine",
 		"ENTER_KEY": "Enter-Taste"
+	},
+	"SCREENCAST": {
+		"PENDING": "Bitte warten...",
+		"QUEUED": "Warten auf die Bestätigung des Screen-Cast-Pop-ups eines anderen Overlays.",
+		"WAITING_FOR_USER_DESC": "Überprüfen Sie Ihren Desktop auf ein Pop-up zur Bildschirmübertragung.\nWählen Sie Folgendes aus:",
+		"WAITING_FOR_USER": "Überprüfen Sie Ihren Desktop auf ein Pop-up zur Bildschirmübertragung.",
+		"FAIL": "Bildschirmübertragungsquelle konnte nicht initialisiert werden."
 	}
 }

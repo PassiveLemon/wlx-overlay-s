@@ -14,7 +14,7 @@ use button::setup_custom_button;
 use glam::{Affine2, Vec2, vec2};
 use idmap::IdMap;
 use label::setup_custom_label;
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 use wgui::{
     assets::AssetPath,
     components::{
@@ -95,6 +95,7 @@ pub struct NewGuiPanelParams<S> {
     pub resize_to_parent: bool,
     pub external_xml: bool,
     pub gui_scale: f32,
+    pub extra_vars: HashMap<Rc<str>, Rc<str>>,
 }
 
 impl<S> Default for NewGuiPanelParams<S> {
@@ -105,6 +106,7 @@ impl<S> Default for NewGuiPanelParams<S> {
             resize_to_parent: false,
             external_xml: false,
             gui_scale: 1.0,
+            extra_vars: HashMap::default(),
         }
     }
 }
@@ -134,6 +136,7 @@ impl<S: 'static> GuiPanel<S> {
             },
             extra: wgui::parser::ParseDocumentExtra {
                 on_custom_attribs: Some(on_custom_attrib_inner.clone()),
+                extra_vars: params.extra_vars,
                 ..Default::default()
             },
         };

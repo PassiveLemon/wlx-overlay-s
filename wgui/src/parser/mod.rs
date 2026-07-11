@@ -523,6 +523,12 @@ impl ParserContext<'_> {
 		}
 	}
 
+	fn populate_extra_variables(&mut self, other: &HashMap<Rc<str>, Rc<str>>) {
+		for (k,v) in other.iter() {
+			self.data_local.var_map.insert(k.clone(), v.clone());
+		}
+	}
+
 	fn populate_theme_variables(&mut self) {
 		let theme = self.layout.state.theme.clone();
 
@@ -1275,6 +1281,7 @@ pub type OnCustomAttribsFunc = Rc<dyn Fn(CustomAttribsInfo)>;
 pub struct ParseDocumentExtra {
 	pub on_custom_attribs: Option<OnCustomAttribsFunc>, // all attributes with '_' character prepended
 	pub dev_mode: bool,
+	pub extra_vars: HashMap<Rc<str>, Rc<str>>,
 }
 
 // filled-in by you in `new_layout_from_assets` function
@@ -1292,6 +1299,7 @@ pub fn parse_from_assets(
 	let parser_data = ParserData::default();
 	let mut ctx = create_default_context(doc_params, layout, &parser_data);
 	ctx.populate_theme_variables();
+	ctx.populate_extra_variables(&doc_params.extra.extra_vars);
 
 	let (file, node_layout) = get_doc_from_asset_path(&ctx, doc_params.path)?;
 	parse_document_root(&file, &mut ctx, parent_id, node_layout)?;

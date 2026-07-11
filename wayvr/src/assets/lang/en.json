@@ -89,7 +89,15 @@
 		"GRABBING_WATCH": "To swap hands, move the watch in front and grab it with the other hand.",
 		"UNRESTRICTED_MOVEMENT": "Unrestricted movement"
 	},
+	"SCREENCAST": {
+		"PENDING": "Please wait...",
+		"QUEUED": "Waiting for a different overlay's screen cast pop-up to be approved.",
+		"WAITING_FOR_USER_DESC": "Check your dekstop for a screen cast pop-up.\nSelect the following:",
+		"WAITING_FOR_USER": "Check your desktop for a screen cast pop-up.",
+		"FAIL": "Could not initialize screen cast source."
+	},
 	"TOAST": {
+		"TITLE_SCREENCAST_FAIL": "Could not start screen cast source!",
 		"CANNOT_ADD_SET": "Cannot add set!",
 		"CANNOT_REMOVE_SET": "Cannot remove set!",
 		"DEFAULT_TITLE": "Notification",

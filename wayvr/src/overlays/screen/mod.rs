@@ -72,7 +72,7 @@ pub fn create_screens(app: &mut AppState) -> anyhow::Result<(ScreenCreateData, b
     {
         if let Some(mut wl) = wlx_capture::wayland::WlxClient::new() {
             log::info!("Wayland detected.");
-            return Ok((wl::create_screens_wayland(&mut wl, app), true));
+            return Ok((wl::create_screens_wayland(&mut wl, app)?, true));
         }
         log::info!("Wayland not detected, assuming X11.");
     }

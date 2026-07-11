@@ -16,6 +16,7 @@ members = [
 anyhow = "1.0.100"
 bytes = { version = "1.11.1" }
 clap = { version = "4.5.53", features = ["derive"] }
+dbus = { version = "0.9.12" }
 glam = { version = "0.30.9", features = ["mint", "serde"] }
 idmap = "0.2.2"
 idmap-derive = "0.2.22"

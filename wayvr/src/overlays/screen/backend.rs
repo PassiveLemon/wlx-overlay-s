@@ -59,7 +59,6 @@ pub struct ScreenBackend {
     stereo_adjust_mouse: bool,
     pub(super) logical_pos: Vec2,
     pub(super) logical_size: Vec2,
-    pub(super) mouse_transform_original: Transform,
     mouse_transform_override: MouseTransform,
     just_resumed: bool,
 }
@@ -89,13 +88,12 @@ impl ScreenBackend {
             stereo_adjust_mouse: false,
             logical_pos: Vec2::ZERO,
             logical_size: Vec2::ZERO,
-            mouse_transform_original: Transform::Undefined,
             mouse_transform_override: MouseTransform::Default,
             just_resumed: false,
         }
     }
 
-    pub(super) fn apply_mouse_transform_with_override(&mut self, override_transform: Transform) {
+    pub(super) fn apply_mouse_transform_with_override(&mut self, transform: Transform) {
         let mut size = self.logical_size;
         let pos = self.logical_pos;
 
@@ -108,11 +106,6 @@ impl ScreenBackend {
                 _ => {}
             }
         }
-
-        let transform = match override_transform {
-            Transform::Undefined => self.mouse_transform_original,
-            other => other,
-        };
 
         self.mouse_transform = match transform {
             Transform::Normal | Transform::Undefined => {

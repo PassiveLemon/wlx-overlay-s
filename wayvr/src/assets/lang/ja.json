@@ -111,7 +111,8 @@
 		"ONE_CONTROLLER_ON_FLOOR": "コントローラーを床に置いてください！",
 		"CANNOT_ADD_SET": "セットを追加できません！",
 		"MAXIMUM_SETS_REACHED": "最大セット数に達しました。",
-		"FIXING_FLOOR_IN_X_SECS": "{SECONDS}秒で床を固定中..."
+		"FIXING_FLOOR_IN_X_SECS": "{SECONDS}秒で床を固定中...",
+		"TITLE_SCREENCAST_FAIL": "スクリーンキャストのソースを開始できませんでした！"
 	},
 	"DONE": "完了",
 	"WHISPER": {
@@ -125,5 +126,12 @@
 		"INITIAL_TEXT": "マイクボタンを押し続けて文字起こしを開始してください...",
 		"INIT_ERROR": "Whisperエンジンの起動中にエラーが発生しました",
 		"ENTER_KEY": "Enterキー"
+	},
+	"SCREENCAST": {
+		"PENDING": "少々お待ちください...",
+		"QUEUED": "別のオーバーレイのスクリーンキャスト許可ポップアップの応答を待っています。",
+		"WAITING_FOR_USER_DESC": "デスクトップのスクリーンキャストのポップアップを確認してください。\n以下を選択してください：",
+		"WAITING_FOR_USER": "デスクトップにスクリーンキャストのポップアップが表示されていないか確認してください。",
+		"FAIL": "スクリーンキャストのソースを初期化できませんでした。"
 	}
 }

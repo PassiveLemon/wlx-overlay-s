@@ -1,25 +1,23 @@
 use glam::vec2;
+use wgui::log::LogErr;
 use wlx_capture::{
     WlxCapture,
     frame::Transform,
     wayland::{WlxClient, WlxOutput},
     wlr_screencopy::WlrScreencopyCapture,
 };
-use wlx_common::{
-    astr_containers::AStrMapExt,
-    config::{CaptureMethod, PwTokenMap},
-};
+use wlx_common::{astr_containers::AStrMapExt, config::CaptureMethod};
 
 use crate::{
-    overlays::screen::{backend::CaptureType, create_screen_from_backend},
+    overlays::screen::{backend::CaptureType, create_screen_from_backend, pw::ScreenCastBackend},
     state::{AppState, ScreenMeta},
+    windowing::backend::OverlayBackend,
 };
 
 use super::{
     ScreenCreateData,
     backend::ScreenBackend,
     capture::{MainThreadWlxCapture, new_wlx_capture},
-    pw::{load_pw_token_config, save_pw_token_config},
 };
 
 impl ScreenBackend {
@@ -38,67 +36,50 @@ impl ScreenBackend {
     }
 }
 
-#[allow(clippy::useless_let_if_seq)]
 pub fn create_screen_renderer_wl(
     output: &WlxOutput,
     has_wlr_screencopy: bool,
-    pw_token_store: &mut PwTokenMap,
     app: &mut AppState,
-) -> Option<ScreenBackend> {
-    let mut capture: Option<ScreenBackend> = None;
-
+) -> anyhow::Result<Box<dyn OverlayBackend>> {
     if matches!(
         app.session.config.capture_method,
         CaptureMethod::ScreenCopyCpu | CaptureMethod::ScreenCopyGpu | CaptureMethod::Auto
     ) && has_wlr_screencopy
     {
-        log::info!("{}: Using ScreenCopy capture", &output.name);
-        capture = ScreenBackend::new_wlr_screencopy(output, app);
-    }
-
-    if capture.is_none() {
-        log::info!("{}: Using Pipewire capture", &output.name);
-
-        let display_name = &*output.name;
-
-        // Find existing token by display
-        let token = pw_token_store
-            .arc_get(display_name)
-            .map(std::string::String::as_str);
-
-        if let Some(t) = token {
-            log::info!("Found existing Pipewire token for display {display_name}: {t}");
-        }
-
-        match ScreenBackend::new_pw(output, token, app) {
-            Ok((renderer, restore_token)) => {
-                capture = Some(renderer);
-
-                if let Some(token) = restore_token
-                    && pw_token_store.arc_set(display_name.into(), token.clone())
-                {
-                    log::info!("Adding Pipewire token {token}");
-                }
-            }
-            Err(e) => {
-                log::warn!(
-                    "{}: Failed to create Pipewire capture: {:?}",
-                    &output.name,
-                    e
-                );
-            }
+        if let Some(mut backend) = ScreenBackend::new_wlr_screencopy(output, app) {
+            log::info!("{}: Using ScreenCopy capture", &output.name);
+            backend.logical_pos = vec2(output.logical_pos.0 as f32, output.logical_pos.1 as f32);
+            backend.logical_size = vec2(output.logical_size.0 as f32, output.logical_size.1 as f32);
+            backend.apply_mouse_transform_with_override(Transform::Undefined);
+            return Ok(Box::new(backend));
         }
     }
-    capture
+
+    log::info!("{}: Using Pipewire capture", &output.name);
+    let display_name = &*output.name;
+
+    // Find existing token by display
+    let token = app
+        .session
+        .pw_tokens
+        .arc_get(display_name)
+        .map(|x| x.to_string().into());
+
+    if token.is_some() {
+        log::info!("Found existing Pipewire token for display {display_name}");
+    }
+
+    Ok(Box::new(
+        ScreenCastBackend::new_wl(output, token, app)
+            .log_err("Failed to create screen with screen cast backend")?,
+    ))
 }
 
-pub fn create_screens_wayland(wl: &mut WlxClient, app: &mut AppState) -> ScreenCreateData {
+pub fn create_screens_wayland(
+    wl: &mut WlxClient,
+    app: &mut AppState,
+) -> anyhow::Result<ScreenCreateData> {
     let mut screens = vec![];
-
-    // Load existing Pipewire tokens from file
-    let mut pw_tokens: PwTokenMap = load_pw_token_config().unwrap_or_default();
-
-    let pw_tokens_copy = pw_tokens.clone();
     let has_wlr_screencopy = wl.maybe_wlr_screencopy_mgr.is_some();
 
     for (id, output) in &wl.outputs {
@@ -114,35 +95,20 @@ pub fn create_screens_wayland(wl: &mut WlxClient, app: &mut AppState) -> ScreenC
             output.logical_pos,
         );
 
-        if let Some(mut backend) =
-            create_screen_renderer_wl(output, has_wlr_screencopy, &mut pw_tokens, app)
-        {
-            backend.logical_pos = vec2(output.logical_pos.0 as f32, output.logical_pos.1 as f32);
-            backend.logical_size = vec2(output.logical_size.0 as f32, output.logical_size.1 as f32);
-            backend.mouse_transform_original = output.transform;
-            backend.apply_mouse_transform_with_override(Transform::Undefined);
+        let backend = create_screen_renderer_wl(output, has_wlr_screencopy, app)?;
+        let window_config = create_screen_from_backend(
+            output.name.clone(),
+            output.transform,
+            &app.session,
+            backend,
+        );
 
-            let window_config = create_screen_from_backend(
-                output.name.clone(),
-                output.transform,
-                &app.session,
-                Box::new(backend),
-            );
+        let meta = ScreenMeta {
+            name: wl.outputs[id].name.clone(),
+            native_handle: *id,
+        };
 
-            let meta = ScreenMeta {
-                name: wl.outputs[id].name.clone(),
-                native_handle: *id,
-            };
-
-            screens.push((meta, window_config));
-        }
-    }
-
-    if pw_tokens_copy != pw_tokens {
-        // Token list changed, re-create token config file
-        if let Err(err) = save_pw_token_config(pw_tokens) {
-            log::error!("Failed to save Pipewire token config: {err}");
-        }
+        screens.push((meta, window_config));
     }
 
     let extent = wl.get_desktop_extent();
@@ -155,5 +121,5 @@ pub fn create_screens_wayland(wl: &mut WlxClient, app: &mut AppState) -> ScreenC
         .inner
         .set_desktop_origin(vec2(origin.0 as f32, origin.1 as f32));
 
-    ScreenCreateData { screens }
+    Ok(ScreenCreateData { screens })
 }
