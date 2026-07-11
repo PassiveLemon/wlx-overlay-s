@@ -15,11 +15,14 @@ members = [
 [workspace.dependencies]
 anyhow = "1.0.100"
 bytes = { version = "1.11.1" }
+chrono = "0.4.42"
 clap = { version = "4.5.53", features = ["derive"] }
 dbus = { version = "0.9.12" }
 glam = { version = "0.30.9", features = ["mint", "serde"] }
 idmap = "0.2.2"
 idmap-derive = "0.2.22"
+interprocess = { version = "2.2.3" }
+libc = "0.2.178"
 log = "0.4.29"
 pipewire = { version = "0.10", features = ["v0_3_33", "v0_3_65"] }
 regex = "1.12.2"
@@ -31,6 +34,8 @@ slotmap = "1.1.1"
 smallvec = "1.15.2"
 smol = "2.0.2"
 strum = { version = "0.27.2", features = ["derive"] }
+tokio = "1.48.0"  # TODO: switch to smol for ipc
+tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 uuid = { version = "1.19.0", features = ["fast-rng", "serde", "v4"] }
 vulkano = {
   version = "0.35.2",
@@ -43,6 +48,7 @@ vulkano-shaders = "0.35.0"
 wayland-client = { version = "0.31" }
 wayland-protocols = { version = "0.32" }
 wayland-protocols-misc = { version = "0.3.12" }
+winit = "0.30.12"
 xdg = "3.0.0"
 
 [patch.crates-io]

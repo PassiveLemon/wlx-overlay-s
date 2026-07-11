@@ -8,12 +8,14 @@ authors = ["galister", "oo8dev"]
 repository = "https://github.com/wlx-team/wayvr"
 
 [dependencies]
+wayvr-ipc = { path = "../wayvr-ipc" }
+
 anyhow.workspace = true
-log.workspace = true
 clap.workspace = true
+log.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+tokio.workspace = true
+
 env_logger = "0.11.8"
-tokio = "1.48.0"
-wayvr-ipc = { path = "../wayvr-ipc" }
 shell-words = "1.1.1"

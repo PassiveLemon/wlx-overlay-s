@@ -119,6 +119,7 @@ impl TestbedGeneric {
 				rect.params.color = color;
 			})),
 			dev_mode: false,
+			..Default::default()
 		};
 
 		let (layout, parser_state) = wgui::parser::new_layout_from_assets(

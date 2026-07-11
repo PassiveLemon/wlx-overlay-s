@@ -8,14 +8,15 @@ authors = ["galister", "oo8dev"]
 repository = "https://github.com/wlx-team/wayvr"
 
 [dependencies]
-anyhow = { workspace = true }
-glam = { workspace = true }
-log = { workspace = true }
-rust-embed = "8.9.0"
-tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
-wgui = { path = "../wgui/" }
-winit = "0.30.12"
-vulkano = { workspace = true }
-vulkano-shaders = { workspace = true }
 dash-frontend = { path = "../dash-frontend/" }
+wgui = { path = "../wgui/" }
 wlx-common = { path = "../wlx-common" }
+
+anyhow.workspace = true
+glam.workspace = true
+log.workspace = true
+rust-embed.workspace = true
+tracing-subscriber.workspace = true
+vulkano.workspace = true
+vulkano-shaders.workspace = true
+winit.workspace = true
