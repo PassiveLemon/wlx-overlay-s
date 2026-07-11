@@ -34,7 +34,7 @@ image = {
     "webp",
   ]
 }
-lru = "0.18.0"
+lru = "0.18.1"
 ouroboros = "0.18.5"
 parking_lot = "0.12.5"
 resvg = { version = "0.47.0", default-features = false }

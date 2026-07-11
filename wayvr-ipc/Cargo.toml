@@ -18,7 +18,7 @@ smallvec.workspace = true
 interprocess = { workspace = true, features = ["tokio"], optional = true }
 serde_json.workspace = true
 tokio = { workspace = true, features = ["macros"], optional = true }
-tokio-util = { version = "0.7.13", optional = true }
+tokio-util = { version = "0.7.18", optional = true }
 
 [features]
 default = ["client"]
