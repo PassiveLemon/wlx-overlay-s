@@ -524,7 +524,7 @@ impl ParserContext<'_> {
 	}
 
 	fn populate_extra_variables(&mut self, other: &HashMap<Rc<str>, Rc<str>>) {
-		for (k,v) in other.iter() {
+		for (k, v) in other.iter() {
 			self.data_local.var_map.insert(k.clone(), v.clone());
 		}
 	}
