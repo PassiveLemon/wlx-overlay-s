@@ -145,7 +145,7 @@
 
           <!-- Right bottom side -->
           <div margin_right="16">
-            <label id="label_time" size="16" weight="light" />
+            <label id="label_time" size="16" weight="light" color="on_background_contrast" />
           </div>
         </rectangle>
       </div>

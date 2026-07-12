@@ -9,7 +9,7 @@
       flex_grow="1"
       gap="24">
       <image src_builtin="dashboard/splash.png" width="300" height="89" />
-      <label id="label_hello" size="32" weight="bold" />
+      <label id="label_hello" size="32" weight="bold" color="on_background" />
 
       <!-- main button list -->
       <div flex_direction="row" gap="8">
@@ -21,15 +21,15 @@
 
       <div gap="8">
         <Button id="btn_welcome_screen" macro="home_button" tooltip="APP_SETTINGS.SHOW_WELCOME_SCREEN">
-          <sprite src_builtin="dashboard/welcome.svg" width="32" height="32" margin="16"/>
+          <sprite src_builtin="dashboard/welcome.svg" width="32" height="32" margin="16" color="on_background"/>
         </Button>
 
         <Button id="btn_website" macro="home_button" tooltip_str="wayvr.org">
-          <sprite src_builtin="dashboard/globe.svg" width="32" height="32" margin="16"/>
+          <sprite src_builtin="dashboard/globe.svg" width="32" height="32" margin="16" color="on_background"/>
         </Button>
 
         <Button id="btn_donate" macro="home_button" tooltip="DONATE.SUPPORT_US">
-          <sprite src_builtin="dashboard/opencollective.svg" width="32" height="32" margin="16"/>
+          <sprite src_builtin="dashboard/opencollective.svg" width="32" height="32" margin="16" color="on_background"/>
         </Button>
       </div>
     </div>
