@@ -3,24 +3,26 @@ use crate::{
 	assets::AssetPath,
 	color::{WguiColor, WguiColorName},
 	components::{
-		self, Component, ComponentBase, ComponentTrait, RefreshData,
+		self,
 		tooltip::{ComponentTooltip, TooltipTrait},
+		Component, ComponentBase, ComponentTrait, RefreshData,
 	},
 	drawing::{self, Boundary},
 	event::{CallbackDataCommon, EventListenerCollection, EventListenerID, EventListenerKind},
 	i18n::Translation,
 	layout::{WidgetID, WidgetPair},
 	renderer_vk::{
-		text::{FontWeight, TextStyle, custom_glyph::CustomGlyphData},
+		text::{custom_glyph::CustomGlyphData, FontWeight, TextStyle},
 		util::centered_matrix,
 	},
 	sound::WguiSoundType,
 	widget::{
-		self, ConstructEssentials, EventResult, WidgetData,
+		self,
 		label::{WidgetLabel, WidgetLabelParams},
 		rectangle::{WidgetRectangle, WidgetRectangleParams},
 		sprite::{WidgetSprite, WidgetSpriteParams},
 		util::WLength,
+		ConstructEssentials, EventResult, WidgetData,
 	},
 };
 use glam::{Mat4, Vec2, Vec3};
@@ -29,7 +31,7 @@ use std::{
 	rc::Rc,
 	time::{Duration, Instant},
 };
-use taffy::{AlignItems, JustifyContent, prelude::length};
+use taffy::{prelude::length, AlignItems, JustifyContent};
 
 pub struct Params<'a> {
 	pub text: Option<Translation>, // if unset, label will not be populated
@@ -38,8 +40,10 @@ pub struct Params<'a> {
 	pub color: Option<WguiColor>,
 	pub border: f32,
 	pub border_color: Option<WguiColor>,
-	pub hover_border_color: Option<WguiColor>,
 	pub hover_color: Option<WguiColor>,
+	pub hover_border_color: Option<WguiColor>,
+	pub sticky_color: Option<WguiColor>,
+	pub sticky_border_color: Option<WguiColor>,
 	pub round: WLength,
 	pub style: taffy::Style,
 	pub text_style: TextStyle,
@@ -58,10 +62,12 @@ impl Default for Params<'_> {
 			text: Some(Translation::from_raw_text("")),
 			sprite_src: None,
 			color: None,
-			hover_color: None,
 			border_color: None,
-			border: 2.0,
+			hover_color: None,
 			hover_border_color: None,
+			sticky_color: None,
+			sticky_border_color: None,
+			border: 2.0,
 			round: WLength::Units(4.0),
 			style: Default::default(),
 			text_style: TextStyle::default(),
@@ -84,6 +90,8 @@ pub struct Colors {
 	pub border_color: WguiColor,
 	pub hover_color: WguiColor,
 	pub hover_border_color: WguiColor,
+	pub sticky_color: WguiColor,
+	pub sticky_border_color: WguiColor,
 }
 
 struct State {
@@ -478,6 +486,12 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 		.hover_border_color
 		.unwrap_or_else(|| border_color.add_rgb(0.5).add_alpha(0.5));
 
+	let sticky_color = params.hover_color.unwrap_or_else(|| color.add_rgb(0.15).add_alpha(0.1));
+
+	let sticky_border_color = params
+		.hover_border_color
+		.unwrap_or_else(|| border_color.add_rgb(0.25).add_alpha(0.35));
+
 	let gradient_intensity = theme.gradient_intensity;
 
 	drop(globals);
@@ -568,6 +582,8 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 			border_color,
 			hover_color,
 			hover_border_color,
+			sticky_color,
+			sticky_border_color,
 		},
 	}));
 

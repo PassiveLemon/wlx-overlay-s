@@ -1,14 +1,15 @@
 use crate::{
 	assets::AssetPath,
 	color::WguiColor,
-	components::{Component, button},
+	components::{button, Component},
 	i18n::Translation,
 	layout::WidgetID,
 	parser::{
-		AttribPair, ParserContext, ParserFile, get_asset_path_from_kv,
-		helpers::{TooltipAttribs, parse_attrib_tooltip},
+		get_asset_path_from_kv,
+		helpers::{parse_attrib_tooltip, TooltipAttribs},
 		parse_children, parse_f32, process_component,
 		style::{parse_color_opt, parse_round, parse_style, parse_text_style},
+		AttribPair, ParserContext, ParserFile,
 	},
 	widget::util::WLength,
 };
@@ -27,6 +28,8 @@ pub fn parse_component_button<'a>(
 	let mut border_color: Option<WguiColor> = None;
 	let mut hover_color: Option<WguiColor> = None;
 	let mut hover_border_color: Option<WguiColor> = None;
+	let mut sticky_color: Option<WguiColor> = None;
+	let mut sticky_border_color: Option<WguiColor> = None;
 	let mut round = WLength::Units(4.0);
 	let mut tooltip = TooltipAttribs::default();
 	let mut sticky: bool = false;
@@ -79,6 +82,12 @@ pub fn parse_component_button<'a>(
 			"hover_border_color" => {
 				parse_color_opt(ctx, tag_name, key, value, &mut hover_border_color);
 			}
+			"sticky_color" => {
+				parse_color_opt(ctx, tag_name, key, value, &mut sticky_color);
+			}
+			"sticky_border_color" => {
+				parse_color_opt(ctx, tag_name, key, value, &mut sticky_border_color);
+			}
 			"sprite_src" | "sprite_src_ext" | "sprite_src_builtin" | "sprite_src_internal" => {
 				let asset_path = get_asset_path_from_kv("sprite_", key, value);
 
@@ -106,8 +115,10 @@ pub fn parse_component_button<'a>(
 			color,
 			border,
 			border_color,
-			hover_border_color,
 			hover_color,
+			hover_border_color,
+			sticky_color,
+			sticky_border_color,
 			text: translation,
 			style,
 			text_style,

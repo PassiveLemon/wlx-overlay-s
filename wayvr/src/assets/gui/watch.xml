@@ -16,7 +16,7 @@
   <template name="Device">
     <rectangle macro="decorative_rect" padding_top="4" padding_bottom="4" align_items="center" gap="8">
       <sprite width="32" height="32" src_builtin="${src}" color="on_background" />
-      <label _source="battery" _device="${idx}" size="24" weight="bold" _low_color="danger" _normal_color="primary" _charging_color="secondary" />
+      <label _source="battery" _device="${idx}" size="24" weight="bold" _low_color="danger" _normal_color="primary" _charging_color="tertiary" />
     </rectangle>
   </template>
 
