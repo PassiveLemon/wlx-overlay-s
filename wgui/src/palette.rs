@@ -116,10 +116,10 @@ static DEFAULT: &WguiColorPalette = &WguiColorPalette {
 	colors: [
 		hex("#21adff"), // Primary
 		hex("#eaf7ff"), // OnPrimary
-		hex("#424b56"), // Secondary
-		hex("#d2e6ff"), // OnSecondary
+		hex("#ffffff"), // Secondary
+		hex("#222222"), // OnSecondary
 		hex("#10d0b3"), // Tertiary
-		hex("#d1fff8"), // OnTertiary
+		hex("#000000"), // OnTertiary
 		hex("#f7469a"), // Danger
 		hex("#ffebf5"), // OnDanger
 		hex("#002e43"), // Background
