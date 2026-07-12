@@ -8,7 +8,7 @@
       flex_direction="column" overflow="visible" align_items="center" justify_content="center" gap="4"
     >
       <div>
-        <sprite src="${src}" src_ext="${src_ext}" width="64" height="64" />
+        <sprite src="${src}" src_ext="${src_ext}" width="64" height="64" color="#FFFFFF" />
       </div>
       <div align_items="center" justify_content="center">
         <label width="116" weight="bold" text="${name}" size="12" wrap="1" align="center" padding_left="16" padding_right="16" />

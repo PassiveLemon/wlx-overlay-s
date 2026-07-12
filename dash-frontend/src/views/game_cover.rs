@@ -107,10 +107,14 @@ impl View {
 				content: Translation::from_raw_text(text),
 				style: TextStyle {
 					weight: Some(FontWeight::Bold),
+					color: Some(drawing::Color::new(1.0, 1.0, 1.0, 1.0).into()),
 					wrap: true,
 					size: Some(16.0),
 					align: Some(HorizontalAlign::Center),
-					shadow: Some(WguiTextShadow::default()),
+					shadow: Some(WguiTextShadow {
+						color: drawing::Color::new(0.0, 0.0, 0.0, 1.0).into(),
+						..Default::default()
+					}),
 					..Default::default()
 				},
 				..Default::default()

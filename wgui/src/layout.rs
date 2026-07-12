@@ -711,6 +711,7 @@ impl Layout {
 			.process(&self.state, &mut self.alterables, params.timestep_alpha);
 		self.process_alterables(alterables)?;
 		self.try_recompute_layout(params.size)?;
+		self.process_pending_components();
 
 		Ok(LayoutUpdateResult {
 			sounds_to_play: std::mem::take(&mut self.sounds_to_play_once),
