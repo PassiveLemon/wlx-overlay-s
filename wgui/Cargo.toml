@@ -36,7 +36,6 @@ image = {
   ]
 }
 lru = "0.18.0"
-num_enum = "0.7.6"  # for converting integers into Option enums (search for TryFromPrimitive in the codebase)
 ouroboros = "0.18.5"
 parking_lot = "0.12.5"
 resvg = { version = "0.47.0", default-features = false }

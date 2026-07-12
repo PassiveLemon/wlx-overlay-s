@@ -6603,7 +6603,6 @@ dependencies = [
  "image",
  "log",
  "lru",
- "num_enum",
  "ouroboros",
  "parking_lot",
  "regex",

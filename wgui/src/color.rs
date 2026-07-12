@@ -1,10 +1,9 @@
 use crate::drawing;
-use num_enum::TryFromPrimitive;
-use strum::EnumCount;
+use strum::{EnumCount, VariantArray};
 // Primary: button color
 // OnPrimary: text color placed on the Primary-colored button
 
-#[derive(Debug, Copy, Clone, TryFromPrimitive, EnumCount)]
+#[derive(Debug, Copy, Clone, EnumCount, VariantArray)]
 #[repr(u8)]
 pub enum WguiColorName {
 	Primary,
@@ -78,7 +77,7 @@ impl WguiColorPalette {
 	fn resolve_name(&self, in_name: &str) -> Option<WguiColorName> {
 		for (idx, (_, name)) in self.colors.iter().enumerate() {
 			if in_name == *name {
-				return WguiColorName::try_from(idx as u8).ok();
+				return WguiColorName::VARIANTS.get(idx).copied();
 			}
 		}
 		None
