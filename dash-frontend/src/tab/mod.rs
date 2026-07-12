@@ -1,3 +1,5 @@
+use strum::EnumCount;
+
 use crate::frontend::Frontend;
 
 pub mod apps;
@@ -8,7 +10,7 @@ pub mod monado;
 pub mod settings;
 pub mod welcome;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, EnumCount)]
 pub enum TabType {
 	Home,
 	Apps,

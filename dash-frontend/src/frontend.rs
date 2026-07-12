@@ -1,11 +1,12 @@
-use std::{path::PathBuf, rc::Rc};
+use std::{collections::HashMap, path::PathBuf, rc::Rc};
 
 use chrono::Timelike;
 use glam::Vec2;
+use strum::EnumCount;
 use wgui::{
 	assets::{AssetPath, AssetProvider},
 	components::button::ComponentButton,
-	event::StyleSetRequest,
+	event::{CallbackDataCommon, StyleSetRequest},
 	font_config::WguiFontConfig,
 	globals::WguiGlobals,
 	i18n::Translation,
@@ -61,6 +62,7 @@ pub struct Frontend<T> {
 	state: ParserState,
 
 	current_tab: Option<Box<dyn Tab<T>>>,
+	side_buttons: Vec<(TabType, Rc<ComponentButton>)>,
 
 	pub tasks: FrontendTasks,
 
@@ -181,6 +183,7 @@ impl<T: 'static> Frontend<T> {
 			layout,
 			state,
 			current_tab: None,
+			side_buttons: Vec::with_capacity(TabType::COUNT),
 			globals,
 			tasks,
 			ticks: 0,
@@ -439,6 +442,15 @@ impl<T: 'static> Frontend<T> {
 
 		self.current_tab = Some(tab);
 
+		let mut common = CallbackDataCommon {
+			state: &self.layout.state,
+			alterables: &mut self.layout.alterables,
+		};
+
+		for (t, btn) in self.side_buttons.iter() {
+			btn.set_sticky_state(&mut common, tab_type == *t);
+		}
+
 		Ok(())
 	}
 
@@ -454,34 +466,29 @@ impl<T: 'static> Frontend<T> {
 		// ################################
 
 		// "Home" side button
-		self.tasks.handle_button(
-			&self.state.fetch_component_as::<ComponentButton>("btn_side_home")?,
-			FrontendTask::SetTab(TabType::Home),
-		);
+		let btn = self.state.fetch_component_as::<ComponentButton>("btn_side_home")?;
+		self.tasks.handle_button(&btn, FrontendTask::SetTab(TabType::Home));
+		self.side_buttons.push((TabType::Home, btn));
 
 		// "Apps" side button
-		self.tasks.handle_button(
-			&self.state.fetch_component_as::<ComponentButton>("btn_side_apps")?,
-			FrontendTask::SetTab(TabType::Apps),
-		);
+		let btn = self.state.fetch_component_as::<ComponentButton>("btn_side_apps")?;
+		self.tasks.handle_button(&btn, FrontendTask::SetTab(TabType::Apps));
+		self.side_buttons.push((TabType::Apps, btn));
 
 		// "Games" side button
-		self.tasks.handle_button(
-			&self.state.fetch_component_as::<ComponentButton>("btn_side_games")?,
-			FrontendTask::SetTab(TabType::Games),
-		);
+		let btn = self.state.fetch_component_as::<ComponentButton>("btn_side_games")?;
+		self.tasks.handle_button(&btn, FrontendTask::SetTab(TabType::Games));
+		self.side_buttons.push((TabType::Games, btn));
 
 		// "Monado side button"
-		self.tasks.handle_button(
-			&self.state.fetch_component_as::<ComponentButton>("btn_side_monado")?,
-			FrontendTask::SetTab(TabType::Monado),
-		);
+		let btn = self.state.fetch_component_as::<ComponentButton>("btn_side_monado")?;
+		self.tasks.handle_button(&btn, FrontendTask::SetTab(TabType::Monado));
+		self.side_buttons.push((TabType::Monado, btn));
 
 		// "Settings" side button
-		self.tasks.handle_button(
-			&self.state.fetch_component_as::<ComponentButton>("btn_side_settings")?,
-			FrontendTask::SetTab(TabType::Settings),
-		);
+		let btn = self.state.fetch_component_as::<ComponentButton>("btn_side_settings")?;
+		self.tasks.handle_button(&btn, FrontendTask::SetTab(TabType::Settings));
+		self.side_buttons.push((TabType::Settings, btn));
 
 		// ################################
 		// BOTTOM BAR BUTTONS
