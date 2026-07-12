@@ -666,12 +666,13 @@ impl View {
 		let mut com = layout.common();
 
 		let mut perform = |btn_num: u8, btn: &Rc<ComponentButton>| {
-			let color = if num == btn_num {
-				WguiColorName::Primary
+			let (color, label_color) = if num == btn_num {
+				(WguiColorName::Primary, WguiColorName::OnPrimary)
 			} else {
-				WguiColorName::BackgroundVariant
+				(WguiColorName::BackgroundVariant, WguiColorName::OnBackgroundVariant)
 			};
 			btn.set_color(&mut com, color.into());
+			btn.set_label_color(&mut com, label_color.into());
 		};
 
 		perform(0, &self.btn_sinks);

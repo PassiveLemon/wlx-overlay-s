@@ -84,7 +84,7 @@ pub fn create_label_error(layout: &mut Layout, parent: WidgetID, content: String
 
 pub fn create_icon(layout: &mut Layout, id_parent: WidgetID, size: Vec2, path: AssetPath) -> anyhow::Result<WidgetID> {
 	let widget_sprite = WidgetSprite::create(WidgetSpriteParams {
-		color: None,
+		color: Some(WguiColorName::OnBackground.into()),
 		glyph_data: Some(CustomGlyphData::from_assets(&layout.state.globals, path)?),
 	});
 

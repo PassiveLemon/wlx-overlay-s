@@ -4,7 +4,7 @@ use taffy::{
 };
 
 use crate::{
-	color::WguiColor,
+	color::{WguiColor, WguiColorName},
 	drawing,
 	parser::{AttribPair, ParserContext, is_percent, parse_f32},
 	renderer_vk::text::{FontWeight, HorizontalAlign, TextStyle},
@@ -61,12 +61,14 @@ pub fn parse_color_opt(
 }
 
 pub fn parse_text_style(ctx: &ParserContext<'_>, attribs: &[AttribPair], tag_name: &str, prefix: &str) -> TextStyle {
-	let mut style = TextStyle::default();
+	let mut style = TextStyle {
+		color: Some(WguiColorName::OnBackground.into()),
+		..Default::default()
+	};
 
 	for pair in attribs {
 		let (key, value) = (pair.attrib.as_ref(), pair.value.as_ref());
-		if key.starts_with(prefix) {
-			let suffix = &key[prefix.len()..];
+		if let Some(suffix) = key.strip_prefix(prefix) {
 			match suffix {
 				"color" => {
 					parse_color_opt(ctx, tag_name, key, value, &mut style.color);

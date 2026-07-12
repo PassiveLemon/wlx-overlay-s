@@ -53,15 +53,15 @@
         <div flex_direction="row" align_items="end" justify_content="center" gap="8" margin_top="8">
           <Button id="btn_unpin" color="#997777" padding_left="8" padding_right="8" round="8" min_height="40">
             <sprite src_builtin="dashboard/heart_minus.svg" width="32" height="32" />
-            <label translation="REMOVE_FROM_FAVOURITES" weight="bold" size="17" shadow="#00000099" />
+            <label translation="REMOVE_FROM_FAVOURITES" weight="bold" size="17" color="#FFFFFF" shadow="#00000099" />
           </Button>
           <Button id="btn_pin" color="#ce4477" border_color="#ce4477" padding_left="8" padding_right="8" round="8" min_height="40" tooltip="ADD_TO_FAVOURITES_HINT">
             <sprite src_builtin="dashboard/heart_plus.svg" width="32" height="32" />
-            <label translation="ADD_TO_FAVOURITES" weight="bold" size="17" shadow="#00000099" />
+            <label translation="ADD_TO_FAVOURITES" weight="bold" size="17" color="#FFFFFF" shadow="#00000099" />
           </Button>
           <Button id="btn_launch" color="#44ce22" border_color="#44ce22" padding_left="8" padding_right="8" round="8" min_width="200" min_height="40">
             <sprite src_builtin="dashboard/play.svg" width="32" height="32" />
-            <label translation="APP_LAUNCHER.LAUNCH" weight="bold" size="17" shadow="#00000099" />
+            <label translation="APP_LAUNCHER.LAUNCH" weight="bold" size="17" color="#FFFFFF" shadow="#00000099" />
           </Button>
         </div>
       </div>

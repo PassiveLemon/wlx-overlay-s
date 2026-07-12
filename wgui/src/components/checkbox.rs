@@ -385,7 +385,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 		id_container,
 		WidgetRectangle::create(WidgetRectangleParams {
 			border: 2.0,
-			border_color: WguiColorName::OnPrimary.into(),
+			border_color: WguiColorName::OnBackground.into(),
 			round: round_8,
 			color: WguiColor::from(WguiColorName::OnPrimary).with_alpha(0.0),
 			..Default::default()
@@ -425,6 +425,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 			content: params.text,
 			style: TextStyle {
 				weight: Some(FontWeight::Bold),
+				color: Some(WguiColorName::OnBackground.into()),
 				..Default::default()
 			},
 		},

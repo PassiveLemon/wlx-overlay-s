@@ -10,12 +10,12 @@
     <label size="20" translation="WELCOME.GUIDE_INTRO"/>
 
     <div gap="4" align_items="center" margin_top="8">
-      <sprite min_width="16" min_height="16" src_builtin="dashboard/info.svg"/>
+      <sprite min_width="16" min_height="16" src_builtin="dashboard/info.svg" color="on_background"/>
       <label wrap="1" size="14" translation="WELCOME.REPOSITION_THIS_WINDOW_BY_GRABBING"/>
     </div>
 
     <div gap="4" align_items="center">
-      <sprite min_width="16" min_height="16" src_builtin="dashboard/info.svg"/>
+      <sprite min_width="16" min_height="16" src_builtin="dashboard/info.svg" color="on_background"/>
       <label wrap="1" size="14" translation="WELCOME.LAST_PAGE_INFO"/>
     </div>
 

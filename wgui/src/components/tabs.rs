@@ -65,14 +65,20 @@ impl ComponentTrait for ComponentTabs {
 	}
 }
 
+fn set_button_selected(common: &mut CallbackDataCommon, button: &Rc<ComponentButton>, selected: bool) {
+	if selected {
+		button.set_color(common, WguiColorName::Primary.into());
+		button.set_label_color(common, WguiColorName::OnPrimary.into());
+	} else {
+		button.set_color(common, WguiColorName::Background.into());
+		button.set_label_color(common, WguiColorName::OnBackground.into());
+	}
+}
+
 impl State {
 	fn select_entry(&mut self, common: &mut CallbackDataCommon, name: &Rc<str>) {
 		for entry in &self.mounted_entries {
-			if *entry.name == **name {
-				entry.button.set_color(common, WguiColorName::Primary.into());
-			} else {
-				entry.button.set_color(common, WguiColorName::BackgroundVariant.into());
-			}
+			set_button_selected(common, &entry.button, *entry.name == **name);
 		}
 		self.selected_entry_name = name.clone();
 
@@ -137,6 +143,9 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 				..Default::default()
 			},
 		)?;
+
+		// init colors
+		set_button_selected(&mut ess.layout.common(), &button, false);
 
 		mounted_entries.push(MountedEntry {
 			name: Rc::from(entry.name),

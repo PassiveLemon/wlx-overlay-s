@@ -2,6 +2,7 @@ use std::{marker::PhantomData, rc::Rc};
 
 use wgui::{
 	assets::AssetPath,
+	color::WguiColorName,
 	components::button::ComponentButton,
 	globals::WguiGlobals,
 	layout::{Layout, WidgetID},
@@ -110,7 +111,14 @@ impl<T> TabWelcome<T> {
 		for i in 0..PAGE_COUNT {
 			let mut params = TemplateParams::new();
 			let is_selected = i == self.current_page;
-			params.insert("COLOR", if is_selected { "#FFFFFF" } else { "#FFFFFF11" });
+			params.insert(
+				"COLOR",
+				if is_selected {
+					"primary"
+				} else {
+					"on_background(opacity-0.25)"
+				},
+			);
 
 			self
 				.state

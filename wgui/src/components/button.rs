@@ -34,6 +34,7 @@ use taffy::{AlignItems, JustifyContent, prelude::length};
 pub struct Params<'a> {
 	pub text: Option<Translation>, // if unset, label will not be populated
 	pub sprite_src: Option<AssetPath<'a>>,
+	pub sprite_color: Option<WguiColor>,
 	pub color: Option<WguiColor>,
 	pub border: f32,
 	pub border_color: Option<WguiColor>,
@@ -53,6 +54,7 @@ pub struct Params<'a> {
 impl Default for Params<'_> {
 	fn default() -> Self {
 		Self {
+			sprite_color: None,
 			text: Some(Translation::from_raw_text("")),
 			sprite_src: None,
 			color: None,
@@ -169,6 +171,13 @@ impl ComponentButton {
 
 		let mut state = self.state.borrow_mut();
 		state.colors.color = color;
+	}
+
+	pub fn set_label_color(&self, common: &mut CallbackDataCommon, color: WguiColor) {
+		let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(self.data.id_label) else {
+			return;
+		};
+		label.set_color(common, color, true);
 	}
 
 	pub fn get_time_since_last_pressed(&self) -> Duration {
@@ -498,7 +507,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 	if let Some(sprite_path) = params.sprite_src {
 		let sprite = WidgetSprite::create(WidgetSpriteParams {
 			glyph_data: Some(CustomGlyphData::from_assets(&ess.layout.state.globals, sprite_path)?),
-			..Default::default()
+			color: Some(params.sprite_color.unwrap_or(WguiColorName::OnBackground.into())),
 		});
 
 		ess.layout.add_child(
@@ -522,6 +531,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 				content,
 				style: TextStyle {
 					weight: Some(FontWeight::Bold),
+					color: Some(WguiColorName::OnBackground.into()),
 					..params.text_style
 				},
 			},

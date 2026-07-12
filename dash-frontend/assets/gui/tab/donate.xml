@@ -5,7 +5,7 @@
   <template name="Avatar">
     <div flex_direction="column" gap="12" align_items="center">
       <image src_builtin="${icon}" width="72" height="72" round="100%" position="relative">
-        <rectangle position="absolute" margin_left="-2" margin_top="-2" width="76" height="76" color="#FFFFFF" round="100%"/>
+        <rectangle position="absolute" margin_left="-2" margin_top="-2" width="76" height="76" color="highlight" round="100%"/>
       </image>
       <label size="14" text="${nickname}"/>
     </div>
@@ -18,7 +18,7 @@
     <div margin="32" flex_direction="column" align_items="center" justify_content="center" gap="16" height="100%">
       <div gap="16" align_items="center" width="100%">
         <sprite color="#FFAAAA" src_builtin="dashboard/donate.svg" min_width="64" min_height="64"/>
-        <label wrap="1" size="20" translation="DONATE.DESCRIPTION"/>
+        <label wrap="1" size="20" translation="DONATE.DESCRIPTION" color="on_background"/>
       </div>
 
       <div flex_direction="column" gap="8" align_items="center" margin_top="16">
@@ -28,7 +28,7 @@
         <label text="opencollective.com/wayvr-org"/>
       </div>
 
-      <label weight="bold" size="24" translation="DONATE.THANK_YOU_WAYVR"/>
+      <label weight="bold" size="24" translation="DONATE.THANK_YOU_WAYVR" color="on_background"/>
 
       <div gap="32" margin_top="16">
         <Avatar icon="dashboard/avatars/galister.png" nickname="galister"/>

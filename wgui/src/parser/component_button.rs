@@ -22,6 +22,7 @@ pub fn parse_component_button<'a>(
 	tag_name: &str,
 ) -> anyhow::Result<WidgetID> {
 	let mut color: Option<WguiColor> = None;
+	let mut sprite_color: Option<WguiColor> = None;
 	let mut border = 2.0;
 	let mut border_color: Option<WguiColor> = None;
 	let mut hover_color: Option<WguiColor> = None;
@@ -63,6 +64,9 @@ pub fn parse_component_button<'a>(
 			"color" => {
 				parse_color_opt(ctx, tag_name, key, value, &mut color);
 			}
+			"sprite_color" => {
+				parse_color_opt(ctx, tag_name, key, value, &mut sprite_color);
+			}
 			"border" => {
 				ctx.parse_check_f32(tag_name, key, value, &mut border);
 			}
@@ -98,6 +102,7 @@ pub fn parse_component_button<'a>(
 	let (widget, button) = button::construct(
 		&mut ctx.get_construct_essentials(parent_id),
 		button::Params {
+			sprite_color,
 			color,
 			border,
 			border_color,

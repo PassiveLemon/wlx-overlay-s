@@ -5,8 +5,8 @@
   <template name="DeviceSlider">
     <rectangle macro="group_box">
       <div width="100%" align_items="center" justify_content="center" gap="8">
-        <sprite src_builtin="${device_icon}" width="16" height="16" />
-        <label text="${device_name}" margin_right="8" size="12" weight="bold" />
+        <sprite src_builtin="${device_icon}" width="16" height="16" color="on_background" />
+        <label text="${device_name}" margin_right="8" size="12" weight="bold" color="on_background" />
       </div>
       <div width="100%" align_items="center">
         <CheckBox id="checkbox" />
@@ -20,7 +20,7 @@
   <template name="Card">
     <rectangle macro="group_box">
       <div width="100%" align_items="center" justify_content="center">
-        <label text="${card_name}" size="12" weight="bold" />
+        <label text="${card_name}" size="12" weight="bold" color="on_background" />
       </div>
       <Button id="btn_card" text="${profile_name}" width="100%" height="32" />
     </rectangle>
@@ -29,7 +29,7 @@
   <template name="SelectAudioProfileText">
     <div align_items="center" gap="8">
       <Button width="48" height="32" id="btn_back">
-        <sprite src_builtin="dashboard/back.svg" width="24" height="24" />
+        <sprite src_builtin="dashboard/back.svg" width="24" height="24" color="on_background" />
       </Button>
       <label translation="AUDIO.SELECT_AUDIO_CARD_PROFILE" size="14" weight="bold" />
     </div>
@@ -59,6 +59,7 @@
           min_width="32"
           tooltip="AUDIO.AUTO_SWITCH_TO_VR_AUDIO"
           color="primary"
+          sprite_color="on_primary"
           tooltip_side="right" />
 
         <BottomButton id="btn_sinks" src_builtin="dashboard/volume.svg" translation="AUDIO.SPEAKERS" />

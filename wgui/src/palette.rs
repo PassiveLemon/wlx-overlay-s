@@ -152,7 +152,7 @@ static AYU: &WguiColorPalette = &WguiColorPalette {
 		hex("#BFBDB6"), // OnBackgroundContrast
 		hex("#565B66"), // Outline
 		hex("#000000"), // Shadow
-		hex("#242936"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -174,7 +174,7 @@ static AYU_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#5C6166"), // OnBackgroundContrast
 		hex("#8A9199"), // Outline
 		hex("#F8F9FA"), // Shadow
-		hex("#FFFFFF"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -196,7 +196,7 @@ static CATTPUCCIN: &WguiColorPalette = &WguiColorPalette {
 		hex("#cdd6f4"), // OnBackgroundContrast
 		hex("#4c4f69"), // Outline
 		hex("#11111b"), // Shadow
-		hex("#45475a"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -218,7 +218,7 @@ static CATTPUCCIN_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#4C4F69"), // OnBackgroundContrast
 		hex("#A5ADCB"), // Outline
 		hex("#DCE0E8"), // Shadow
-		hex("#E6E9EF"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -240,7 +240,7 @@ static CYBERPUNK: &WguiColorPalette = &WguiColorPalette {
 		hex("#5C8AC4"), // OnBackgroundContrast
 		hex("#45A0D6"), // Outline
 		hex("#090D13"), // Shadow
-		hex("#17202C"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -262,7 +262,7 @@ static CYBERPUNK_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#1A1914"), // OnBackgroundContrast
 		hex("#7B52AB"), // Outline
 		hex("#B8D4E6"), // Shadow
-		hex("#EAF3F5"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -284,7 +284,7 @@ static DRACULA: &WguiColorPalette = &WguiColorPalette {
 		hex("#F8F8F2"), // OnBackgroundContrast
 		hex("#5A5E77"), // Outline
 		hex("#282A36"), // Shadow
-		hex("#343746"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -306,7 +306,7 @@ static DRACULA_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#282A36"), // OnBackgroundContrast
 		hex("#CACAD3"), // Outline
 		hex("#D6D8E0"), // Shadow
-		hex("#DDDDE4"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -328,7 +328,7 @@ static ELDRITCH: &WguiColorPalette = &WguiColorPalette {
 		hex("#EBFAFA"), // OnBackgroundContrast
 		hex("#3B4261"), // Outline
 		hex("#414868"), // Shadow
-		hex("#343A52"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -350,7 +350,7 @@ static ELDRITCH_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#171928"), // OnBackgroundContrast
 		hex("#B0B6C3"), // Outline
 		hex("#E0E3E8"), // Shadow
-		hex("#E8EBF2"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -372,7 +372,7 @@ static EVERFOREST: &WguiColorPalette = &WguiColorPalette {
 		hex("#D3C6AA"), // OnBackgroundContrast
 		hex("#D3C6AA"), // Outline
 		hex("#475258"), // Shadow
-		hex("#343F44"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -394,7 +394,7 @@ static EVERFOREST_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#232A2E"), // OnBackgroundContrast
 		hex("#232A2E"), // Outline
 		hex("#ECF5ED"), // Shadow
-		hex("#D3C6AA"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -416,7 +416,7 @@ static GRUVBOX: &WguiColorPalette = &WguiColorPalette {
 		hex("#FBF1C7"), // OnBackgroundContrast
 		hex("#57514E"), // Outline
 		hex("#282828"), // Shadow
-		hex("#504945"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -438,7 +438,7 @@ static GRUVBOX_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#3C3836"), // OnBackgroundContrast
 		hex("#BDAE93"), // Outline
 		hex("#D5C4A1"), // Shadow
-		hex("#DCCFA8"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -460,7 +460,7 @@ static KANAGAWA: &WguiColorPalette = &WguiColorPalette {
 		hex("#C8C093"), // OnBackgroundContrast
 		hex("#363646"), // Outline
 		hex("#1F1F28"), // Shadow
-		hex("#363646"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -482,7 +482,7 @@ static KANAGAWA_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#545464"), // OnBackgroundContrast
 		hex("#CFC49C"), // Outline
 		hex("#F2ECBC"), // Shadow
-		hex("#E7DBA0"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -504,7 +504,7 @@ static MONOCHROME: &WguiColorPalette = &WguiColorPalette {
 		hex("#828282"), // OnBackgroundContrast
 		hex("#3C3C3C"), // Outline
 		hex("#000000"), // Shadow
-		hex("#242424"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -526,7 +526,7 @@ static MONOCHROME_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#555555"), // OnBackgroundContrast
 		hex("#C3C3C3"), // Outline
 		hex("#FAFAFA"), // Shadow
-		hex("#F2F2F2"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -548,7 +548,7 @@ static NORD: &WguiColorPalette = &WguiColorPalette {
 		hex("#ECEFF4"), // OnBackgroundContrast
 		hex("#505A70"), // Outline
 		hex("#2E3440"), // Shadow
-		hex("#434C5E"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -570,7 +570,7 @@ static NORD_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#2E3440"), // OnBackgroundContrast
 		hex("#C5CEDD"), // Outline
 		hex("#D8DEE9"), // Shadow
-		hex("#F5F7FA"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -592,7 +592,7 @@ static OSAKA_JADE: &WguiColorPalette = &WguiColorPalette {
 		hex("#A6B5B1"), // OnBackgroundContrast
 		hex("#1B6352"), // Outline
 		hex("#040A09"), // Shadow
-		hex("#16382F"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -614,7 +614,7 @@ static OSAKA_JADE_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#263731"), // OnBackgroundContrast
 		hex("#5C7A6A"), // Outline
 		hex("#8A9E90"), // Shadow
-		hex("#C2D2C6"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -636,7 +636,7 @@ static ROSEPINE: &WguiColorPalette = &WguiColorPalette {
 		hex("#E0DEF4"), // OnBackgroundContrast
 		hex("#403D52"), // Outline
 		hex("#191724"), // Shadow
-		hex("#403D52"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -658,7 +658,7 @@ static ROSEPINE_LIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#575279"), // OnBackgroundContrast
 		hex("#DFDAD9"), // Outline
 		hex("#FAF4ED"), // Shadow
-		hex("#FFFFFF"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -680,7 +680,7 @@ static SOLARIZED_NIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#839496"), // OnBackgroundContrast
 		hex("#0C5C70"), // Outline
 		hex("#002B36"), // Shadow
-		hex("#0A4050"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -702,7 +702,7 @@ static SOLARIZED_DAY: &WguiColorPalette = &WguiColorPalette {
 		hex("#657B83"), // OnBackgroundContrast
 		hex("#DFD4B1"), // Outline
 		hex("#EEE8D5"), // Shadow
-		hex("#FFFDF5"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };
 
@@ -724,7 +724,7 @@ static TOKYO_NIGHT: &WguiColorPalette = &WguiColorPalette {
 		hex("#C0CAF5"), // OnBackgroundContrast
 		hex("#565F89"), // Outline
 		hex("#15161E"), // Shadow
-		hex("#2F3549"), // Highlight
+		hex("#ffffff"), // Highlight
 	],
 };
 
@@ -746,6 +746,6 @@ static TOKYO_DAY: &WguiColorPalette = &WguiColorPalette {
 		hex("#3760BF"), // OnBackgroundContrast
 		hex("#B4B5B9"), // Outline
 		hex("#A8AECB"), // Shadow
-		hex("#F0F1F5"), // Highlight
+		hex("#000000"), // Highlight
 	],
 };

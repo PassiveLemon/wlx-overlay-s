@@ -3,8 +3,8 @@
     flex_direction="column"
     align_items="baseline"
     border="2"
-    color="#00000055"
-    border_color="#FFFFFF66"
+    color="background_contrast(opacity-0.5)"
+    border_color="outline"
     padding="12"
     gap="8"
     round="8" />
@@ -12,9 +12,9 @@
   <!-- src_builtin, text, translation -->
   <template name="GroupBoxTitle">
     <div flex_direction="row" align_items="center" gap="8">
-      <sprite src_builtin="${src_builtin}" width="24" height="24" />
-      <label text="${text}" translation="${translation}" weight="bold" size="18" />
+      <sprite src_builtin="${src_builtin}" width="24" height="24" color="on_background" />
+      <label text="${text}" translation="${translation}" weight="bold" size="18" color="on_background" />
     </div>
-    <rectangle color="#FFFFFF44" width="100%" height="2" />
+    <rectangle color="outline" width="100%" height="2" />
   </template>
 </layout>

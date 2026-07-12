@@ -12,12 +12,13 @@
       round="100%"
       width="~side_button_size"
       height="~side_button_size"
-      color="background_contrast"
+      color="background_contrast(transparent)"
       border_color="background_contrast"
+      hover_border_color="on_background_contrast"
       tooltip="${tooltip}"
       tooltip_side="${tooltip_side}"
     >
-      <sprite src_builtin="${src_builtin}" width="~side_sprite_size" height="~side_sprite_size" />
+      <sprite src_builtin="${src_builtin}" width="~side_sprite_size" height="~side_sprite_size" color="on_background_contrast" />
     </Button>
   </template>
 
@@ -45,7 +46,7 @@
           <SideButton id="btn_side_apps" src_builtin="dashboard/apps.svg" tooltip="APPLICATIONS" tooltip_side="right" />
           <SideButton id="btn_side_games" src_builtin="dashboard/games.svg" tooltip="GAMES" tooltip_side="right" />
           <SideButton id="btn_side_monado" src_builtin="dashboard/monado.svg" tooltip="MONADO_RUNTIME" tooltip_side="right" />
-          <rectangle height="2" color="#FFFFFF33" width="~side_sprite_size" />
+          <rectangle height="2" color="outline" width="~side_sprite_size" />
           <SideButton id="btn_side_settings" src_builtin="dashboard/settings.svg" tooltip="SETTINGS" tooltip_side="right" />
         </rectangle>
       </div>
@@ -62,13 +63,13 @@
           <!-- Title bar -->
           <div width="100%" align_items="center" justify_content="center">
             <rectangle min_width="300" height="100%" consume_mouse_events="1" round="100%" color="background_contrast" align_items="center" justify_content="center" gap="8">
-              <sprite id="sprite_titlebar_icon" width="24" height="24" />
-              <label id="label_titlebar_title" weight="bold" size="16" text="Title" />
+              <sprite id="sprite_titlebar_icon" width="24" height="24" color="on_background_contrast" />
+              <label id="label_titlebar_title" weight="bold" size="16" text="Title" color="on_background_contrast" />
             </rectangle>
           </div>
           <!-- Close button -->
           <Button position="absolute" id="btn_close" color="background_contrast" border_color="background_contrast" round="100%" width="~top_size" height="~top_size" tooltip="CLOSE_WINDOW" tooltip_side="left">
-            <sprite src_builtin="dashboard/close.svg" width="32" height="32" />
+            <sprite src_builtin="dashboard/close.svg" width="32" height="32" color="on_background_contrast" />
           </Button>
         </div>
 
@@ -130,22 +131,22 @@
 
           <!-- top shine -->
           <div position="absolute" width="100%" height="100%" justify_content="center">
-            <rectangle position="absolute" width="99%" height="2" color="#FFFFFF22" round="4" />
+            <rectangle position="absolute" width="99%" height="2" color="highlight(opacity-0.2)" round="4" />
           </div>
 
           <!-- Left bottom side -->
           <div margin_left="8">
-            <Button id="btn_audio" color="#FFFFFF00" border_color="#FFFFFF00" tooltip="AUDIO.VOLUME" tooltip_side="top">
-              <sprite src_builtin="dashboard/volume.svg" width="24" height="24" margin="8" />
+            <Button id="btn_audio" color="highlight(transparent)" border_color="highlight(transparent)" tooltip="AUDIO.VOLUME" tooltip_side="top">
+              <sprite src_builtin="dashboard/volume.svg" width="24" height="24" margin="8" color="on_background" />
             </Button>
-            <Button id="btn_recenter" color="#FFFFFF00" border_color="#FFFFFF00" tooltip="ACTIONS.RECENTER_PLAYSPACE" tooltip_side="top">
-              <sprite src_builtin="dashboard/recenter.svg" width="24" height="24" margin="8" />
+            <Button id="btn_recenter" color="highlight(transparent)" border_color="highlight(transparent)" tooltip="ACTIONS.RECENTER_PLAYSPACE" tooltip_side="top">
+              <sprite src_builtin="dashboard/recenter.svg" width="24" height="24" margin="8" color="on_background" />
             </Button>
           </div>
 
           <!-- Right bottom side -->
           <div margin_right="16">
-            <label id="label_time" size="16" weight="light" color="on_background_contrast" />
+            <label id="label_time" weight="bold" size="16" color="on_background" />
           </div>
         </rectangle>
       </div>
