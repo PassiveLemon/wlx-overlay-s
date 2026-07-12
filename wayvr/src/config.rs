@@ -186,6 +186,7 @@ pub struct AutoSettings {
     pub tutorial_graduated: bool,
     pub whisper_model: Arc<str>,
     pub default_overlay_scale: f32,
+    pub color_palette: Arc<str>,
 }
 
 fn get_settings_path() -> PathBuf {
@@ -250,6 +251,7 @@ pub fn save_settings(config: &GeneralConfig) -> anyhow::Result<()> {
         tutorial_graduated: config.tutorial_graduated,
         whisper_model: config.whisper_model.clone(),
         default_overlay_scale: config.default_overlay_scale,
+        color_palette: config.color_palette.clone(),
     };
 
     let json = serde_json::to_string_pretty(&conf).unwrap(); // want panic

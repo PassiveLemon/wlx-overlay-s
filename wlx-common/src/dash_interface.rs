@@ -82,6 +82,7 @@ pub trait DashInterface<T> {
 pub enum ConfigChangeKind {
 	OverlayConfig,
 	EnvironmentBlend,
+	WguiThemeChange, // TODO: does not do anything right now
 	/// Marks the config for saving but doesn't notify any components
 	#[default]
 	Other,

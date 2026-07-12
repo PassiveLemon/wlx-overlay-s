@@ -249,6 +249,10 @@ fn def_empty() -> Arc<str> {
 	"".into()
 }
 
+fn def_default() -> Arc<str> {
+	"Default".into()
+}
+
 fn def_theme_path() -> Arc<str> {
 	"theme".into()
 }
@@ -468,4 +472,7 @@ pub struct GeneralConfig {
 
 	#[serde(default = "def_empty")]
 	pub whisper_model: Arc<str>,
+
+	#[serde(default = "def_default")]
+	pub color_palette: Arc<str>,
 }
