@@ -55,6 +55,7 @@ pub fn create_label(layout: &mut Layout, id_parent: WidgetID, content: Translati
 				wrap: true,
 				..Default::default()
 			},
+			..Default::default()
 		},
 	);
 
@@ -74,6 +75,7 @@ pub fn create_label_error(layout: &mut Layout, parent: WidgetID, content: String
 				weight: Some(FontWeight::Bold),
 				..Default::default()
 			},
+			..Default::default()
 		},
 	);
 

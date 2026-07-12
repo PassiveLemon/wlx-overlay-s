@@ -607,6 +607,7 @@ fn mount_requires_restart(layout: &mut Layout, parent: WidgetID) -> anyhow::Resu
 				}),
 				..Default::default()
 			},
+			..Default::default()
 		},
 	);
 

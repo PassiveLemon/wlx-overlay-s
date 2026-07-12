@@ -348,6 +348,7 @@ pub fn construct(
 				}),
 				..Default::default()
 			},
+			..Default::default()
 		},
 	);
 	let (label, _node_label) = ess.layout.add_child(

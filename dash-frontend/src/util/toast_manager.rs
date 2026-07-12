@@ -110,6 +110,7 @@ impl ToastManager {
 					wrap: true,
 					..Default::default()
 				},
+				..Default::default()
 			},
 		);
 		let (label, _) = layout.add_child(rect.id, label, taffy::Style { ..Default::default() })?;

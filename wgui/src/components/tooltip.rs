@@ -260,6 +260,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 				weight: Some(FontWeight::Bold),
 				..Default::default()
 			},
+			..Default::default()
 		},
 	);
 

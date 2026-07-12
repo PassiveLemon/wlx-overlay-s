@@ -686,6 +686,7 @@ fn mount_slider_handle(
 					align: Some(HorizontalAlign::Center),
 					..Default::default()
 				},
+				..Default::default()
 			},
 		);
 		Some(ess.layout.add_child(slider_handle.id, label, Default::default())?)

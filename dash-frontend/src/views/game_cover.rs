@@ -113,6 +113,7 @@ impl View {
 					shadow: Some(WguiTextShadow::default()),
 					..Default::default()
 				},
+				..Default::default()
 			},
 		);
 

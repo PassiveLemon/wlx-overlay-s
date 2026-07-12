@@ -130,7 +130,7 @@
     <Button macro="button_style" id="overlay_${idx}" tooltip_str="${name}" _context_name="${name}" _press_left="::ContextMenuOpen menu_screen" _press_right="::OverlayToggle ${name}">
       <sprite width="38" height="38" color="on_background_variant" src_builtin="edit/screen.svg" />
       <div position="absolute" margin_top="-7" margin_left="-1">
-        <label text="${display}" size="~text_size" color="on_background_variant(opacity-0.2)" weight="bold" />
+        <label text="${display}" size="~text_size" color="on_background_variant(opacity-0.2)" weight="bold" use_bg_color="1" />
       </div>
     </Button>
   </template>
@@ -163,7 +163,7 @@
     <Button macro="button_style" id="overlay_${idx}" tooltip_str="${name}" _context_name="${name}" _press_left="::ContextMenuOpen menu_mirror" _press_right="::OverlayToggle ${name}">
       <sprite width="38" height="38" color="on_background_variant" src_builtin="edit/mirror.svg" />
       <div position="absolute" margin_top="5" margin_left="13">
-        <label text="${display}" size="20" color="on_background(opacity-0.2)" weight="bold" />
+        <label text="${display}" size="20" color="on_background(opacity-0.2)" weight="bold" use_bg_color="1" />
       </div>
     </Button>
   </template>
@@ -192,7 +192,7 @@
     <Button macro="button_style" id="set_${idx}" _press="::SetSwitch ${idx}" tooltip="WATCH.SWITCH_TO_SET" tooltip_side="bottom">
       <sprite width="38" height="38" color="on_background_variant" src_builtin="watch/set2.svg" />
       <div position="absolute" margin_top="10" margin_left="-7">
-        <label text="${display}" size="20" color="on_background(opacity-0.2)" weight="bold" />
+        <label text="${display}" size="20" color="on_background(opacity-0.2)" weight="bold" use_bg_color="1" />
       </div>
     </Button>
   </template>

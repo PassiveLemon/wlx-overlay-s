@@ -149,24 +149,24 @@ impl ComponentTrait for ComponentButton {
 						log::error!("Button with more than one sprite!");
 					}
 					// apply initial color from button
-					if let Some(on_color) = state.colors.color.on_color() {
+					if let Some(fg_color) = state.colors.color.fg_color() {
 						let common = &mut CallbackDataCommon {
 							state: &data.layout.state,
 							alterables: &mut data.layout.alterables,
 						};
-						widget.set_color(common, on_color);
+						widget.set_color(common, fg_color);
 					}
 					state.id_sprite = child;
 				} else if let Some(mut widget) = data.layout.state.widgets.get_as::<WidgetLabel>(child) {
 					if !state.id_label.is_null() && state.id_label != child {
 						log::error!("Button with more than one label!");
 					}
-					if let Some(on_color) = state.colors.color.on_color() {
+					if let Some(fg_color) = state.colors.color.fg_color() {
 						let common = &mut CallbackDataCommon {
 							state: &data.layout.state,
 							alterables: &mut data.layout.alterables,
 						};
-						widget.set_color(common, on_color, true);
+						widget.set_color(common, fg_color, true);
 					}
 					state.id_label = child;
 				}
@@ -216,12 +216,12 @@ impl ComponentButton {
 		let mut state = self.state.borrow_mut();
 		state.colors.color = color;
 
-		if let Some(on_color) = color.on_color() {
+		if let Some(fg_color) = color.fg_color() {
 			if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(state.id_label) {
-				label.set_color(common, on_color, true);
+				label.set_color(common, fg_color, true);
 			}
 			if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(state.id_sprite) {
-				sprite.set_color(common, on_color);
+				sprite.set_color(common, fg_color);
 			}
 		}
 	}
@@ -287,15 +287,15 @@ impl ComponentButton {
 						.border_color
 						.lerp(&common.globals().palette, alt_border_color, mult);
 
-					if let Some(on_color0) = colors.color.on_color()
-						&& let Some(on_color1) = alt_color.on_color()
+					if let Some(fg_color0) = colors.color.fg_color()
+						&& let Some(fg_color1) = alt_color.fg_color()
 					{
-						let on_color = on_color0.lerp(&common.globals().palette, &on_color1, mult);
+						let fg_color = fg_color0.lerp(&common.globals().palette, &fg_color1, mult);
 						if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(state.id_label) {
-							label.set_color(common, on_color, true);
+							label.set_color(common, fg_color, true);
 						}
 						if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(state.id_sprite) {
-							sprite.set_color(common, on_color);
+							sprite.set_color(common, fg_color);
 						}
 					}
 				}
@@ -328,15 +328,15 @@ fn anim_hover(
 		(colors.border_color, colors.color)
 	};
 
-	if let Some(on_color0) = init_color.on_color()
-		&& let Some(on_color1) = colors.hover_color.on_color()
+	if let Some(fg_color0) = init_color.fg_color()
+		&& let Some(fg_color1) = colors.hover_color.fg_color()
 	{
-		let on_color = on_color0.lerp(&common.globals().palette, &on_color1, mult);
+		let fg_color = fg_color0.lerp(&common.globals().palette, &fg_color1, mult);
 		if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(label) {
-			label.set_color(common, on_color, true);
+			label.set_color(common, fg_color, true);
 		}
 		if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(sprite) {
-			sprite.set_color(common, on_color);
+			sprite.set_color(common, fg_color);
 		}
 	}
 
@@ -628,6 +628,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 					color: Some(WguiColorName::OnBackground.into()),
 					..params.text_style
 				},
+				..Default::default()
 			},
 		);
 

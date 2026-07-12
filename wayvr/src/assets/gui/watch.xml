@@ -38,7 +38,7 @@
     <Button macro="button_style" id="overlay_${idx}" tooltip_str="${name}" _press="::OverlayToggle ${name}">
       <sprite width="38" height="38" color="on_background" src_builtin="edit/screen.svg" />
       <div position="absolute" margin_top="-7" margin_left="-1">
-        <label text="${display}" size="18" color="on_background(opacity-0.2)" weight="bold" />
+        <label text="${display}" size="18" color="on_background(opacity-0.2)" weight="bold" use_bg_color="1" />
       </div>
     </Button>
   </template>
@@ -51,7 +51,7 @@
     <Button macro="button_style" id="overlay_${idx}" tooltip_str="${name}" _press="::OverlayToggle ${name}">
       <sprite width="38" height="38" color="on_background" src_builtin="edit/mirror.svg" />
       <div position="absolute" margin_top="5" margin_left="13">
-        <label text="${display}" size="20" color="on_background" weight="bold" />
+        <label text="${display}" size="20" color="on_background" weight="bold" use_bg_color="1" />
       </div>
     </Button>
   </template>
@@ -65,7 +65,7 @@
     <Button macro="button_style" id="set_${idx}" _press="::SetToggle ${idx}" tooltip="WATCH.SWITCH_TO_SET" tooltip_side="top">
       <sprite width="38" height="38" color="on_background" src_builtin="watch/set2.svg" />
       <div position="absolute" margin_top="9">
-        <label text="${display}" size="24" color="#00050F" weight="bold" />
+        <label text="${display}" size="24" color="#00050F" weight="bold" use_bg_color="1" />
       </div>
     </Button>
   </template>

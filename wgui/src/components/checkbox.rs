@@ -486,6 +486,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 				color: Some(WguiColorName::OnBackground.into()),
 				..Default::default()
 			},
+			..Default::default()
 		},
 	);
 	let (label, _node_label) = ess.layout.add_child(id_container, widget_label, Default::default())?;
