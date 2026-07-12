@@ -2,8 +2,33 @@ use flate2::read::GzDecoder;
 use std::ffi::OsStr;
 use std::io::Read;
 use std::path::{Component, Path, PathBuf};
+use std::rc::Rc;
 
 use crate::i18n::LangsList;
+
+pub enum AssetPathRc {
+	WguiInternal(Rc<str>),  // tied to internal wgui AssetProvider. Used internally
+	BuiltIn(Rc<str>),       // tied to user AssetProvider
+	FileOrBuiltIn(Rc<str>), // attempts to load from a path relative to asset_folder, falls back to BuiltIn
+	File(Rc<str>),          // load from filesystem
+}
+
+impl AssetPathRc {
+	pub fn as_borrowed(&self) -> AssetPath<'_> {
+		match self {
+			Self::WguiInternal(path) => AssetPath::WguiInternal(path.as_ref()),
+			Self::BuiltIn(path) => AssetPath::BuiltIn(path.as_ref()),
+			Self::FileOrBuiltIn(path) => AssetPath::FileOrBuiltIn(path.as_ref()),
+			Self::File(path) => AssetPath::File(path.as_ref()),
+		}
+	}
+}
+
+impl<'a> From<&'a AssetPathRc> for AssetPath<'a> {
+	fn from(path: &'a AssetPathRc) -> Self {
+		path.as_borrowed()
+	}
+}
 
 #[derive(Debug, Clone, Copy)]
 pub enum AssetPath<'a> {

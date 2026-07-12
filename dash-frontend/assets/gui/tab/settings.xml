@@ -56,17 +56,19 @@
     </div>
   </template>
 
+  <macro name="tab_style" color="background" sticky_color="primary" sticky_border_color="primary(rgb-mult-0.5)" hover_color="tertiary" hover_border_color="tertiary(rgb-mult-0.5)" />
+
   <elements>
     <div gap="4">
       <Tabs id="tabs">
-        <Tab name="look_and_feel" translation="APP_SETTINGS.LOOK_AND_FEEL" sprite_src_builtin="dashboard/palette.svg" />
-        <Tab name="skybox" translation="APP_SETTINGS.SKYBOX" sprite_src_builtin="dashboard/globe.svg" />
-        <Tab name="features" translation="APP_SETTINGS.FEATURES" sprite_src_builtin="dashboard/options.svg" />
-        <Tab name="controls" translation="APP_SETTINGS.CONTROLS" sprite_src_builtin="dashboard/controller.svg" />
-        <Tab name="space_drag" translation="APP_SETTINGS.SPACE_DRAG" sprite_src_builtin="dashboard/drag.svg" />
-        <Tab name="misc" translation="APP_SETTINGS.MISC" sprite_src_builtin="dashboard/blocks.svg" />
-        <Tab name="autostart_apps" translation="APP_SETTINGS.AUTOSTART_APPS" sprite_src_builtin="dashboard/apps.svg" />
-        <Tab name="troubleshooting" translation="APP_SETTINGS.TROUBLESHOOTING" sprite_src_builtin="dashboard/cpu.svg" />
+        <Tab macro="tab_style" name="look_and_feel" translation="APP_SETTINGS.LOOK_AND_FEEL" sprite_src_builtin="dashboard/palette.svg" />
+        <Tab macro="tab_style" name="skybox" translation="APP_SETTINGS.SKYBOX" sprite_src_builtin="dashboard/globe.svg" />
+        <Tab macro="tab_style" name="features" translation="APP_SETTINGS.FEATURES" sprite_src_builtin="dashboard/options.svg" />
+        <Tab macro="tab_style" name="controls" translation="APP_SETTINGS.CONTROLS" sprite_src_builtin="dashboard/controller.svg" />
+        <Tab macro="tab_style" name="space_drag" translation="APP_SETTINGS.SPACE_DRAG" sprite_src_builtin="dashboard/drag.svg" />
+        <Tab macro="tab_style" name="misc" translation="APP_SETTINGS.MISC" sprite_src_builtin="dashboard/blocks.svg" />
+        <Tab macro="tab_style" name="autostart_apps" translation="APP_SETTINGS.AUTOSTART_APPS" sprite_src_builtin="dashboard/apps.svg" />
+        <Tab macro="tab_style" name="troubleshooting" translation="APP_SETTINGS.TROUBLESHOOTING" sprite_src_builtin="dashboard/cpu.svg" />
       </Tabs>
       <div flex_wrap="wrap" justify_content="stretch" gap="4" id="settings_root" width="100%">
         <!-- filled-in at runtime -->

@@ -1,6 +1,6 @@
 use crate::{
-	assets::AssetPath,
-	color::WguiColorName,
+	assets::AssetPathRc,
+	color::WguiColor,
 	components::{
 		Component, ComponentBase, ComponentTrait, RefreshData,
 		button::{self, ComponentButton},
@@ -8,7 +8,7 @@ use crate::{
 	event::CallbackDataCommon,
 	i18n::Translation,
 	layout::WidgetPair,
-	widget::{ConstructEssentials, div::WidgetDiv},
+	widget::{ConstructEssentials, div::WidgetDiv, util::WLength},
 };
 use std::{cell::RefCell, rc::Rc};
 use taffy::{
@@ -16,17 +16,25 @@ use taffy::{
 	prelude::{length, percent},
 };
 
-pub struct Entry<'a> {
-	pub sprite_src: Option<AssetPath<'a>>,
+pub struct Entry {
+	pub sprite_src: Option<AssetPathRc>,
 	pub text: Translation,
-	pub name: &'a str,
+	pub name: Rc<str>,
 }
 
 pub struct Params<'a> {
 	pub style: taffy::Style,
-	pub entries: Vec<Entry<'a>>,
+	pub entries: Vec<Entry>,
 	pub selected_entry_name: &'a str, // default: ""
 	pub on_select: Option<TabSelectCallback>,
+	pub round: WLength,
+	pub color: Option<WguiColor>,
+	pub border: f32,
+	pub border_color: Option<WguiColor>,
+	pub hover_color: Option<WguiColor>,
+	pub hover_border_color: Option<WguiColor>,
+	pub sticky_color: Option<WguiColor>,
+	pub sticky_border_color: Option<WguiColor>,
 }
 
 struct MountedEntry {
@@ -65,18 +73,10 @@ impl ComponentTrait for ComponentTabs {
 	}
 }
 
-fn set_button_selected(common: &mut CallbackDataCommon, button: &Rc<ComponentButton>, selected: bool) {
-	if selected {
-		button.set_color(common, WguiColorName::Primary.into());
-	} else {
-		button.set_color(common, WguiColorName::Background.into());
-	}
-}
-
 impl State {
 	fn select_entry(&mut self, common: &mut CallbackDataCommon, name: &Rc<str>) {
 		for entry in &self.mounted_entries {
-			set_button_selected(common, &entry.button, *entry.name == **name);
+			entry.button.set_sticky_state(common, *entry.name == **name);
 		}
 		self.selected_entry_name = name.clone();
 
@@ -121,7 +121,9 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 	let mut mounted_entries = Vec::<MountedEntry>::new();
 
 	// Mount entries
-	for entry in params.entries {
+	for (idx, entry) in params.entries.into_iter().enumerate() {
+		let sprite_src = entry.sprite_src.as_ref().map(AssetPathRc::as_borrowed);
+
 		let (_, button) = button::construct(
 			&mut ConstructEssentials {
 				layout: ess.layout,
@@ -129,7 +131,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 			},
 			button::Params {
 				text: Some(entry.text),
-				sprite_src: entry.sprite_src,
+				sprite_src,
 				style: taffy::Style {
 					min_size: taffy::Size {
 						width: percent(1.0),
@@ -138,15 +140,23 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 					justify_content: Some(taffy::JustifyContent::START),
 					..Default::default()
 				},
+				round: params.round,
+				color: params.color,
+				border: params.border,
+				border_color: params.border_color,
+				hover_color: params.hover_color,
+				hover_border_color: params.hover_border_color,
+				sticky_color: params.sticky_color,
+				sticky_border_color: params.sticky_border_color,
 				..Default::default()
 			},
 		)?;
 
 		// init colors
-		set_button_selected(&mut ess.layout.common(), &button, false);
+		button.set_sticky_state(&mut ess.layout.common(), idx == 0);
 
 		mounted_entries.push(MountedEntry {
-			name: Rc::from(entry.name),
+			name: entry.name,
 			button,
 		});
 	}

@@ -1,12 +1,20 @@
+use std::rc::Rc;
+
 use crate::{
-	assets::AssetPath,
+	assets::AssetPathRc,
+	color::WguiColor,
 	components::{Component, tabs},
 	i18n::Translation,
 	layout::WidgetID,
-	parser::{AttribPair, ParserContext, get_asset_path_from_kv, process_component, style::parse_style},
+	parser::{
+		AttribPair, ParserContext, ParserFile, get_asset_path_rc_from_kv, process_attribs, process_component,
+		style::{parse_color_opt, parse_round, parse_style},
+	},
+	widget::util::WLength,
 };
 
 pub fn parse_component_tabs<'a>(
+	file: &'a ParserFile,
 	ctx: &mut ParserContext,
 	node: roxmltree::Node<'a, 'a>,
 	parent_id: WidgetID,
@@ -17,25 +25,71 @@ pub fn parse_component_tabs<'a>(
 
 	let mut entries = Vec::<tabs::Entry>::new();
 
+	let mut border = 2.0;
+	let mut color: Option<WguiColor> = None;
+	let mut border_color: Option<WguiColor> = None;
+	let mut hover_color: Option<WguiColor> = None;
+	let mut hover_border_color: Option<WguiColor> = None;
+	let mut sticky_color: Option<WguiColor> = None;
+	let mut sticky_border_color: Option<WguiColor> = None;
+	let mut round = WLength::Units(4.0);
+
 	for child in node.children() {
 		match child.tag_name().name() {
 			"" => { /* ignore */ }
 			"Tab" => {
-				let mut name: Option<&str> = None;
+				let mut name: Option<Rc<str>> = None;
 				let mut text: Option<Translation> = None;
-				let mut sprite_src: Option<AssetPath> = None;
+				let mut sprite_src: Option<AssetPathRc> = None;
 
-				for attrib in child.attributes() {
-					let (key, value) = (attrib.name(), attrib.value());
-					match key {
-						"name" => name = Some(value),
-						"text" => text = Some(Translation::from_raw_text(value)),
-						"translation" => text = Some(Translation::from_translation_key(value)),
+				let attribs = process_attribs(file, ctx, &child, false);
+
+				for attrib in attribs.iter() {
+					match &*attrib.attrib {
+						"name" => name = Some(attrib.value.clone()),
+						"text" => text = Some(Translation::from_raw_text(&*attrib.value)),
+						"translation" => text = Some(Translation::from_translation_key(&*attrib.value)),
 						"sprite_src" | "sprite_src_ext" | "sprite_src_builtin" | "sprite_src_internal" => {
-							sprite_src = Some(get_asset_path_from_kv("sprite_", key, value));
+							sprite_src = Some(get_asset_path_rc_from_kv(
+								"sprite_",
+								&*attrib.attrib,
+								attrib.value.clone(),
+							));
+							continue;
+						}
+						"round" => {
+							parse_round(
+								ctx,
+								tag_name,
+								&*attrib.attrib,
+								&*attrib.value,
+								&mut round,
+								ctx.layout.state.theme.rounding_mult,
+							);
+						}
+						"color" => {
+							parse_color_opt(ctx, tag_name, &*attrib.attrib, &*attrib.value, &mut color);
+						}
+						"border" => {
+							ctx.parse_check_f32(tag_name, &*attrib.attrib, &*attrib.value, &mut border);
+						}
+						"border_color" => {
+							parse_color_opt(ctx, tag_name, &*attrib.attrib, &*attrib.value, &mut border_color);
+						}
+						"hover_color" => {
+							parse_color_opt(ctx, tag_name, &*attrib.attrib, &*attrib.value, &mut hover_color);
+						}
+						"hover_border_color" => {
+							parse_color_opt(ctx, tag_name, &*attrib.attrib, &*attrib.value, &mut hover_border_color);
+						}
+						"sticky_color" => {
+							parse_color_opt(ctx, tag_name, &*attrib.attrib, &*attrib.value, &mut sticky_color);
+						}
+						"sticky_border_color" => {
+							parse_color_opt(ctx, tag_name, &*attrib.attrib, &*attrib.value, &mut sticky_border_color);
 						}
 						other_key => {
-							ctx.print_invalid_attrib("Tab", other_key, value);
+							ctx.print_invalid_attrib("Tab", other_key, &*attrib.value);
 						}
 					}
 				}
@@ -59,6 +113,14 @@ pub fn parse_component_tabs<'a>(
 			selected_entry_name: "first",
 			entries,
 			on_select: None,
+			border,
+			color,
+			border_color,
+			hover_color,
+			hover_border_color,
+			sticky_color,
+			sticky_border_color,
+			round,
 		},
 	)?;
 

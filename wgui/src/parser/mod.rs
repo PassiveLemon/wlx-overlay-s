@@ -19,7 +19,7 @@ mod widget_rectangle;
 mod widget_sprite;
 
 use crate::{
-	assets::{AssetPath, AssetPathOwned, normalize_path},
+	assets::{AssetPath, AssetPathOwned, AssetPathRc, normalize_path},
 	components::{Component, ComponentWeak},
 	globals::WguiGlobals,
 	i18n::Translation,
@@ -1082,7 +1082,9 @@ fn parse_child<'a>(
 		"EditBox" => new_widget_id = Some(parse_component_editbox(ctx, parent_id, &attribs, tag_name)?),
 		"BarGraph" => new_widget_id = Some(parse_component_bar_graph(ctx, parent_id, &attribs, tag_name)?),
 		"Tabs" => {
-			new_widget_id = Some(parse_component_tabs(ctx, child_node, parent_id, &attribs, tag_name)?);
+			new_widget_id = Some(parse_component_tabs(
+				file, ctx, child_node, parent_id, &attribs, tag_name,
+			)?);
 		}
 		"" => { /* ignore */ }
 		other_tag_name => {
@@ -1327,21 +1329,26 @@ fn parse_document_root(
 	Ok(())
 }
 
-fn get_asset_path_from_kv<'a>(prefix: &'static str, key: &'a str, value: &'a str) -> AssetPath<'a> {
-	let key_split = match key.find(prefix) {
-		Some(pos) => {
-			assert!(pos == 0, "invalid split");
-			key.get(prefix.len()..).unwrap()
-		}
-		None => key,
-	};
-	match key_split {
+fn get_asset_path_from_kv<'a>(prefix: &str, key: &'a str, value: &'a str) -> AssetPath<'a> {
+	let key = key.strip_prefix(prefix).unwrap_or(key);
+
+	match key {
 		"src" => AssetPath::FileOrBuiltIn(value),
 		"src_ext" => AssetPath::File(value),
 		"src_builtin" => AssetPath::BuiltIn(value),
 		"src_internal" => AssetPath::WguiInternal(value),
-		other => {
-			panic!("unexpected attrib {other}");
-		}
+		other => panic!("unexpected attrib {other}"),
+	}
+}
+
+fn get_asset_path_rc_from_kv(prefix: &'static str, key: &str, value: Rc<str>) -> AssetPathRc {
+	let key = key.strip_prefix(prefix).unwrap_or(key);
+
+	match key {
+		"src" => AssetPathRc::FileOrBuiltIn(value),
+		"src_ext" => AssetPathRc::File(value),
+		"src_builtin" => AssetPathRc::BuiltIn(value),
+		"src_internal" => AssetPathRc::WguiInternal(value),
+		other => panic!("unexpected attrib {other}"),
 	}
 }
