@@ -5,7 +5,7 @@ use taffy::prelude::{length, percent};
 
 use crate::{
 	animation::{Animation, AnimationCallback, AnimationEasing},
-	color::{WguiColor, WguiColorName}, palette::WguiColorPalette,
+	color::{WguiColor, WguiColorName},
 	components::{
 		Component, ComponentBase, ComponentTrait, RefreshData,
 		tooltip::{self, ComponentTooltip, TooltipTrait},
@@ -16,6 +16,7 @@ use crate::{
 	},
 	i18n::Translation,
 	layout::{WidgetID, WidgetPair},
+	palette::WguiColorPalette,
 	renderer_vk::{
 		text::{FontWeight, HorizontalAlign, TextStyle},
 		util,

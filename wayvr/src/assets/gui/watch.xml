@@ -3,8 +3,6 @@
     <var key="clock0_size" value="46" />
     <var key="clock0_date_size" value="16" />
     <var key="clock0_dow_size" value="16" />
-    <var key="clock_alt1_color" value="#8bd5ca" />
-    <var key="clock_alt2_color" value="#b7bdf8" />
     <var key="clock_alt_size" value="24" />
     <var key="clock_alt_tz_size" value="14" />
   </theme>
@@ -18,7 +16,7 @@
   <template name="Device">
     <rectangle macro="decorative_rect" padding_top="4" padding_bottom="4" align_items="center" gap="8">
       <sprite width="32" height="32" src_builtin="${src}" color="on_background" />
-      <label _source="battery" _device="${idx}" size="24" weight="bold" />
+      <label _source="battery" _device="${idx}" size="24" weight="bold" _low_color="danger" _normal_color="primary" _charging_color="secondary" />
     </rectangle>
   </template>
 
@@ -83,12 +81,12 @@
       <div flex_direction="row" gap="8" justify_content="space_around">
         <!-- Timezone names here are only placeholders. Set your timezones via ~/.config/wayvr/conf.d -->
         <div flex_direction="column">
-          <label text="Paris" _source="clock" _display="name" _timezone="0" color="~clock_alt1_color" size="~clock_alt_tz_size" weight="bold" align="center" />
-          <label text="23:59" _source="clock" _display="time" _timezone="0" color="~clock_alt1_color" size="~clock_alt_size" weight="bold" align="center" />
+          <label text="Paris" _source="clock" _display="name" _timezone="0" color="secondary" size="~clock_alt_tz_size" weight="bold" align="center" />
+          <label text="23:59" _source="clock" _display="time" _timezone="0" color="secondary" size="~clock_alt_size" weight="bold" align="center" />
         </div>
         <div flex_direction="column">
-          <label text="New York" _source="clock" _display="name" _timezone="1" color="~clock_alt2_color" size="~clock_alt_tz_size" weight="bold" align="center" />
-          <label text="23:59" _source="clock" _display="time" _timezone="1" color="~clock_alt2_color" size="~clock_alt_size" weight="bold" align="center" />
+          <label text="New York" _source="clock" _display="name" _timezone="1" color="tertiary" size="~clock_alt_tz_size" weight="bold" align="center" />
+          <label text="23:59" _source="clock" _display="time" _timezone="1" color="tertiary" size="~clock_alt_size" weight="bold" align="center" />
         </div>
       </div>
     </div>

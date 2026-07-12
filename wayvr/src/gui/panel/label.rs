@@ -3,6 +3,8 @@ use std::rc::Rc;
 use chrono::DateTime;
 use chrono::Local;
 use chrono_tz::Tz;
+use wgui::color::WguiColor;
+use wgui::globals::WguiGlobals;
 use wgui::{
     drawing,
     event::{self, EventCallback},
@@ -16,6 +18,24 @@ use crate::{
     gui::panel::{log_invalid_attrib, log_missing_attrib},
     state::AppState,
 };
+
+fn parse_color(
+    attribs: &CustomAttribsInfoOwned,
+    key: &str,
+    globals: &WguiGlobals,
+    default: drawing::Color,
+) -> WguiColor {
+    let Some(value) = attribs.get_value(key) else {
+        return default.into();
+    };
+    if let Some(color) = drawing::Color::from_hex(value) {
+        return color.into();
+    }
+    if let Some(color) = globals.get().palette.find(value) {
+        return color;
+    }
+    default.into()
+}
 
 #[allow(clippy::too_many_lines)]
 pub(super) fn setup_custom_label<S: 'static>(
@@ -44,18 +64,19 @@ pub(super) fn setup_custom_label<S: 'static>(
             };
 
             let state = BatteryLabelState {
-                low_color: attribs
-                    .get_value("_low_color")
-                    .and_then(drawing::Color::from_hex)
-                    .unwrap_or(BAT_LOW),
-                normal_color: attribs
-                    .get_value("_normal_color")
-                    .and_then(drawing::Color::from_hex)
-                    .unwrap_or(BAT_NORMAL),
-                charging_color: attribs
-                    .get_value("_charging_color")
-                    .and_then(drawing::Color::from_hex)
-                    .unwrap_or(BAT_CHARGING),
+                low_color: parse_color(attribs, "_low_color", &layout.state.globals, BAT_LOW),
+                normal_color: parse_color(
+                    attribs,
+                    "_normal_color",
+                    &layout.state.globals,
+                    BAT_NORMAL,
+                ),
+                charging_color: parse_color(
+                    attribs,
+                    "_charging_color",
+                    &layout.state.globals,
+                    BAT_CHARGING,
+                ),
                 low_threshold: attribs
                     .get_value("_low_threshold")
                     .and_then(|s| s.parse().ok())
@@ -182,9 +203,9 @@ const BAT_LOW_THRESHOLD: u32 = 30;
 
 struct BatteryLabelState {
     device: usize,
-    low_color: drawing::Color,
-    normal_color: drawing::Color,
-    charging_color: drawing::Color,
+    low_color: WguiColor,
+    normal_color: WguiColor,
+    charging_color: WguiColor,
     low_threshold: u32,
 }
 
@@ -211,7 +232,7 @@ fn battery_on_tick(
         } else {
             state.normal_color
         };
-        label.set_color(common, color.into(), false);
+        label.set_color(common, color, false);
         label.set_text(common, Translation::from_raw_text(&text));
         return;
     }
