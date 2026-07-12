@@ -168,7 +168,6 @@ impl AppState {
             .ok();
 
         let mut app_state = Self {
-            session,
             tasks,
             gfx,
             gfx_extras,
@@ -185,7 +184,7 @@ impl AppState {
                 &lang_provider,
                 &WguiFontConfig::default(),
                 get_config_file_path(&theme_path),
-                "Default", // TODO
+                &session.config.color_palette,
             )?,
             wgui_theme: Rc::new(theme),
             dbus,
@@ -209,6 +208,7 @@ impl AppState {
             screencast_manager,
 
             delta_time: 1.0 / 120.0,
+            session,
         };
 
         if let Some(error_toast) = hid_error {
