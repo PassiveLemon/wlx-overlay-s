@@ -12,8 +12,9 @@ use wgui::{
 use wlx_common::{config::GeneralConfig, dash_interface::ConfigChangeKind};
 
 use crate::tab::settings::{
-	SettingType, SettingsMountParams, SettingsTab, Task, horiz_cell,
-	macros::{MacroParams, options_category, options_checkbox, options_dropdown, options_slider_f32},
+	horiz_cell,
+	macros::{options_category, options_checkbox, options_dropdown, options_slider_f32, MacroParams},
+	SettingType, SettingsMountParams, SettingsTab, Task,
 };
 
 pub struct State {}
@@ -51,8 +52,8 @@ impl State {
 			"APP_SETTINGS.LOOK_AND_FEEL",
 			"dashboard/palette.svg",
 		)?;
-		options_dropdown::<wlx_common::locale::Language>(par.mp, c, &SettingType::Language)?;
 		palettes_dropdown(par.mp, c)?;
+		options_dropdown::<wlx_common::locale::Language>(par.mp, c, &SettingType::Language)?;
 		options_checkbox(par.mp, c, SettingType::OpaqueBackground)?;
 		options_checkbox(par.mp, c, SettingType::HideUsername)?;
 		options_checkbox(par.mp, c, SettingType::HideGrabHelp)?;
