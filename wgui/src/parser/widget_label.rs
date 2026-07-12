@@ -1,4 +1,5 @@
 use crate::{
+	color::ParentColor,
 	i18n::Translation,
 	layout::WidgetID,
 	parser::{
@@ -39,8 +40,8 @@ pub fn parse_widget_label<'a>(
 			"translation" if !value.is_empty() => {
 				params.content = Translation::from_translation_key(value);
 			}
-			"use_bg_color" if !value.is_empty() => {
-				params.use_bg_color = true;
+			"parent_color" => {
+				params.parent_color = ParentColor::try_from(value).unwrap_or_default();
 			}
 			_ => {}
 		}

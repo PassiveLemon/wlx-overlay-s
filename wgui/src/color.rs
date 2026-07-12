@@ -34,6 +34,15 @@ pub struct WguiNamedColor {
 	alpha: f32,
 }
 
+#[derive(Default, Clone, Copy, Debug, EnumString)]
+#[strum(ascii_case_insensitive, serialize_all = "snake_case")]
+pub enum ParentColor {
+	#[default]
+	Foreground,
+	Background,
+	Ignore,
+}
+
 #[derive(Clone, Copy, Debug)]
 pub enum WguiColor {
 	Raw(drawing::Color),

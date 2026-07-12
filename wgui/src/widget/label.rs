@@ -5,7 +5,7 @@ use slotmap::Key;
 use taffy::AvailableSpace;
 
 use crate::{
-	color::{WguiColor, WguiColorName},
+	color::{ParentColor, WguiColor, WguiColorName},
 	drawing::{self, PrimitiveExtent},
 	event::CallbackDataCommon,
 	globals::Globals,
@@ -22,7 +22,7 @@ use super::{WidgetObj, WidgetState};
 pub struct WidgetLabelParams {
 	pub content: Translation,
 	pub style: TextStyle,
-	pub use_bg_color: bool,
+	pub parent_color: ParentColor,
 }
 
 pub struct WidgetLabel {
@@ -127,8 +127,8 @@ impl WidgetLabel {
 		}
 	}
 
-	pub fn uses_bg_color(&self) -> bool {
-		self.params.use_bg_color
+	pub fn parent_color(&self) -> ParentColor {
+		self.params.parent_color
 	}
 }
 

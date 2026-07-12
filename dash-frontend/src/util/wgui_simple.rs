@@ -88,6 +88,7 @@ pub fn create_icon(layout: &mut Layout, id_parent: WidgetID, size: Vec2, path: A
 	let widget_sprite = WidgetSprite::create(WidgetSpriteParams {
 		color: Some(WguiColorName::OnBackground.into()),
 		glyph_data: Some(CustomGlyphData::from_assets(&layout.state.globals, path)?),
+		..Default::default()
 	});
 
 	let size = taffy::Size {

@@ -1,7 +1,7 @@
 use crate::{
 	animation::{Animation, AnimationEasing},
 	assets::AssetPath,
-	color::{WguiColor, WguiColorName},
+	color::{ParentColor, WguiColor, WguiColorName},
 	components::{
 		self, Component, ComponentBase, ComponentTrait, RefreshData,
 		tooltip::{ComponentTooltip, TooltipTrait},
@@ -149,29 +149,24 @@ impl ComponentTrait for ComponentButton {
 						log::error!("Button with more than one sprite!");
 					}
 					// apply initial color from button
-					if let Some(fg_color) = state.colors.color.fg_color() {
+					if let Some(apply_color) = color_to_apply(widget.parent_color(), state.colors.color) {
 						let common = &mut CallbackDataCommon {
 							state: &data.layout.state,
 							alterables: &mut data.layout.alterables,
 						};
-						widget.set_color(common, fg_color);
+						widget.set_color(common, apply_color);
 					}
 					state.id_sprite = child;
 				} else if let Some(mut widget) = data.layout.state.widgets.get_as::<WidgetLabel>(child) {
 					if !state.id_label.is_null() && state.id_label != child {
 						log::error!("Button with more than one label!");
 					}
-					if let Some(fg_color) = state.colors.color.fg_color() {
+					if let Some(apply_color) = color_to_apply(widget.parent_color(), state.colors.color) {
 						let common = &mut CallbackDataCommon {
 							state: &data.layout.state,
 							alterables: &mut data.layout.alterables,
 						};
-						let label_color = if widget.uses_bg_color() {
-							state.colors.color
-						} else {
-							fg_color
-						};
-						widget.set_color(common, label_color, true);
+						widget.set_color(common, apply_color, true);
 					}
 					state.id_label = child;
 				}
@@ -221,14 +216,15 @@ impl ComponentButton {
 		let mut state = self.state.borrow_mut();
 		state.colors.color = color;
 
-		if let Some(fg_color) = color.fg_color() {
-			if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(state.id_label) {
-				let label_color = if label.uses_bg_color() { color } else { fg_color };
-				label.set_color(common, label_color, true);
-			}
-			if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(state.id_sprite) {
-				sprite.set_color(common, fg_color);
-			}
+		if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(state.id_label)
+			&& let Some(apply_color) = color_to_apply(label.parent_color(), color)
+		{
+			label.set_color(common, apply_color, true);
+		}
+		if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(state.id_sprite)
+			&& let Some(apply_color) = color_to_apply(sprite.parent_color(), color)
+		{
+			sprite.set_color(common, apply_color);
 		}
 	}
 
@@ -297,12 +293,16 @@ impl ComponentButton {
 						&& let Some(fg_color1) = alt_color.fg_color()
 					{
 						let fg_color = fg_color0.lerp(&common.globals().palette, &fg_color1, mult);
-						if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(state.id_label) {
-							let label_color = if label.uses_bg_color() { bg_color } else { fg_color };
-							label.set_color(common, label_color, true);
+						if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(state.id_label)
+							&& let Some(apply) = color_to_apply2(label.parent_color(), bg_color, fg_color)
+						{
+							label.set_color(common, apply, true);
 						}
-						if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(state.id_sprite) {
-							sprite.set_color(common, fg_color);
+
+						if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(state.id_sprite)
+							&& let Some(apply) = color_to_apply2(sprite.parent_color(), bg_color, fg_color)
+						{
+							sprite.set_color(common, apply);
 						}
 					}
 				}
@@ -334,19 +334,22 @@ fn anim_hover(
 	} else {
 		(colors.border_color, colors.color)
 	};
-
 	let bg_color = init_color.lerp(&common.globals().palette, &colors.hover_color, mult);
 
 	if let Some(fg_color0) = init_color.fg_color()
 		&& let Some(fg_color1) = colors.hover_color.fg_color()
 	{
 		let fg_color = fg_color0.lerp(&common.globals().palette, &fg_color1, mult);
-		if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(label) {
-			let label_color = if label.uses_bg_color() { bg_color } else { fg_color };
-			label.set_color(common, label_color, true);
+		if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(label)
+			&& let Some(apply) = color_to_apply2(label.parent_color(), bg_color, fg_color)
+		{
+			label.set_color(common, apply, true);
 		}
-		if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(sprite) {
-			sprite.set_color(common, fg_color);
+
+		if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(sprite)
+			&& let Some(apply) = color_to_apply2(sprite.parent_color(), bg_color, fg_color)
+		{
+			sprite.set_color(common, apply);
 		}
 	}
 
@@ -606,6 +609,7 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 		let sprite = WidgetSprite::create(WidgetSpriteParams {
 			glyph_data: Some(CustomGlyphData::from_assets(&ess.layout.state.globals, sprite_path)?),
 			color: Some(params.sprite_color.unwrap_or(WguiColorName::OnBackground.into())),
+			..Default::default()
 		});
 
 		let (sprite_pair, _) = ess.layout.add_child(
@@ -697,4 +701,20 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 
 	ess.layout.register_component_refresh(&Component(button.clone()));
 	Ok((root, button))
+}
+
+fn color_to_apply(parent_color: ParentColor, bg_color: WguiColor) -> Option<WguiColor> {
+	match parent_color {
+		ParentColor::Foreground => bg_color.fg_color(),
+		ParentColor::Background => Some(bg_color),
+		ParentColor::Ignore => None,
+	}
+}
+
+fn color_to_apply2(parent_color: ParentColor, bg_color: WguiColor, fg_color: WguiColor) -> Option<WguiColor> {
+	match parent_color {
+		ParentColor::Foreground => Some(fg_color),
+		ParentColor::Background => Some(bg_color),
+		ParentColor::Ignore => None,
+	}
 }

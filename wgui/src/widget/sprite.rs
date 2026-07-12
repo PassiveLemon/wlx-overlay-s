@@ -4,7 +4,7 @@ use cosmic_text::{Attrs, Buffer, Color, Shaping, Weight};
 use slotmap::Key;
 
 use crate::{
-	color::WguiColor,
+	color::{ParentColor, WguiColor},
 	drawing::{self, PrimitiveExtent},
 	event::{CallbackDataCommon, EventAlterables},
 	globals::Globals,
@@ -22,6 +22,7 @@ use super::{WidgetObj, WidgetState};
 pub struct WidgetSpriteParams {
 	pub glyph_data: Option<CustomGlyphData>,
 	pub color: Option<WguiColor>,
+	pub parent_color: ParentColor,
 }
 
 #[derive(Debug, Default)]
@@ -61,6 +62,10 @@ impl WidgetSprite {
 
 	pub fn get_content(&self) -> Option<CustomGlyphData> {
 		self.params.glyph_data.clone()
+	}
+
+	pub fn parent_color(&self) -> ParentColor {
+		self.params.parent_color
 	}
 }
 

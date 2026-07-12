@@ -1,4 +1,5 @@
 use crate::{
+	color::ParentColor,
 	layout::WidgetID,
 	parser::{
 		AttribPair, ParserContext, ParserFile, get_asset_path_from_kv, parse_children, parse_widget_universal,
@@ -38,6 +39,9 @@ pub fn parse_widget_sprite<'a>(
 			}
 			"color" => {
 				parse_color_opt(ctx, tag_name, key, value, &mut params.color);
+			}
+			"parent_color" => {
+				params.parent_color = ParentColor::try_from(value).unwrap_or_default();
 			}
 			_ => {}
 		}
