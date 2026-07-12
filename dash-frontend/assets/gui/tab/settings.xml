@@ -39,7 +39,7 @@
   </template>
 
   <template name="DangerButton">
-    <Button id="${id}" border_color="danger" color="danger(rgb-mult-0.5)" height="32" tooltip="${translation}_HELP" padding="4" gap="8">
+    <Button id="${id}" color="danger" border_color="danger(rgb-mult-0.5)" height="32" tooltip="${translation}_HELP" padding="4" gap="8">
       <sprite src_builtin="${icon}" height="24" width="24" color="on_danger" />
       <label align="left" translation="${translation}" weight="bold" min_width="200" color="on_danger" />
     </Button>

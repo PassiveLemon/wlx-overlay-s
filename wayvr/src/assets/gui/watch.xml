@@ -11,7 +11,7 @@
     padding="8" color="background"
     border="2" border_color="outline" round="8" />
 
-  <macro name="button_style" padding="8" border="2" round="8" align_items="center" justify_content="center" />
+  <macro name="button_style" padding="8" border="2" round="8" align_items="center" justify_content="center" sticky_color="primary" sticky_border_color="primary(rgb-mult-0.5)" hover_color="tertiary" hover_border_color="tertiary(rgb-mult-0.5)" />
 
   <template name="Device">
     <rectangle macro="decorative_rect" padding_top="4" padding_bottom="4" align_items="center" gap="8">

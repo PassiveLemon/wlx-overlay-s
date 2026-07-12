@@ -235,12 +235,18 @@ impl ComponentButton {
 				let colors = &state.colors;
 
 				{
-					let globals = common.globals();
-					let palette = &globals.palette;
-					let bgcolor = colors.color.lerp(palette, &colors.hover_color, mult * 0.5);
-					rect.params.color = bgcolor;
-					rect.params.color2 = get_color2(&bgcolor, gradient_intensity);
-					rect.params.border_color = colors.border_color.lerp(palette, &colors.hover_border_color, mult);
+				let bgcolor = if sticky_down {
+					colors.color.lerp(&common.globals().palette, &colors.sticky_color, mult)
+				} else {
+					colors.color.lerp(&common.globals().palette, &colors.hover_color, mult * 0.5)
+				};
+				rect.params.color = bgcolor;
+				rect.params.color2 = get_color2(&bgcolor, gradient_intensity);
+				rect.params.border_color = if sticky_down {
+					colors.border_color.lerp(&common.globals().palette, &colors.sticky_border_color, mult)
+				} else {
+					colors.border_color.lerp(&common.globals().palette, &colors.hover_border_color, mult)
+				};
 				}
 				common.alterables.mark_redraw();
 			}),
@@ -267,8 +273,8 @@ fn anim_hover(
 
 	let (init_border_color, init_color) = if sticky_down {
 		(
-			colors.hover_border_color,
-			colors.color.lerp(&globals.palette, &colors.hover_color, 0.5),
+			colors.sticky_border_color,
+			colors.sticky_color,
 		)
 	} else {
 		(colors.border_color, colors.color)
@@ -486,10 +492,12 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 		.hover_border_color
 		.unwrap_or_else(|| border_color.add_rgb(0.5).add_alpha(0.5));
 
-	let sticky_color = params.hover_color.unwrap_or_else(|| color.add_rgb(0.15).add_alpha(0.1));
+	let sticky_color = params
+		.sticky_color
+		.unwrap_or_else(|| color.add_rgb(0.15).add_alpha(0.1));
 
 	let sticky_border_color = params
-		.hover_border_color
+		.sticky_border_color
 		.unwrap_or_else(|| border_color.add_rgb(0.25).add_alpha(0.35));
 
 	let gradient_intensity = theme.gradient_intensity;
