@@ -14,6 +14,7 @@ use wlx_common::{config::GeneralConfig, dash_interface::ConfigChangeKind};
 use crate::tab::settings::{
 	SettingType, SettingsMountParams, SettingsTab, Task, horiz_cell,
 	macros::{MacroParams, options_category, options_checkbox, options_dropdown, options_slider_f32},
+	mount_requires_restart,
 };
 
 pub struct State {}
@@ -91,6 +92,8 @@ fn palettes_dropdown(mp: &mut MacroParams, parent: WidgetID) -> anyhow::Result<(
 			Translation::from_raw_text(current_palette),
 		);
 	}
+
+	mount_requires_restart(mp.layout, parent)?;
 
 	let btn = mp.parser_state.fetch_component_as::<ComponentButton>(&id)?;
 	btn.on_click(Rc::new({

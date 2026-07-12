@@ -145,7 +145,7 @@ impl ComponentTrait for ComponentButton {
 
 			for (child, _) in children {
 				if let Some(mut widget) = data.layout.state.widgets.get_as::<WidgetSprite>(child) {
-					if !state.id_sprite.is_null() {
+					if !state.id_sprite.is_null() && state.id_sprite != child {
 						log::error!("Button with more than one sprite!");
 					}
 					// apply initial color from button
@@ -158,7 +158,7 @@ impl ComponentTrait for ComponentButton {
 					}
 					state.id_sprite = child;
 				} else if let Some(mut widget) = data.layout.state.widgets.get_as::<WidgetLabel>(child) {
-					if !state.id_label.is_null() {
+					if !state.id_label.is_null() && state.id_label != child {
 						log::error!("Button with more than one label!");
 					}
 					if let Some(on_color) = state.colors.color.on_color() {
