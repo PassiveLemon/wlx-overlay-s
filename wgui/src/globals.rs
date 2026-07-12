@@ -12,9 +12,9 @@ use regex::Regex;
 use crate::{
 	assets::{AssetPath, AssetProvider, LangProvider},
 	assets_internal,
-	color::WguiColorPalette,
 	font_config::{WguiFontConfig, WguiFontSystem},
 	i18n::I18n,
+	palette::WguiColorPalette,
 	renderer_vk::text::custom_glyph::CustomGlyphCache,
 };
 
@@ -37,6 +37,7 @@ impl WguiGlobals {
 		lang_provider: &dyn LangProvider,
 		font_config: &WguiFontConfig,
 		asset_folder: PathBuf,
+		color_palette: &str,
 	) -> anyhow::Result<Self> {
 		let i18n_builtin = I18n::new(assets_builtin.as_mut(), lang_provider)?;
 		let assets_internal = Box::new(assets_internal::AssetInternal {});
@@ -48,7 +49,7 @@ impl WguiGlobals {
 			font_system: WguiFontSystem::new(font_config, i18n_builtin.get_locale()),
 			i18n_builtin,
 			custom_glyph_cache: CustomGlyphCache::new(),
-			palette: Default::default(),
+			palette: WguiColorPalette::from_name(color_palette),
 		}))))
 	}
 

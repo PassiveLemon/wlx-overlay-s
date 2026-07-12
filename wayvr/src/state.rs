@@ -185,6 +185,7 @@ impl AppState {
                 &lang_provider,
                 &WguiFontConfig::default(),
                 get_config_file_path(&theme_path),
+                "Default", // TODO
             )?,
             wgui_theme: Rc::new(theme),
             dbus,

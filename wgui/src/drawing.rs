@@ -193,43 +193,66 @@ impl Color {
 	}
 
 	// expects strings like "#424242" or "#424242FF"
-	pub fn from_hex(html_hex: &str) -> Option<drawing::Color> {
-		let Some(ch) = html_hex.chars().next() else {
+	pub const fn from_hex(html_hex: &str) -> Option<drawing::Color> {
+		const fn hex_nibble(byte: u8) -> Option<u8> {
+			match byte {
+				b'0'..=b'9' => Some(byte - b'0'),
+				b'a'..=b'f' => Some(byte - b'a' + 10),
+				b'A'..=b'F' => Some(byte - b'A' + 10),
+				_ => None,
+			}
+		}
+
+		const fn hex_byte(high: u8, low: u8) -> Option<u8> {
+			let high = match hex_nibble(high) {
+				Some(value) => value,
+				None => return None,
+			};
+
+			let low = match hex_nibble(low) {
+				Some(value) => value,
+				None => return None,
+			};
+
+			Some((high << 4) | low)
+		}
+
+		let bytes = html_hex.as_bytes();
+
+		if (bytes.len() != 7 && bytes.len() != 9) || bytes[0] != b'#' {
 			return None;
+		}
+
+		let r = match hex_byte(bytes[1], bytes[2]) {
+			Some(value) => value,
+			None => return None,
 		};
 
-		if ch != '#' {
-			return None;
-		}
+		let g = match hex_byte(bytes[3], bytes[4]) {
+			Some(value) => value,
+			None => return None,
+		};
 
-		if html_hex.len() == 7 {
-			if let (Ok(r), Ok(g), Ok(b)) = (
-				u8::from_str_radix(&html_hex[1..3], 16),
-				u8::from_str_radix(&html_hex[3..5], 16),
-				u8::from_str_radix(&html_hex[5..7], 16),
-			) {
-				return Some(drawing::Color::new(
-					f32::from(r) / 255.,
-					f32::from(g) / 255.,
-					f32::from(b) / 255.,
-					1.,
-				));
+		let b = match hex_byte(bytes[5], bytes[6]) {
+			Some(value) => value,
+			None => return None,
+		};
+
+		let a = if bytes.len() == 9 {
+			match hex_byte(bytes[7], bytes[8]) {
+				Some(value) => value,
+				None => return None,
 			}
-		} else if html_hex.len() == 9
-			&& let (Ok(r), Ok(g), Ok(b), Ok(a)) = (
-				u8::from_str_radix(&html_hex[1..3], 16),
-				u8::from_str_radix(&html_hex[3..5], 16),
-				u8::from_str_radix(&html_hex[5..7], 16),
-				u8::from_str_radix(&html_hex[7..9], 16),
-			) {
-			return Some(drawing::Color::new(
-				f32::from(r) / 255.,
-				f32::from(g) / 255.,
-				f32::from(b) / 255.,
-				f32::from(a) / 255.,
-			));
-		}
-		None
+		} else {
+			255
+		};
+
+		Some(drawing::Color::new(
+			r as f32 / 255.0,
+			g as f32 / 255.0,
+			b as f32 / 255.0,
+			a as f32 / 255.0,
+		))
 	}
 }
 

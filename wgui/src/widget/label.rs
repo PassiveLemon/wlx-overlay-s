@@ -5,12 +5,13 @@ use slotmap::Key;
 use taffy::AvailableSpace;
 
 use crate::{
-	color::{WguiColor, WguiColorName, WguiColorPalette},
+	color::{WguiColor, WguiColorName},
 	drawing::{self, PrimitiveExtent},
 	event::CallbackDataCommon,
 	globals::Globals,
 	i18n::Translation,
 	layout::{LayoutState, WidgetID},
+	palette::WguiColorPalette,
 	renderer_vk::text::TextStyle,
 	widget::WidgetStateFlags,
 };

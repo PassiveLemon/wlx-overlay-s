@@ -8,9 +8,9 @@ use glam::Vec2;
 use wgui::{
 	assets::AssetPath,
 	components::{
-		Component,
 		button::{ButtonClickCallback, ComponentButton},
 		checkbox::ComponentCheckbox,
+		Component,
 	},
 	drawing::Color,
 	font_config::WguiFontConfig,
@@ -86,12 +86,14 @@ impl TestbedGeneric {
 
 	pub fn new(assets: Box<assets::Asset>) -> anyhow::Result<Self> {
 		let lang_provider = WayVRLangProvider::default();
+		let palette_name = std::env::var("PALETTE").unwrap_or_else(|_| "Default".to_string());
 
 		let globals = WguiGlobals::new(
 			assets,
 			&lang_provider,
 			&WguiFontConfig::default(),
 			PathBuf::new(), // cwd
+			&palette_name,
 		)?;
 
 		let extra = ParseDocumentExtra {

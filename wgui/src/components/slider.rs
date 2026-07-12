@@ -5,7 +5,7 @@ use taffy::prelude::{length, percent};
 
 use crate::{
 	animation::{Animation, AnimationCallback, AnimationEasing},
-	color::{WguiColor, WguiColorName, WguiColorPalette},
+	color::{WguiColor, WguiColorName}, palette::WguiColorPalette,
 	components::{
 		Component, ComponentBase, ComponentTrait, RefreshData,
 		tooltip::{self, ComponentTooltip, TooltipTrait},

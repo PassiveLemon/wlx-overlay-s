@@ -12,8 +12,9 @@ use glam::Mat4;
 use parking_lot::Mutex;
 
 use crate::{
-	color::{WguiColor, WguiColorName, WguiColorPalette},
+	color::{WguiColor, WguiColorName},
 	drawing::{self},
+	palette::WguiColorPalette,
 };
 
 pub static SWASH_CACHE: LazyLock<Mutex<SwashCache>> = LazyLock::new(|| Mutex::new(SwashCache::new()));
@@ -107,7 +108,11 @@ impl From<&TextStyle> for Metrics {
 
 impl From<&TextStyle> for Wrap {
 	fn from(value: &TextStyle) -> Self {
-		if value.wrap { Self::WordOrGlyph } else { Self::None }
+		if value.wrap {
+			Self::WordOrGlyph
+		} else {
+			Self::None
+		}
 	}
 }
 

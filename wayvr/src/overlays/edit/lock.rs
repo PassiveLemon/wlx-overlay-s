@@ -3,10 +3,11 @@ use std::rc::Rc;
 use anyhow::Context;
 use wgui::{
     animation::{Animation, AnimationEasing},
-    color::{WguiColor, WguiColorName, WguiColorPalette},
+    color::{WguiColor, WguiColorName},
     components::button::ComponentButton,
     event::CallbackDataCommon,
     layout::WidgetID,
+    palette::WguiColorPalette,
     parser::Fetchable,
     widget::rectangle::WidgetRectangle,
 };

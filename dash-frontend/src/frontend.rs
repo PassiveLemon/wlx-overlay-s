@@ -29,8 +29,8 @@ use wlx_common::{
 use crate::{
 	assets,
 	tab::{
-		Tab, TabType, apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado,
-		settings::TabSettings, welcome::TabWelcome,
+		apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado, settings::TabSettings,
+		welcome::TabWelcome, Tab, TabType,
 	},
 	util::{
 		popup_manager::{MountPopupOnceParams, PopupManager, PopupManagerParams},
@@ -94,6 +94,7 @@ pub struct InitParams<'a, T> {
 	pub show_welcome: bool,
 	pub has_monado: bool,
 	pub theme: Rc<WguiTheme>,
+	pub color_palette: &'a str,
 }
 
 #[derive(Clone)]
@@ -138,6 +139,7 @@ impl<T: 'static> Frontend<T> {
 				family_name_monospace: "",
 			},
 			PathBuf::new(), //FIXME: pass from somewhere else
+			params.color_palette,
 		)?;
 
 		let (layout, state) = wgui::parser::new_layout_from_assets(

@@ -16,11 +16,12 @@ use glam::{FloatExt, Mat4, Vec2, vec2, vec3};
 use wgui::{
     animation::{Animation, AnimationEasing},
     assets::AssetPath,
-    color::{WguiColorName, WguiColorPalette},
+    color::WguiColorName,
     drawing::{self},
     event::{self, CallbackMetadata, EventListenerKind},
     layout::LayoutUpdateParams,
     log::LogErr,
+    palette::WguiColorPalette,
     parser::{Fetchable, ParseDocumentParams, TemplateParams},
     renderer_vk::util,
     taffy::{self, prelude::length},

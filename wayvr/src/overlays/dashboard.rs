@@ -94,6 +94,7 @@ impl DashFrontend {
             show_welcome: tutorial,
             has_monado: matches!(app.xr_backend, XrBackend::OpenXR),
             theme: app.wgui_theme.clone(),
+            color_palette: "Default", // TODO
         })?;
 
         frontend
