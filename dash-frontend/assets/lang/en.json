@@ -96,6 +96,7 @@
 		"CAPTURE_METHOD": "Wayland screen capture",
 		"CAPTURE_METHOD_HELP": "Try changing this if you are\nexperiencing black or glitchy screens",
 		"COLOR_KEYING": "Color keying",
+		"COLOR_PALETTE": "Color palette",
 		"CLEAR_PIPEWIRE_TOKENS": "Clear PipeWire tokens",
 		"CLEAR_PIPEWIRE_TOKENS_HELP": "Prompt for screen selection on next start",
 		"CLEAR_SAVED_STATE": "Clear saved state",

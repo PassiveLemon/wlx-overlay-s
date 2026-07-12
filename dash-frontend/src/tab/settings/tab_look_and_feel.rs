@@ -79,7 +79,6 @@ fn palettes_dropdown(mp: &mut MacroParams, parent: WidgetID) -> anyhow::Result<(
 	let mut params = TemplateParams::new();
 	params.insert("id", &id);
 	params.insert("translation", "APP_SETTINGS.COLOR_PALETTE".into());
-	params.insert("tooltip", "APP_SETTINGS.COLOR_PALETTE_HELP".into());
 
 	mp.parser_state
 		.instantiate_template(mp.doc_params, "DropdownButton", mp.layout, parent, params)?;
