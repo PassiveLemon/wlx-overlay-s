@@ -68,10 +68,8 @@ impl ComponentTrait for ComponentTabs {
 fn set_button_selected(common: &mut CallbackDataCommon, button: &Rc<ComponentButton>, selected: bool) {
 	if selected {
 		button.set_color(common, WguiColorName::Primary.into());
-		button.set_label_color(common, WguiColorName::OnPrimary.into());
 	} else {
 		button.set_color(common, WguiColorName::Background.into());
-		button.set_label_color(common, WguiColorName::OnBackground.into());
 	}
 }
 

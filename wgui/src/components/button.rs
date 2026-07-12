@@ -3,35 +3,34 @@ use crate::{
 	assets::AssetPath,
 	color::{WguiColor, WguiColorName},
 	components::{
-		self,
+		self, Component, ComponentBase, ComponentTrait, RefreshData,
 		tooltip::{ComponentTooltip, TooltipTrait},
-		Component, ComponentBase, ComponentTrait, RefreshData,
 	},
 	drawing::{self, Boundary},
 	event::{CallbackDataCommon, EventListenerCollection, EventListenerID, EventListenerKind},
 	i18n::Translation,
 	layout::{WidgetID, WidgetPair},
 	renderer_vk::{
-		text::{custom_glyph::CustomGlyphData, FontWeight, TextStyle},
+		text::{FontWeight, TextStyle, custom_glyph::CustomGlyphData},
 		util::centered_matrix,
 	},
 	sound::WguiSoundType,
 	widget::{
-		self,
+		self, ConstructEssentials, EventResult, WidgetData,
 		label::{WidgetLabel, WidgetLabelParams},
 		rectangle::{WidgetRectangle, WidgetRectangleParams},
 		sprite::{WidgetSprite, WidgetSpriteParams},
 		util::WLength,
-		ConstructEssentials, EventResult, WidgetData,
 	},
 };
 use glam::{Mat4, Vec2, Vec3};
+use slotmap::Key;
 use std::{
 	cell::RefCell,
 	rc::Rc,
 	time::{Duration, Instant},
 };
-use taffy::{prelude::length, AlignItems, JustifyContent};
+use taffy::{AlignItems, JustifyContent, prelude::length};
 
 pub struct Params<'a> {
 	pub text: Option<Translation>, // if unset, label will not be populated
@@ -102,6 +101,9 @@ struct State {
 	active_tooltip: Option<Rc<ComponentTooltip>>,
 	colors: Colors,
 	last_pressed: Instant,
+	id_label: WidgetID,  // Label
+	id_sprite: WidgetID, // Sprite
+	children_discovered: bool,
 }
 
 impl TooltipTrait for State {
@@ -111,8 +113,7 @@ impl TooltipTrait for State {
 }
 
 struct Data {
-	id_label: WidgetID, // Label
-	id_rect: WidgetID,  // Rectangle
+	id_rect: WidgetID, // Rectangle
 	sticky: bool,
 }
 
@@ -134,6 +135,44 @@ impl ComponentTrait for ComponentButton {
 	fn refresh(&self, data: &mut RefreshData) {
 		let mut state = self.state.borrow_mut();
 
+		if !state.children_discovered {
+			state.children_discovered = true;
+
+			let mut children = vec![];
+			data
+				.layout
+				.collect_children_ids_recursive(self.data.id_rect, &mut children);
+
+			for (child, _) in children {
+				if let Some(mut widget) = data.layout.state.widgets.get_as::<WidgetSprite>(child) {
+					if !state.id_sprite.is_null() {
+						log::error!("Button with more than one sprite!");
+					}
+					// apply initial color from button
+					if let Some(on_color) = state.colors.color.on_color() {
+						let common = &mut CallbackDataCommon {
+							state: &data.layout.state,
+							alterables: &mut data.layout.alterables,
+						};
+						widget.set_color(common, on_color);
+					}
+					state.id_sprite = child;
+				} else if let Some(mut widget) = data.layout.state.widgets.get_as::<WidgetLabel>(child) {
+					if !state.id_label.is_null() {
+						log::error!("Button with more than one label!");
+					}
+					if let Some(on_color) = state.colors.color.on_color() {
+						let common = &mut CallbackDataCommon {
+							state: &data.layout.state,
+							alterables: &mut data.layout.alterables,
+						};
+						widget.set_color(common, on_color, true);
+					}
+					state.id_label = child;
+				}
+			}
+		}
+
 		if state.active_tooltip.is_some() {
 			let l_state = &data.layout.state;
 			if let Some(node_id) = l_state.nodes.get(self.base.get_id()) {
@@ -152,16 +191,13 @@ fn get_color2(color: &WguiColor, gradient_intensity: f32) -> WguiColor {
 }
 
 impl ComponentButton {
-	pub fn get_label(&self) -> WidgetID {
-		self.data.id_label
-	}
-
 	pub fn get_rect(&self) -> WidgetID {
 		self.data.id_rect
 	}
 
 	pub fn set_text(&self, common: &mut CallbackDataCommon, text: Translation) {
-		let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(self.data.id_label) else {
+		let state = self.state.borrow();
+		let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(state.id_label) else {
 			return;
 		};
 
@@ -179,13 +215,15 @@ impl ComponentButton {
 
 		let mut state = self.state.borrow_mut();
 		state.colors.color = color;
-	}
 
-	pub fn set_label_color(&self, common: &mut CallbackDataCommon, color: WguiColor) {
-		let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(self.data.id_label) else {
-			return;
-		};
-		label.set_color(common, color, true);
+		if let Some(on_color) = color.on_color() {
+			if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(state.id_label) {
+				label.set_color(common, on_color, true);
+			}
+			if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(state.id_sprite) {
+				sprite.set_color(common, on_color);
+			}
+		}
 	}
 
 	pub fn get_time_since_last_pressed(&self) -> Duration {
@@ -234,19 +272,32 @@ impl ComponentButton {
 				let state = state.borrow();
 				let colors = &state.colors;
 
+				let (alt_color, alt_border_color) = if sticky_down {
+					(&colors.sticky_color, &colors.sticky_border_color)
+				} else {
+					(&colors.hover_color, &colors.hover_border_color)
+				};
+
 				{
-				let bgcolor = if sticky_down {
-					colors.color.lerp(&common.globals().palette, &colors.sticky_color, mult)
-				} else {
-					colors.color.lerp(&common.globals().palette, &colors.hover_color, mult * 0.5)
-				};
-				rect.params.color = bgcolor;
-				rect.params.color2 = get_color2(&bgcolor, gradient_intensity);
-				rect.params.border_color = if sticky_down {
-					colors.border_color.lerp(&common.globals().palette, &colors.sticky_border_color, mult)
-				} else {
-					colors.border_color.lerp(&common.globals().palette, &colors.hover_border_color, mult)
-				};
+					let bgcolor = colors.color.lerp(&common.globals().palette, alt_color, mult);
+
+					rect.params.color = bgcolor;
+					rect.params.color2 = get_color2(&bgcolor, gradient_intensity);
+					rect.params.border_color = colors
+						.border_color
+						.lerp(&common.globals().palette, alt_border_color, mult);
+
+					if let Some(on_color0) = colors.color.on_color()
+						&& let Some(on_color1) = alt_color.on_color()
+					{
+						let on_color = on_color0.lerp(&common.globals().palette, &on_color1, mult);
+						if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(state.id_label) {
+							label.set_color(common, on_color, true);
+						}
+						if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(state.id_sprite) {
+							sprite.set_color(common, on_color);
+						}
+					}
 				}
 				common.alterables.mark_redraw();
 			}),
@@ -260,6 +311,8 @@ impl ComponentButton {
 fn anim_hover(
 	common: &mut CallbackDataCommon,
 	rect: &mut WidgetRectangle,
+	label: WidgetID,
+	sprite: WidgetID,
 	widget_data: &mut WidgetData,
 	colors: &Colors,
 	widget_boundary: Boundary,
@@ -269,16 +322,25 @@ fn anim_hover(
 ) {
 	let mult = pos * if pressed { 1.5 } else { 1.0 };
 
-	let globals = common.globals();
-
 	let (init_border_color, init_color) = if sticky_down {
-		(
-			colors.sticky_border_color,
-			colors.sticky_color,
-		)
+		(colors.sticky_border_color, colors.sticky_color)
 	} else {
 		(colors.border_color, colors.color)
 	};
+
+	if let Some(on_color0) = init_color.on_color()
+		&& let Some(on_color1) = colors.hover_color.on_color()
+	{
+		let on_color = on_color0.lerp(&common.globals().palette, &on_color1, mult);
+		if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(label) {
+			label.set_color(common, on_color, true);
+		}
+		if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(sprite) {
+			sprite.set_color(common, on_color);
+		}
+	}
+
+	let globals = common.globals();
 
 	let bgcolor = init_color.lerp(&globals.palette, &colors.hover_color, mult);
 
@@ -306,6 +368,8 @@ fn anim_hover_create(state: Rc<RefCell<State>>, widget_id: WidgetID, fade_in: bo
 			anim_hover(
 				common,
 				rect,
+				state.id_label,
+				state.id_sprite,
 				anim_data.data,
 				&state.colors,
 				anim_data.widget_boundary,
@@ -385,6 +449,8 @@ fn register_event_mouse_press(state: Rc<RefCell<State>>, listeners: &mut EventLi
 			anim_hover(
 				common,
 				rect,
+				state.id_label,
+				state.id_sprite,
 				event_data.widget_data,
 				&state.colors,
 				common.state.get_node_boundary(event_data.node_id),
@@ -434,6 +500,8 @@ fn register_event_mouse_release(
 					anim_hover(
 						common,
 						rect,
+						state.id_label,
+						state.id_sprite,
 						event_data.widget_data,
 						&state.colors,
 						common.state.get_node_boundary(event_data.node_id),
@@ -526,13 +594,13 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 		right: length(4.0),
 	};
 
-	if let Some(sprite_path) = params.sprite_src {
+	let id_sprite = if let Some(sprite_path) = params.sprite_src {
 		let sprite = WidgetSprite::create(WidgetSpriteParams {
 			glyph_data: Some(CustomGlyphData::from_assets(&ess.layout.state.globals, sprite_path)?),
 			color: Some(params.sprite_color.unwrap_or(WguiColorName::OnBackground.into())),
 		});
 
-		ess.layout.add_child(
+		let (sprite_pair, _) = ess.layout.add_child(
 			root.id,
 			sprite,
 			taffy::Style {
@@ -544,7 +612,11 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 				..Default::default()
 			},
 		)?;
-	}
+
+		sprite_pair.id
+	} else {
+		WidgetID::default()
+	};
 
 	let id_label = if let Some(content) = params.text {
 		let widget_label = WidgetLabel::create(
@@ -573,7 +645,6 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 	};
 
 	let data = Rc::new(Data {
-		id_label,
 		id_rect,
 		sticky: params.sticky,
 	});
@@ -593,6 +664,9 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 			sticky_color,
 			sticky_border_color,
 		},
+		id_label,
+		id_sprite,
+		children_discovered: false,
 	}));
 
 	let base = ComponentBase {

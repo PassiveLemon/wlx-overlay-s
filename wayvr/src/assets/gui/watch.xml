@@ -11,7 +11,8 @@
     padding="8" color="background"
     border="2" border_color="outline" round="8" />
 
-  <macro name="button_style" padding="8" border="2" round="8" align_items="center" justify_content="center" sticky_color="primary" sticky_border_color="primary(rgb-mult-0.5)" hover_color="tertiary" hover_border_color="tertiary(rgb-mult-0.5)" />
+  <macro name="button_style" padding="8" border="2" round="8" align_items="center" justify_content="center"
+    sticky_color="primary" sticky_border_color="primary(rgb-mult-0.5)" hover_color="tertiary" hover_border_color="tertiary(rgb-mult-0.5)" />
 
   <template name="Device">
     <rectangle macro="decorative_rect" padding_top="4" padding_bottom="4" align_items="center" gap="8">
@@ -74,8 +75,8 @@
       <div flex_direction="column" >
         <label text="11:22 PM" _source="clock" _display="time" color="on_background" size="~clock0_size" weight="bold" align="center" />
         <div padding_left="2" gap="16" flex_direction="row" justify_content="center">
-          <label text="Tue" _source="clock" _display="dow_short" color="on_background" size="~clock0_dow_size" weight="bold" />
-          <label text="22/2/2022" _source="clock" _display="date" color="on_background" size="~clock0_date_size" weight="bold" />
+          <label text="Tue" _source="clock" _display="dow_short" color="on_background_variant" size="~clock0_dow_size" weight="bold" />
+          <label text="22/2/2022" _source="clock" _display="date" color="on_background_variant" size="~clock0_date_size" weight="bold" />
         </div>
       </div>
       <div flex_direction="row" gap="8" justify_content="space_around">

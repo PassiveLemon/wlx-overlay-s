@@ -1,15 +1,14 @@
 use crate::{
 	assets::AssetPath,
 	color::WguiColor,
-	components::{button, Component},
+	components::{Component, button},
 	i18n::Translation,
 	layout::WidgetID,
 	parser::{
-		get_asset_path_from_kv,
-		helpers::{parse_attrib_tooltip, TooltipAttribs},
+		AttribPair, ParserContext, ParserFile, get_asset_path_from_kv,
+		helpers::{TooltipAttribs, parse_attrib_tooltip},
 		parse_children, parse_f32, process_component,
 		style::{parse_color_opt, parse_round, parse_style, parse_text_style},
-		AttribPair, ParserContext, ParserFile,
 	},
 	widget::util::WLength,
 };

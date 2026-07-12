@@ -282,7 +282,7 @@ impl Layout {
 		})
 	}
 
-	fn collect_children_ids_recursive(&self, widget_id: WidgetID, out: &mut Vec<(WidgetID, taffy::NodeId)>) {
+	pub(crate) fn collect_children_ids_recursive(&self, widget_id: WidgetID, out: &mut Vec<(WidgetID, taffy::NodeId)>) {
 		let Some(node_id) = self.state.nodes.get(widget_id) else {
 			return;
 		};

@@ -118,9 +118,30 @@ impl WguiColor {
 			c1.lerp(&c2, val).into()
 		}
 	}
+
+	pub fn on_color(&self) -> Option<Self> {
+		if let Self::Named(name) = self {
+			name.name.on_color().map(|x| x.into())
+		} else {
+			None
+		}
+	}
 }
 
 impl WguiColorName {
+	pub fn on_color(&self) -> Option<Self> {
+		match self {
+			Self::Primary => Some(Self::OnPrimary),
+			Self::Secondary => Some(Self::OnSecondary),
+			Self::Tertiary => Some(Self::OnTertiary),
+			Self::Danger => Some(Self::OnDanger),
+			Self::Background => Some(Self::OnBackground),
+			Self::BackgroundVariant => Some(Self::OnBackgroundVariant),
+			Self::BackgroundContrast => Some(Self::OnBackgroundContrast),
+			_ => None,
+		}
+	}
+
 	pub const fn to_wgui_color(&self) -> WguiColor {
 		WguiColor::Named(WguiNamedColor {
 			name: *self,
