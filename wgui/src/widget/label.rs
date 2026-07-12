@@ -120,17 +120,15 @@ impl WidgetLabel {
 	}
 
 	pub fn set_color(&mut self, common: &mut CallbackDataCommon, color: WguiColor, apply_to_existing_text: bool) {
-		if self.params.use_bg_color {
-			if let Some(bg_color) = color.bg_color() {
-				self.params.style.color = Some(bg_color);
-			}
-		} else {
-			self.params.style.color = Some(color);
-		}
+		self.params.style.color = Some(color);
 		if apply_to_existing_text {
 			self.update_attrs(&common.globals().palette);
 			common.mark_widget_dirty(self.id);
 		}
+	}
+
+	pub fn uses_bg_color(&self) -> bool {
+		self.params.use_bg_color
 	}
 }
 

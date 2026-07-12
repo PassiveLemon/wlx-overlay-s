@@ -166,7 +166,12 @@ impl ComponentTrait for ComponentButton {
 							state: &data.layout.state,
 							alterables: &mut data.layout.alterables,
 						};
-						widget.set_color(common, fg_color, true);
+						let label_color = if widget.uses_bg_color() {
+							state.colors.color
+						} else {
+							fg_color
+						};
+						widget.set_color(common, label_color, true);
 					}
 					state.id_label = child;
 				}
@@ -218,7 +223,8 @@ impl ComponentButton {
 
 		if let Some(fg_color) = color.fg_color() {
 			if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(state.id_label) {
-				label.set_color(common, fg_color, true);
+				let label_color = if label.uses_bg_color() { color } else { fg_color };
+				label.set_color(common, label_color, true);
 			}
 			if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(state.id_sprite) {
 				sprite.set_color(common, fg_color);
@@ -279,10 +285,10 @@ impl ComponentButton {
 				};
 
 				{
-					let bgcolor = colors.color.lerp(&common.globals().palette, alt_color, mult);
+					let bg_color = colors.color.lerp(&common.globals().palette, alt_color, mult);
 
-					rect.params.color = bgcolor;
-					rect.params.color2 = get_color2(&bgcolor, gradient_intensity);
+					rect.params.color = bg_color;
+					rect.params.color2 = get_color2(&bg_color, gradient_intensity);
 					rect.params.border_color = colors
 						.border_color
 						.lerp(&common.globals().palette, alt_border_color, mult);
@@ -292,7 +298,8 @@ impl ComponentButton {
 					{
 						let fg_color = fg_color0.lerp(&common.globals().palette, &fg_color1, mult);
 						if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(state.id_label) {
-							label.set_color(common, fg_color, true);
+							let label_color = if label.uses_bg_color() { bg_color } else { fg_color };
+							label.set_color(common, label_color, true);
 						}
 						if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(state.id_sprite) {
 							sprite.set_color(common, fg_color);
@@ -328,12 +335,15 @@ fn anim_hover(
 		(colors.border_color, colors.color)
 	};
 
+	let bg_color = init_color.lerp(&common.globals().palette, &colors.hover_color, mult);
+
 	if let Some(fg_color0) = init_color.fg_color()
 		&& let Some(fg_color1) = colors.hover_color.fg_color()
 	{
 		let fg_color = fg_color0.lerp(&common.globals().palette, &fg_color1, mult);
 		if let Some(mut label) = common.state.widgets.get_as::<WidgetLabel>(label) {
-			label.set_color(common, fg_color, true);
+			let label_color = if label.uses_bg_color() { bg_color } else { fg_color };
+			label.set_color(common, label_color, true);
 		}
 		if let Some(mut sprite) = common.state.widgets.get_as::<WidgetSprite>(sprite) {
 			sprite.set_color(common, fg_color);
@@ -342,8 +352,6 @@ fn anim_hover(
 
 	let globals = common.globals();
 
-	let bgcolor = init_color.lerp(&globals.palette, &colors.hover_color, mult);
-
 	let gradient_intensity = common.state.theme.gradient_intensity;
 
 	//let t = Mat4::from_scale(Vec3::splat(1.0 + pos * 0.5)) * Mat4::from_rotation_z(pos * 1.0);
@@ -351,8 +359,8 @@ fn anim_hover(
 	let t = Mat4::from_scale(Vec3::splat(1.0 + pos * 0.05));
 	widget_data.transform = centered_matrix(widget_boundary.size, &t);
 
-	rect.params.color = bgcolor;
-	rect.params.color2 = get_color2(&bgcolor, gradient_intensity);
+	rect.params.color = bg_color;
+	rect.params.color2 = get_color2(&bg_color, gradient_intensity);
 
 	rect.params.border_color = init_border_color.lerp(&globals.palette, &colors.hover_border_color, mult);
 }
