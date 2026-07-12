@@ -350,9 +350,9 @@ impl State {
 const BODY_COLOR: WguiColor = WguiColorName::Background.to_wgui_color();
 const BODY_BORDER_COLOR: WguiColor = WguiColorName::Outline.to_wgui_color();
 const HANDLE_COLOR: WguiColorName = WguiColorName::BackgroundVariant;
-const HANDLE_COLOR_HOVERED: WguiColor = WguiColorName::Secondary.to_wgui_color();
+const HANDLE_COLOR_HOVERED: WguiColor = WguiColorName::Tertiary.to_wgui_color();
 const HANDLE_BORDER_COLOR: WguiColor = WguiColorName::Outline.to_wgui_color();
-const HANDLE_BORDER_COLOR_HOVERED: WguiColor = WguiColorName::Primary.to_wgui_color().mult_rgb(1.25);
+const HANDLE_BORDER_COLOR_HOVERED: WguiColor = WguiColorName::OnTertiary.to_wgui_color();
 const HANDLE_TEXT_COLOR: WguiColorName = WguiColorName::OnBackgroundVariant;
 const HANDLE_TEXT_COLOR_HOVERED: WguiColorName = WguiColorName::OnSecondary;
 

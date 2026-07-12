@@ -49,7 +49,7 @@
     <div macro="keycap_div">
       <rectangle id="${id}" macro="keycap_rect" gap="3">
         <label text="${text}" size="~text_size" />
-        <label color="on_background(opacity-0.5)" text="${text_altgr}" size="~text_size" />
+        <label color="on_background_variant" text="${text_altgr}" size="~text_size" />
       </rectangle>
     </div>
   </template>
@@ -59,7 +59,7 @@
   <template name="KeySymbol">
     <div macro="keycap_div">
       <rectangle id="${id}" macro="keycap_rect" gap="3">
-        <label color="on_background(opacity-0.5)" text="${text_shift}" size="~text_size" />
+        <label color="on_background_variant" text="${text_shift}" size="~text_size" />
         <label text="${text}" size="~text_size" />
       </rectangle>
     </div>
@@ -71,14 +71,14 @@
     <div macro="keycap_div">
       <rectangle id="${id}" macro="keycap_rect" flex_direction="row" flex_wrap="wrap" padding="4">
         <div width="50%" height="50%" align_items="center" justify_content="center">
-          <label color="on_background(opacity-0.5)" text="${text_shift}" size="~text_size" />
+          <label color="on_background_variant" text="${text_shift}" size="~text_size" />
         </div>
         <div width="50%" height="50%" align_items="center" justify_content="center" />
         <div width="50%" height="50%" align_items="center" justify_content="center">
           <label text="${text}" size="~text_size" />
         </div>
         <div width="50%" height="50%" align_items="center" justify_content="center">
-          <label color="on_background(opacity-0.5)" text="${text_altgr}" size="~text_size" />
+          <label color="on_background_variant" text="${text_altgr}" size="~text_size" />
         </div>
       </rectangle>
     </div>

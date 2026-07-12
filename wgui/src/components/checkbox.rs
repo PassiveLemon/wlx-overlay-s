@@ -97,7 +97,8 @@ pub struct ComponentCheckbox {
 	state: Rc<RefCell<State>>,
 }
 
-const COLOR_UNCHECKED: drawing::Color = drawing::Color::new(0.0, 0.0, 0.0, 0.0);
+const COLOR_UNCHECKED: WguiColor = WguiColorName::Background.to_wgui_color();
+const COLOR_HOVERED: WguiColor = WguiColorName::Tertiary.to_wgui_color();
 
 impl ComponentTrait for ComponentCheckbox {
 	fn base(&self) -> &ComponentBase {
