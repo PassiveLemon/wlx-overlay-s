@@ -10,6 +10,7 @@ use wgui::{
 	font_config::WguiFontConfig,
 	globals::WguiGlobals,
 	layout::{Layout, LayoutParams, LayoutUpdateParams},
+	palette::WguiColorPalette,
 	parser::{ParseDocumentParams, ParserState},
 };
 use wlx_common::locale::WayVRLangProvider;
@@ -37,7 +38,7 @@ impl TestbedAny {
 			&lang_provider,
 			&WguiFontConfig::default(),
 			PathBuf::new(), // cwd
-			&palette_name,
+			WguiColorPalette::get_builtin(&palette_name),
 		)?;
 
 		let (layout, state) = wgui::parser::new_layout_from_assets(

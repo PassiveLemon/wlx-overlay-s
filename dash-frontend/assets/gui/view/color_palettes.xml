@@ -1,5 +1,4 @@
 <layout>
-  <!-- id, text -->
   <template name="ColorPaletteButton">
     <Button id="${id}" width="350" flex_direction="column" justify_content="space_around" tooltip="${tooltip}" tooltip_side="bottom"
       color="${background}" hover_color="${background_variant}" border_color="${outline}" hover_border_color="${highlight}" padding="16" margin="4" >
@@ -10,6 +9,13 @@
         <rectangle round="100%" width="32" height="32" color="${tertiary}" border="2" border_color="${on_tertiary}" />
         <rectangle round="100%" width="32" height="32" color="${danger}" border="2" border_color="${on_danger}" />
       </div>
+    </Button>
+  </template>
+
+  <template name="CustomPaletteButton">
+    <Button id="custom_btn" width="350" flex_direction="column" justify_content="space_around" padding="16" margin="4" >
+      <label translation="APP_SETTINGS.COLOR_PALETTE_CUSTOM_URL" size="16" weight="bold" />
+      <label translation="APP_SETTINGS.COLOR_PALETTE_CUSTOM_URL2" size="14" color="on_background_variant" />
     </Button>
   </template>
 

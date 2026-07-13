@@ -13,7 +13,7 @@ pub struct WguiColorPalette {
 }
 
 impl WguiColorPalette {
-	pub fn from_name(palette_name: &str) -> Self {
+	pub fn get_builtin(palette_name: &str) -> Self {
 		for (name, palette) in PALETTES {
 			if *name == palette_name {
 				// just clone here, makes it easier for future customization
@@ -23,6 +23,10 @@ impl WguiColorPalette {
 
 		log::warn!("No color palette with name '{palette_name}', using default colors.");
 		return DEFAULT.clone();
+	}
+
+	pub const fn from_inner(colors: [drawing::Color; WguiColorName::COUNT]) -> Self {
+		Self { colors }
 	}
 
 	fn apply_modifier(color: WguiColor, modifier: &str) -> Option<WguiColor> {
@@ -82,8 +86,8 @@ const fn hex(hex: &str) -> drawing::Color {
 
 pub static PALETTES: &[(&'static str, &WguiColorPalette)] = &[
 	("Default", DEFAULT),
-	("Ayu", AYU),
-	("Catppuccin", CATTPUCCIN),
+	("Ayu Dusk", AYU),
+	("Catppuccin", CATPPUCCIN),
 	("Cyberpunk", CYBERPUNK),
 	("Dracula", DRACULA),
 	("Eldritch", ELDRITCH),
@@ -93,21 +97,21 @@ pub static PALETTES: &[(&'static str, &WguiColorPalette)] = &[
 	("Monochrome", MONOCHROME),
 	("Nord", NORD),
 	("Osaka Jade", OSAKA_JADE),
-	("Rosepine", ROSEPINE),
+	("Rosé Pine", ROSEPINE),
 	("Solarized Night", SOLARIZED_NIGHT),
 	("Tokyo Night", TOKYO_NIGHT),
-	("Ayu Light", AYU_LIGHT),
-	("Catppuccin Light", CATTPUCCIN_LIGHT),
+	("Ayu Day", AYU_LIGHT),
+	("Catppuccin Latte", CATPPUCCIN_LATTE),
 	("Cyberpunk Light", CYBERPUNK_LIGHT),
-	("Dracula Light", DRACULA_LIGHT),
-	("Eldritch Light", ELDRITCH_LIGHT),
+	("Alucard", DRACULA_LIGHT),
+	("Eldritch Dusk", ELDRITCH_LIGHT),
 	("Everforest Light", EVERFOREST_LIGHT),
 	("Gruvbox Light", GRUVBOX_LIGHT),
-	("Kanagawa Light", KANAGAWA_LIGHT),
+	("Kanagawa Lotus", KANAGAWA_LIGHT),
 	("Monochrome Light", MONOCHROME_LIGHT),
 	("Nord Light", NORD_LIGHT),
 	("Osaka Jade Light", OSAKA_JADE_LIGHT),
-	("Rosepine Light", ROSEPINE_LIGHT),
+	("Rosé Pine Dawn", ROSEPINE_LIGHT),
 	("Solarized Day", SOLARIZED_DAY),
 	("Tokyo Day", TOKYO_DAY),
 ];
@@ -178,7 +182,7 @@ static AYU_LIGHT: &WguiColorPalette = &WguiColorPalette {
 	],
 };
 
-static CATTPUCCIN: &WguiColorPalette = &WguiColorPalette {
+static CATPPUCCIN: &WguiColorPalette = &WguiColorPalette {
 	colors: [
 		hex("#cba6f7"), // Primary
 		hex("#11111b"), // OnPrimary
@@ -200,13 +204,13 @@ static CATTPUCCIN: &WguiColorPalette = &WguiColorPalette {
 	],
 };
 
-static CATTPUCCIN_LIGHT: &WguiColorPalette = &WguiColorPalette {
+static CATPPUCCIN_LATTE: &WguiColorPalette = &WguiColorPalette {
 	colors: [
 		hex("#8839EF"), // Primary
 		hex("#EFF1F5"), // OnPrimary
 		hex("#FE640B"), // Secondary
 		hex("#EFF1F5"), // OnSecondary
-		hex("#40A02B"), // Tertiary
+		hex("#179299"), // Tertiary
 		hex("#EFF1F5"), // OnTertiary
 		hex("#D20F39"), // Danger
 		hex("#DCE0E8"), // OnDanger

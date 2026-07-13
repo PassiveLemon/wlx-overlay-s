@@ -6,11 +6,15 @@ use wgui::{
 	globals::WguiGlobals,
 	i18n::Translation,
 	layout::{Layout, WidgetID},
+	log::LogErr,
 	palette::PALETTES,
 	parser::{Fetchable, ParseDocumentParams, TemplateParams},
 	task::Tasks,
 };
-use wlx_common::dash_interface::ConfigChangeKind;
+use wlx_common::{
+	dash_interface::ConfigChangeKind,
+	palette::{list_palette_files, load_custom_palette},
+};
 
 use crate::{
 	frontend::{FrontendTask, FrontendTasks},
@@ -22,6 +26,7 @@ use crate::{
 #[derive(Clone)]
 enum Task {
 	SelectPalette(String),
+	CustomPaletteUrl,
 	Restart,
 	Cancel,
 }
@@ -66,6 +71,11 @@ impl ViewTrait for View {
 
 					self.settings_tasks.push(SettingsTask::RestartSoftware);
 				}
+				Task::CustomPaletteUrl => {
+					self.frontend_tasks.push(FrontendTask::OpenURL(
+						"https://wayvr.org/docs/basics/customization/".into(),
+					));
+				}
 			}
 		}
 		Ok(())
@@ -105,8 +115,67 @@ impl View {
 		let tasks = Tasks::new();
 		let popup_dialog = PopupHolder::<views::dialog_box::View>::default();
 
+		for (idx, name) in list_palette_files().into_iter().enumerate() {
+			let Ok(palette) = load_custom_palette(&name).log_warn("Could not load custom color palette") else {
+				continue;
+			};
+
+			let id = format!("profile_custom_{idx}");
+			let is_current = &*params.current_palette == name.as_str();
+
+			let mut cell_params = TemplateParams::new();
+			cell_params.insert("id", &id);
+
+			let display_name = &name[..name.len() - 5];
+
+			if is_current {
+				cell_params.insert_str("text", format!("{display_name} ✅"));
+				cell_params.insert("tooltip", "APP_SETTINGS.COLOR_PALETTE_CURRENT");
+			} else {
+				cell_params.insert("text", display_name);
+				cell_params.insert("tooltip", "APP_SETTINGS.COLOR_PALETTE_ACTIVATE");
+			}
+
+			insert_colors!(
+				cell_params,
+				&palette,
+				"primary" => Primary,
+				"on_primary" => OnPrimary,
+				"secondary" => Secondary,
+				"on_secondary" => OnSecondary,
+				"tertiary" => Tertiary,
+				"on_tertiary" => OnTertiary,
+				"danger" => Danger,
+				"on_danger" => OnDanger,
+				"background" => Background,
+				"on_background" => OnBackground,
+				"background_variant" => BackgroundVariant,
+				"outline" => Outline,
+				"highlight" => Highlight,
+			);
+
+			parser_state.instantiate_template(
+				doc_params,
+				"ColorPaletteButton",
+				params.layout,
+				list_parent,
+				cell_params,
+			)?;
+
+			if !is_current {
+				let btn = parser_state.fetch_component_as::<ComponentButton>(&id)?;
+				let tasks_clone = tasks.clone();
+				btn.on_click(Rc::new({
+					move |_common, _e| {
+						tasks_clone.push(Task::SelectPalette(name.to_string()));
+						Ok(())
+					}
+				}));
+			}
+		}
+
 		for (idx, (name, palette)) in PALETTES.iter().enumerate() {
-			let id = format!("profile_btn_{idx}");
+			let id = format!("profile_builtin_{idx}");
 			let is_current = &*params.current_palette == *name;
 
 			let mut cell_params = TemplateParams::new();
@@ -157,6 +226,22 @@ impl View {
 				}));
 			}
 		}
+
+		parser_state.instantiate_template(
+			doc_params,
+			"CustomPaletteButton",
+			params.layout,
+			list_parent,
+			TemplateParams::default(),
+		)?;
+		let btn = parser_state.fetch_component_as::<ComponentButton>("custom_btn")?;
+		let tasks_clone = tasks.clone();
+		btn.on_click(Rc::new({
+			move |_common, _e| {
+				tasks_clone.push(Task::CustomPaletteUrl);
+				Ok(())
+			}
+		}));
 
 		Ok(Self {
 			tasks,

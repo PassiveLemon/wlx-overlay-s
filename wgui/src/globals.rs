@@ -37,7 +37,7 @@ impl WguiGlobals {
 		lang_provider: &dyn LangProvider,
 		font_config: &WguiFontConfig,
 		asset_folder: PathBuf,
-		color_palette: &str,
+		palette: WguiColorPalette,
 	) -> anyhow::Result<Self> {
 		let i18n_builtin = I18n::new(assets_builtin.as_mut(), lang_provider)?;
 		let assets_internal = Box::new(assets_internal::AssetInternal {});
@@ -49,7 +49,7 @@ impl WguiGlobals {
 			font_system: WguiFontSystem::new(font_config, i18n_builtin.get_locale()),
 			i18n_builtin,
 			custom_glyph_cache: CustomGlyphCache::new(),
-			palette: WguiColorPalette::from_name(color_palette),
+			palette,
 		}))))
 	}
 

@@ -8,15 +8,16 @@ use glam::Vec2;
 use wgui::{
 	assets::AssetPath,
 	components::{
-		Component,
 		button::{ButtonClickCallback, ComponentButton},
 		checkbox::ComponentCheckbox,
+		Component,
 	},
 	drawing::Color,
 	font_config::WguiFontConfig,
 	globals::WguiGlobals,
 	i18n::Translation,
 	layout::{Layout, LayoutParams, LayoutUpdateParams, Widget},
+	palette::WguiColorPalette,
 	parser::{Fetchable, ParseDocumentExtra, ParseDocumentParams, ParserState},
 	taffy::{self, prelude::length},
 	task::Tasks,
@@ -93,7 +94,7 @@ impl TestbedGeneric {
 			&lang_provider,
 			&WguiFontConfig::default(),
 			PathBuf::new(), // cwd
-			&palette_name,
+			WguiColorPalette::get_builtin(&palette_name),
 		)?;
 
 		let extra = ParseDocumentExtra {

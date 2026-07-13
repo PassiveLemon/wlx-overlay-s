@@ -24,14 +24,15 @@ use wlx_common::{
 	audio,
 	dash_interface::{BoxDashInterface, ConfigChangeKind, RecenterMode},
 	locale::WayVRLangProvider,
+	palette::load_palette,
 	timestep::{self, Timestep},
 };
 
 use crate::{
 	assets,
 	tab::{
-		Tab, TabType, apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado,
-		settings::TabSettings, welcome::TabWelcome,
+		apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado, settings::TabSettings,
+		welcome::TabWelcome, Tab, TabType,
 	},
 	util::{
 		popup_manager::{MountPopupOnceParams, PopupManager, PopupManagerParams},
@@ -131,6 +132,8 @@ impl<T: 'static> Frontend<T> {
 		let font_binary_regular = assets.load_from_path_gzip("Quicksand-Regular.ttf.gz")?;
 		let font_binary_light = assets.load_from_path_gzip("Quicksand-Light.ttf.gz")?;
 
+		let palette = load_palette(params.color_palette);
+
 		let globals = WguiGlobals::new(
 			assets,
 			params.lang_provider,
@@ -141,7 +144,7 @@ impl<T: 'static> Frontend<T> {
 				family_name_monospace: "",
 			},
 			PathBuf::new(), //FIXME: pass from somewhere else
-			params.color_palette,
+			palette,
 		)?;
 
 		let (layout, state) = wgui::parser::new_layout_from_assets(

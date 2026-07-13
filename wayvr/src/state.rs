@@ -16,6 +16,7 @@ use wgui::{
 use wlx_capture::pipewire::ScreenCastManager;
 use wlx_common::config::PwTokenMap;
 use wlx_common::locale::WayVRLangProvider;
+use wlx_common::palette::load_palette;
 use wlx_common::{
     audio,
     config::GeneralConfig,
@@ -167,6 +168,8 @@ impl AppState {
             )
             .ok();
 
+        let palette = load_palette(&*session.config.color_palette);
+
         let mut app_state = Self {
             tasks,
             gfx,
@@ -184,7 +187,7 @@ impl AppState {
                 &lang_provider,
                 &WguiFontConfig::default(),
                 get_config_file_path(&theme_path),
-                &session.config.color_palette,
+                palette,
             )?,
             wgui_theme: Rc::new(theme),
             dbus,
