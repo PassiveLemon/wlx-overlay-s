@@ -43,7 +43,7 @@ mod tab_space_drag;
 mod tab_troubleshooting;
 
 #[derive(Clone)]
-enum TabNameEnum {
+pub(crate) enum TabNameEnum {
 	AutostartApps,
 	Controls,
 	Features,
@@ -291,7 +291,7 @@ impl<T> Tab<T> for TabSettings<T> {
 // Sorted alphabetically
 #[allow(clippy::enum_variant_names)]
 #[derive(Clone, Copy, Eq, PartialEq, AsRefStr, EnumString)]
-enum SettingType {
+pub(crate) enum SettingType {
 	AllowSliding,
 	BlockGameInput,
 	BlockGameInputIgnoreWatch,

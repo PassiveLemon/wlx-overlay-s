@@ -206,7 +206,12 @@
 		"WHISPER_MODEL_HELP": "Modello Whisper da utilizzare.\nI modelli più grandi producono risultati\npiù accurati, ma consumano più VRAM.",
 		"DEFAULT_OVERLAY_SCALE": "Dimensioni overlay predefinite",
 		"DEFAULT_OVERLAY_SCALE_HELP": "Genera nuovi overlay con questa scala.",
-		"COLOR_PALETTE": "Tavolozza colori"
+		"COLOR_PALETTE": "Tavolozza colori",
+		"COLOR_PALETTES": "Tavolozze colori",
+		"COLOR_PALETTE_CURRENT": "Tema attualmente attivo.",
+		"COLOR_PALETTE_ACTIVATE": "Clicca per usare questo tema.",
+		"APPLY_CHANGES_RESTART": "Riavviare WayVR per applicare le modifiche?",
+		"COLOR_PALETTE_HELP": "Clicca per sfogliare le palette di colori.\nPer crearne di personalizzate, visita il sito web!"
 	},
 	"APPLICATION_LAUNCHER": "Lanciatore applicazioni",
 	"APPLICATION_STARTED": "Applicazione avviata",

@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use cosmic_text::{Attrs, AttrsList, BorrowedWithFontSystem, Buffer, Metrics, Scroll, Shaping, Wrap};
+use cosmic_text::{Attrs, AttrsList, BorrowedWithFontSystem, Buffer, Metrics, Shaping, Wrap};
 use slotmap::Key;
 use taffy::AvailableSpace;
 

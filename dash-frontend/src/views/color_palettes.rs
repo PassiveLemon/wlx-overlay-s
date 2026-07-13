@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{rc::Rc, sync::Arc};
 use wgui::{
 	assets::AssetPath,
 	color::WguiColorName,
@@ -32,6 +32,7 @@ pub struct Params<'a> {
 	pub parent_id: WidgetID,
 	pub frontend_tasks: &'a FrontendTasks,
 	pub settings_tasks: Tasks<SettingsTask>,
+	pub current_palette: Arc<str>,
 }
 
 pub struct View {
@@ -40,6 +41,7 @@ pub struct View {
 	globals: WguiGlobals,
 	popup_dialog: PopupHolder<views::dialog_box::View>,
 	settings_tasks: Tasks<SettingsTask>,
+	chosen_palette: Option<Arc<str>>,
 }
 
 impl ViewTrait for View {
@@ -49,9 +51,7 @@ impl ViewTrait for View {
 		for task in self.tasks.drain() {
 			match task {
 				Task::SelectPalette(profile) => {
-					par.general_config.color_palette = profile.into();
-					par.config_change_kind.replace(ConfigChangeKind::WguiThemeChange);
-
+					self.chosen_palette = Some(profile.into());
 					self.show_restart_dialog_box()?;
 				}
 				Task::Cancel => {
@@ -59,6 +59,11 @@ impl ViewTrait for View {
 					close_dialog();
 				}
 				Task::Restart => {
+					if let Some(palette) = self.chosen_palette.take() {
+						par.general_config.color_palette = palette;
+						par.config_change_kind.replace(ConfigChangeKind::WguiThemeChange);
+					}
+
 					self.settings_tasks.push(SettingsTask::RestartSoftware);
 				}
 			}
@@ -74,13 +79,12 @@ macro_rules! insert_colors {
 		$( $key:literal => $color:ident ),* $(,)?
 	) => {
 		$(
-			$params.insert(
+			$params.insert_str(
 				$key,
 				WguiColorName::$color
 					.to_wgui_color()
 					.resolve($palette)
 					.to_hex()
-					.as_str()
 			);
 		)*
 	};
@@ -103,10 +107,19 @@ impl View {
 
 		for (idx, (name, palette)) in PALETTES.iter().enumerate() {
 			let id = format!("profile_btn_{idx}");
+			let is_current = &*params.current_palette == *name;
 
 			let mut cell_params = TemplateParams::new();
 			cell_params.insert("id", &id);
-			cell_params.insert("text", name);
+
+			if is_current {
+				cell_params.insert_str("text", format!("{name} ✅"));
+				cell_params.insert("tooltip", "APP_SETTINGS.COLOR_PALETTE_CURRENT");
+			} else {
+				cell_params.insert("text", name);
+				cell_params.insert("tooltip", "APP_SETTINGS.COLOR_PALETTE_ACTIVATE");
+			}
+
 			insert_colors!(
 				cell_params,
 				palette,
@@ -133,14 +146,16 @@ impl View {
 				cell_params,
 			)?;
 
-			let btn = parser_state.fetch_component_as::<ComponentButton>(&id)?;
-			let tasks_clone = tasks.clone();
-			btn.on_click(Rc::new({
-				move |_common, _e| {
-					tasks_clone.push(Task::SelectPalette(name.to_string()));
-					Ok(())
-				}
-			}));
+			if !is_current {
+				let btn = parser_state.fetch_component_as::<ComponentButton>(&id)?;
+				let tasks_clone = tasks.clone();
+				btn.on_click(Rc::new({
+					move |_common, _e| {
+						tasks_clone.push(Task::SelectPalette(name.to_string()));
+						Ok(())
+					}
+				}));
+			}
 		}
 
 		Ok(Self {
@@ -149,6 +164,7 @@ impl View {
 			globals: params.globals.clone(),
 			popup_dialog,
 			settings_tasks: params.settings_tasks,
+			chosen_palette: None,
 		})
 	}
 
@@ -197,6 +213,7 @@ pub fn mount_popup(
 	globals: WguiGlobals,
 	popup: PopupHolder<View>,
 	settings_tasks: Tasks<SettingsTask>,
+	current_palette: Arc<str>,
 ) {
 	frontend_tasks
 		.clone()
@@ -209,6 +226,7 @@ pub fn mount_popup(
 					parent_id: data.id_content,
 					frontend_tasks: &frontend_tasks,
 					settings_tasks,
+					current_palette,
 				})?;
 
 				popup.set_view(data.handle, view, None);

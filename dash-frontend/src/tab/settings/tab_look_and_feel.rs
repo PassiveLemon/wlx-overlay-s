@@ -44,6 +44,7 @@ impl SettingsTab for State {
 						self.globals.clone(),
 						self.popup_color_palettes.clone(),
 						self.settings_tasks.clone(),
+						par.general_config.color_palette.clone(),
 					);
 				}
 			}

@@ -180,7 +180,12 @@
 		"WHISPER_MODEL_HELP": "Model Whisper do wykorzystania.\nWiększe modele dają dokładniejsze\nwyniki, ale zużywają więcej pamięci VRAM.",
 		"DEFAULT_OVERLAY_SCALE": "Domyślny rozmiar nakładki",
 		"DEFAULT_OVERLAY_SCALE_HELP": "Twórz nowe nakładki w tej skali.",
-		"COLOR_PALETTE": "Paleta kolorów"
+		"COLOR_PALETTE": "Paleta kolorów",
+		"COLOR_PALETTES": "Palety kolorów",
+		"COLOR_PALETTE_CURRENT": "Obecnie aktywny motyw.",
+		"COLOR_PALETTE_ACTIVATE": "Kliknij, aby użyć tego motywu.",
+		"APPLY_CHANGES_RESTART": "Zrestartować WayVR, aby zastosować zmiany?",
+		"COLOR_PALETTE_HELP": "Kliknij, aby przeglądać palety kolorów.\nAby stworzyć własne, odwiedź stronę internetową!"
 	},
 	"APPLICATION_LAUNCHER": "Uruchamiacz aplikacji",
 	"APPLICATIONS": "Aplikacje",

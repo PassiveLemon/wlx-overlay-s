@@ -2,7 +2,6 @@ use std::{marker::PhantomData, rc::Rc};
 
 use wgui::{
 	assets::AssetPath,
-	color::WguiColorName,
 	components::button::ComponentButton,
 	globals::WguiGlobals,
 	layout::{Layout, WidgetID},

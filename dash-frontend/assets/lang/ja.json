@@ -185,7 +185,12 @@
 		"WHISPER_MODEL_HELP": "使用するWhisperモデル。\nモデルが大きいほど精度は向上しますが、\nVRAMの消費量が増加します。",
 		"DEFAULT_OVERLAY_SCALE": "デフォルトのオーバーレイサイズ",
 		"DEFAULT_OVERLAY_SCALE_HELP": "新しいオーバーレイをこのスケールで生成します。",
-		"COLOR_PALETTE": "カラーパレット"
+		"COLOR_PALETTE": "カラーパレット",
+		"COLOR_PALETTES": "カラーパレット",
+		"COLOR_PALETTE_CURRENT": "現在有効なテーマ。",
+		"COLOR_PALETTE_ACTIVATE": "クリックしてこのテーマを適用します。",
+		"APPLY_CHANGES_RESTART": "変更を適用するためにWayVRを再起動しますか？",
+		"COLOR_PALETTE_HELP": "クリックしてカラーパレットを選択してください。\nカスタムパレットの作成については、ウェブサイトを参照してください！"
 	},
 	"HELLO": "こんにちは！",
 	"AUDIO": {

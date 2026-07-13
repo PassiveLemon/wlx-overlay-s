@@ -1,8 +1,8 @@
 <layout>
   <!-- id, text -->
   <template name="ColorPaletteButton">
-    <Button id="${id}" width="350" flex_direction="column" justify_content="space_around"
-      color="${background}" hover_color="${background_variant}" border_color="${outline}" hover_border_color="${highlight}" padding="16" >
+    <Button id="${id}" width="350" flex_direction="column" justify_content="space_around" tooltip="${tooltip}" tooltip_side="bottom"
+      color="${background}" hover_color="${background_variant}" border_color="${outline}" hover_border_color="${highlight}" padding="16" margin="4" >
       <label text="${text}" size="24" weight="bold" color="${on_background}" parent_color="ignore"/>
       <div flex_direction="row" width="100%" justify_content="space_evenly" padding_top="16" >
         <rectangle round="100%" width="32" height="32" color="${primary}" border="2" border_color="${on_primary}" />
