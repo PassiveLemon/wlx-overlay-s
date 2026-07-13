@@ -13,6 +13,7 @@ license = "GPL-3.0-only"
 [dependencies]
 dbus = { workspace = true, features = ["futures"], optional = true }
 idmap = { workspace = true }
+libc.workspace = true
 log = { workspace = true }
 pipewire = { workspace = true, optional = true }
 slotmap.workspace = true
@@ -29,7 +30,6 @@ wayland-protocols = {
 }
 
 drm-fourcc = "2.2.0"
-libc = "0.2.178"
 rxscreen = {
   version = "0.1.7",
   features = [
