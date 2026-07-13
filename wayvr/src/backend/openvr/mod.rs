@@ -112,7 +112,9 @@ pub fn openvr_run(args: &Args) -> Result<(), BackendError> {
 
     app.late_init();
 
-    let _ = install_manifest(&mut app_mgr);
+    if args.install {
+        let _ = install_manifest(&mut app_mgr);
+    }
 
     let mut overlays = OverlayWindowManager::<OpenVrOverlayData>::new(&mut app, args.headless)?;
 

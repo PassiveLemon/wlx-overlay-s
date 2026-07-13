@@ -73,9 +73,13 @@ struct Args {
     #[arg(long)]
     wait: bool,
 
-    /// Uninstall OpenVR manifest and exit
+    /// Uninstall SteamVR manifest and exit
     #[arg(long)]
     uninstall: bool,
+
+    /// Install SteamVR manifest (not recommended; WayVR may have issues when auto-started by SteamVR!)
+    #[arg(long)]
+    install: bool,
 
     /// Replace running WayVR instance
     #[arg(long)]
