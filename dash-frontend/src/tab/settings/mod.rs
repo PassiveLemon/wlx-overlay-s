@@ -71,7 +71,7 @@ impl TabNameEnum {
 }
 
 #[derive(Clone)]
-enum Task {
+pub(crate) enum Task {
 	ClearPipewireTokens,
 	ClearSavedState,
 	DeleteAllConfigs,

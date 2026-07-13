@@ -1,0 +1,21 @@
+<layout>
+  <!-- id, text -->
+  <template name="ColorPaletteButton">
+    <Button id="${id}" width="350" flex_direction="column" justify_content="space_around"
+      color="${background}" hover_color="${background_variant}" border_color="${outline}" hover_border_color="${highlight}" padding="16" >
+      <label text="${text}" size="24" weight="bold" color="${on_background}" parent_color="ignore"/>
+      <div flex_direction="row" width="100%" justify_content="space_evenly" padding_top="16" >
+        <rectangle round="100%" width="32" height="32" color="${primary}" border="2" border_color="${on_primary}" />
+        <rectangle round="100%" width="32" height="32" color="${secondary}" border="2" border_color="${on_secondary}" />
+        <rectangle round="100%" width="32" height="32" color="${tertiary}" border="2" border_color="${on_tertiary}" />
+        <rectangle round="100%" width="32" height="32" color="${danger}" border="2" border_color="${on_danger}" />
+      </div>
+    </Button>
+  </template>
+
+  <elements>
+    <div flex_direction="column" gap="8" width="100%" align_items="center">
+      <div id="list_parent" flex_grow="1" flex_wrap="wrap" flex_direction="row" gap="4" width="100%" justify_content="center"></div>
+    </div>
+  </elements>
+</layout>
