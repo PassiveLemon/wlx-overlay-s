@@ -19,8 +19,9 @@
         <div width="100%" justify_content="center">
           <label id="text_window_title" weight="bold" color="on_background" />
         </div>
-        <Button id="but_close" border="0" round="4" color="on_background(transparent)" hover_color="primary" position="absolute">
-          <sprite src_internal="wgui/close.svg" width="32" height="32" color="on_background" />
+        <Button id="but_close" border="0" round="4" color="on_background(transparent)" position="absolute"
+          hover_color="danger" hover_border_color="danger(rgb-mult-0.5)" >
+          <sprite src_internal="wgui/close.svg" width="32" height="32" />
         </Button>
       </div>
 

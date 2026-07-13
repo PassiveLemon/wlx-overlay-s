@@ -2,8 +2,8 @@
   <macro name="dropdown_button"
     flex_direction="row"
     border="2"
-    color="#00000055"
-    border_color="#FFFFFF66"
+    color="background"
+    border_color="outline"
     justify_content="space_between" />
 
   <!-- id, text, translation, tooltip, min_width -->

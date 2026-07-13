@@ -95,8 +95,7 @@
   </template>
 
   <macro name="button_style" border="2" round="6"
-    align_items="center" justify_content="center" padding="6" width="60" height="60" overflow="visible"
-    sticky_color="primary" sticky_border_color="primary(rgb-mult-0.5)" hover_color="tertiary" hover_border_color="tertiary(rgb-mult-0.5)" />
+    align_items="center" justify_content="center" padding="6" width="60" height="60" overflow="visible" />
 
   <macro name="bg_rect" width="100%" color="background_contrast" round="10" border="2" border_color="primary" />
 

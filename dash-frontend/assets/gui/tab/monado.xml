@@ -1,12 +1,10 @@
 <layout>
-  <macro name="tab_style" color="background" sticky_color="primary" sticky_border_color="primary(rgb-mult-0.5)" hover_color="tertiary" hover_border_color="tertiary(rgb-mult-0.5)" />
-
   <elements>
     <div gap="4">
       <Tabs id="tabs">
-        <Tab macro="tab_style" name="general_settings" translation="GENERAL_SETTINGS" sprite_src_builtin="dashboard/settings.svg" />
-        <Tab macro="tab_style" name="process_list" translation="PROCESS_LIST" sprite_src_builtin="dashboard/cpu.svg" />
-        <Tab macro="tab_style" name="debug_timings" translation="DEBUG_INFO" sprite_src_builtin="dashboard/not_a_bug.svg" />
+        <Tab name="general_settings" translation="GENERAL_SETTINGS" sprite_src_builtin="dashboard/settings.svg" />
+        <Tab name="process_list" translation="PROCESS_LIST" sprite_src_builtin="dashboard/cpu.svg" />
+        <Tab name="debug_timings" translation="DEBUG_INFO" sprite_src_builtin="dashboard/not_a_bug.svg" />
       </Tabs>
       <div gap="4" id="content" width="100%">
         <!-- filled-in at runtime -->

@@ -20,7 +20,8 @@
           </Button>
 
           <Button macro="window_button" _release="::DecorCloseWindow"
-            border_color="danger" color="danger">
+            color="danger" border_color="danger(rgb-mult-0.5)" 
+            hover_color="danger(rgb-add-0.2)" hover_border_color="danger">
             <sprite macro="window_button_icon" src="edit/close.svg" />
           </Button>
         </div>

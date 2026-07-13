@@ -14,18 +14,12 @@
       height="~side_button_size"
       color="background_contrast(transparent)"
       border_color="background_contrast"
-      hover_color="tertiary"
-      hover_border_color="tertiary(rgb-mult-0.5)"
-      sticky_color="primary"
-      sticky_border_color="primary(rgb-mult-0.5)"
       tooltip="${tooltip}"
       tooltip_side="${tooltip_side}"
     >
       <sprite src_builtin="${src_builtin}" width="~side_sprite_size" height="~side_sprite_size" color="on_background_contrast" />
     </Button>
   </template>
-
-  <macro name="button_style" sticky_color="primary" sticky_border_color="primary(rgb-mult-0.5)" hover_color="tertiary" hover_border_color="tertiary(rgb-mult-0.5)" />
 
   <elements>
     <!-- left/right separator (menu and rest) -->
@@ -73,8 +67,9 @@
             </rectangle>
           </div>
           <!-- Close button -->
-          <Button position="absolute" id="btn_close" color="background_contrast" border_color="background_contrast" round="100%" width="~top_size" height="~top_size" tooltip="CLOSE_WINDOW" tooltip_side="left">
-            <sprite src_builtin="dashboard/close.svg" width="32" height="32" color="on_background_contrast" />
+          <Button position="absolute" id="btn_close" color="background_contrast" border_color="background_contrast" round="100%" width="~top_size" height="~top_size" tooltip="CLOSE_WINDOW" tooltip_side="left"
+            hover_color="danger" hover_border_color="danger(rgb-mult-0.5)" >
+            <sprite src_builtin="dashboard/close.svg" width="32" height="32" />
           </Button>
         </div>
 
@@ -141,11 +136,11 @@
 
           <!-- Left bottom side -->
           <div margin_left="8">
-            <Button macro="button_style" id="btn_audio" color="highlight(transparent)" border_color="highlight(transparent)" tooltip="AUDIO.VOLUME" tooltip_side="top">
-              <sprite src_builtin="dashboard/volume.svg" width="24" height="24" margin="8" color="on_background" />
+            <Button id="btn_audio" color="background(transparent)" border_color="background(transparent)" tooltip="AUDIO.VOLUME" tooltip_side="top">
+              <sprite src_builtin="dashboard/volume.svg" width="24" height="24" margin="8" />
             </Button>
-            <Button macro="button_style" id="btn_recenter" color="highlight(transparent)" border_color="highlight(transparent)" tooltip="ACTIONS.RECENTER_PLAYSPACE" tooltip_side="top">
-              <sprite src_builtin="dashboard/recenter.svg" width="24" height="24" margin="8" color="on_background" />
+            <Button id="btn_recenter" color="background(transparent)" border_color="background(transparent)" tooltip="ACTIONS.RECENTER_PLAYSPACE" tooltip_side="top">
+              <sprite src_builtin="dashboard/recenter.svg" width="24" height="24" margin="8" />
             </Button>
           </div>
 

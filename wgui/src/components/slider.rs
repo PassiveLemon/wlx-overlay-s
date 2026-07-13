@@ -352,7 +352,7 @@ const BODY_BORDER_COLOR: WguiColor = WguiColorName::Outline.to_wgui_color();
 const HANDLE_COLOR: WguiColorName = WguiColorName::BackgroundVariant;
 const HANDLE_COLOR_HOVERED: WguiColor = WguiColorName::Tertiary.to_wgui_color();
 const HANDLE_BORDER_COLOR: WguiColor = WguiColorName::Outline.to_wgui_color();
-const HANDLE_BORDER_COLOR_HOVERED: WguiColor = WguiColorName::OnTertiary.to_wgui_color();
+const HANDLE_BORDER_COLOR_HOVERED: WguiColor = WguiColorName::Tertiary.to_wgui_color().mult_rgb(0.5);
 const HANDLE_TEXT_COLOR: WguiColorName = WguiColorName::OnBackgroundVariant;
 const HANDLE_TEXT_COLOR_HOVERED: WguiColorName = WguiColorName::OnSecondary;
 

@@ -541,6 +541,13 @@ fn register_event_mouse_release(
 	)
 }
 
+const DEFAULT_COLOR: WguiColor = WguiColorName::BackgroundVariant.to_wgui_color();
+const DEFAULT_BORDER_COLOR: WguiColor = WguiColorName::Outline.to_wgui_color();
+const DEFAULT_HOVER_COLOR: WguiColor = WguiColorName::Tertiary.to_wgui_color();
+const DEFAULT_HOVER_BORDER_COLOR: WguiColor = WguiColorName::Tertiary.to_wgui_color().mult_rgb(0.5);
+const DEFAULT_STICKY_COLOR: WguiColor = WguiColorName::Primary.to_wgui_color();
+const DEFAULT_STICKY_BORDER_COLOR: WguiColor = WguiColorName::Primary.to_wgui_color().mult_rgb(0.5);
+
 pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Result<(WidgetPair, Rc<ComponentButton>)> {
 	let mut style = params.style;
 	let theme = &ess.layout.state.theme;
@@ -557,27 +564,17 @@ pub fn construct(ess: &mut ConstructEssentials, params: Params) -> anyhow::Resul
 	let globals = ess.layout.state.globals.get();
 
 	// update colors to default ones if they are not specified
-	let color = params.color.unwrap_or_else(|| WguiColorName::BackgroundVariant.into());
+	let color = params.color.unwrap_or(DEFAULT_COLOR);
 
-	let border_color = params
-		.border_color
-		.unwrap_or_else(|| WguiColor::from(WguiColorName::Outline));
+	let border_color = params.border_color.unwrap_or(DEFAULT_BORDER_COLOR);
 
-	let hover_color = params
-		.hover_color
-		.unwrap_or_else(|| color.add_rgb(0.25).add_alpha(0.15));
+	let hover_color = params.hover_color.unwrap_or(DEFAULT_HOVER_COLOR);
 
-	let hover_border_color = params
-		.hover_border_color
-		.unwrap_or_else(|| border_color.add_rgb(0.5).add_alpha(0.5));
+	let hover_border_color = params.hover_border_color.unwrap_or(DEFAULT_HOVER_BORDER_COLOR);
 
-	let sticky_color = params
-		.sticky_color
-		.unwrap_or_else(|| color.add_rgb(0.15).add_alpha(0.1));
+	let sticky_color = params.sticky_color.unwrap_or(DEFAULT_STICKY_COLOR);
 
-	let sticky_border_color = params
-		.sticky_border_color
-		.unwrap_or_else(|| border_color.add_rgb(0.25).add_alpha(0.35));
+	let sticky_border_color = params.sticky_border_color.unwrap_or(DEFAULT_STICKY_BORDER_COLOR);
 
 	let gradient_intensity = theme.gradient_intensity;
 

@@ -1,7 +1,6 @@
 <layout>
   <macro name="button_style" border="2" round="6"
-    align_items="center" justify_content="center" padding="6" width="60" height="60" overflow="visible"
-    sticky_color="primary" sticky_border_color="primary(rgb-mult-0.5)" hover_color="tertiary" hover_border_color="tertiary(rgb-mult-0.5)" />
+    align_items="center" justify_content="center" padding="6" width="60" height="60" overflow="visible" />
 
   <macro name="bg_rect" width="100%" color="background" border_color="outline" round="10" border="2" />
 
@@ -33,7 +32,8 @@
           </Button>
         </div>
         <div gap="10">
-          <Button macro="button_style" _press="::WhisperUnloadAndClose" tooltip="WHISPER.UNLOAD_AND_CLOSE" tooltip_side="left">
+          <Button macro="button_style" _press="::WhisperUnloadAndClose" tooltip="WHISPER.UNLOAD_AND_CLOSE" tooltip_side="left"
+            hover_color="danger" hover_border_color="danger(rgb-mult-0.5)">
             <sprite width="38" height="38" src_builtin="edit/close.svg" />
           </Button>
         </div>
