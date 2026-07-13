@@ -25,6 +25,8 @@ pub struct WidgetSpriteParams {
 	pub parent_color: ParentColor,
 }
 
+const DEFAULT_COLOR: WguiColor = WguiColor::Raw(drawing::Color::from_hex("#ffffff").unwrap());
+
 #[derive(Debug, Default)]
 pub struct WidgetSprite {
 	params: WidgetSpriteParams,
@@ -47,8 +49,8 @@ impl WidgetSprite {
 		common.mark_widget_dirty(self.id);
 	}
 
-	pub const fn get_color(&self) -> Option<WguiColor> {
-		self.params.color
+	pub fn get_color(&self) -> WguiColor {
+		self.params.color.unwrap_or(DEFAULT_COLOR)
 	}
 
 	pub fn set_content(&mut self, alterables: &mut EventAlterables, content: Option<CustomGlyphData>) {
@@ -80,9 +82,14 @@ impl WidgetObj for WidgetSprite {
 				top: 0.0,
 				width: boundary.size.x,
 				height: boundary.size.y,
-				color: Some(self.params.color.map_or(cosmic_text::Color::rgb(255, 255, 255), |c| {
-					c.resolve(&state.globals.palette).into()
-				})),
+				color: Some(
+					self
+						.params
+						.color
+						.unwrap_or(DEFAULT_COLOR)
+						.resolve(&state.globals.palette)
+						.into(),
+				),
 				snap_to_physical_pixel: true,
 			};
 

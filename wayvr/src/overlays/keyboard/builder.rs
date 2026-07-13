@@ -6,26 +6,29 @@ use crate::{
         panel::{GuiPanel, NewGuiPanelParams, apply_custom_command},
         timer::GuiTimer,
     },
-    overlays::keyboard::alt_modifier_to_key,
+    overlays::keyboard::{ChildWidget, alt_modifier_to_key},
     state::AppState,
     subsystem::hid::XkbKeymap,
     windowing::backend::OverlayEventData,
 };
 use anyhow::Context;
 use glam::{FloatExt, Mat4, Vec2, vec2, vec3};
+use smallvec::{SmallVec, smallvec};
 use wgui::{
     animation::{Animation, AnimationEasing},
     assets::AssetPath,
-    color::WguiColorName,
-    drawing::{self},
+    color::{WguiColor, WguiColorName},
     event::{self, CallbackMetadata, EventListenerKind},
-    layout::LayoutUpdateParams,
+    layout::{LayoutUpdateParams, WidgetID},
     log::LogErr,
     palette::WguiColorPalette,
     parser::{Fetchable, ParseDocumentParams, TemplateParams},
     renderer_vk::util,
     taffy::{self, prelude::length},
-    widget::{EventResult, div::WidgetDiv, rectangle::WidgetRectangle},
+    widget::{
+        EventResult, div::WidgetDiv, label::WidgetLabel, rectangle::WidgetRectangle,
+        sprite::WidgetSprite,
+    },
 };
 
 use super::{
@@ -149,6 +152,8 @@ pub(super) fn create_keyboard_panel(
             )?;
 
             if let Ok(widget_id) = panel.parser_state.get_widget_id(&my_id) {
+                let (labels, sprites) = find_children(&panel, widget_id);
+
                 let key_state = {
                     let rect = panel
                         .layout
@@ -165,6 +170,8 @@ pub(super) fn create_keyboard_panel(
                         cur_border_color: rect.params.border_color.into(),
                         border: rect.params.border,
                         drawn_state: false.into(),
+                        labels,
+                        sprites,
                     })
                 };
 
@@ -322,6 +329,35 @@ pub(super) fn create_keyboard_panel(
     Ok(panel)
 }
 
+fn find_children<S>(
+    panel: &GuiPanel<S>,
+    widget_id: WidgetID,
+) -> (SmallVec<[ChildWidget; 3]>, SmallVec<[ChildWidget; 1]>) {
+    let mut labels = smallvec![];
+    let mut sprites = smallvec![];
+
+    let mut children = vec![];
+    panel
+        .layout
+        .collect_children_ids_recursive(widget_id, &mut children);
+
+    for (child, _) in children {
+        if let Some(widget) = panel.layout.state.widgets.get_as::<WidgetSprite>(child) {
+            sprites.push(ChildWidget {
+                id: child,
+                base_color: widget.get_color(),
+            });
+        } else if let Some(widget) = panel.layout.state.widgets.get_as::<WidgetLabel>(child) {
+            labels.push(ChildWidget {
+                id: child,
+                base_color: widget.get_color(),
+            });
+        }
+    }
+
+    (labels, sprites)
+}
+
 const BUTTON_HOVER_SCALE: f32 = 0.1;
 
 fn get_anim_transform(pos: f32, widget_size: Vec2, width_mult: f32) -> Mat4 {
@@ -334,30 +370,22 @@ fn get_anim_transform(pos: f32, widget_size: Vec2, width_mult: f32) -> Mat4 {
     util::centered_matrix(widget_size, &Mat4::from_scale(scale))
 }
 
+const HOVER_COLOR: WguiColor = WguiColorName::Tertiary.to_wgui_color();
+const HOVER_BORDER_COLOR: WguiColor = WguiColorName::Tertiary.to_wgui_color().mult_rgb(0.5);
+const HOVER_TEXT_COLOR: WguiColor = WguiColorName::OnTertiary.to_wgui_color();
+const PRESS_BORDER_COLOR: WguiColor = WguiColorName::Highlight.to_wgui_color();
+
 fn set_anim_color(
     palette: &WguiColorPalette,
     key_state: &KeyState,
     rect: &mut WidgetRectangle,
     pos: f32,
 ) {
-    // fade to accent color
-    rect.params.color = key_state
-        .color
-        .lerp(palette, &WguiColorName::Primary.into(), pos);
+    rect.params.color = key_state.color.lerp(palette, &HOVER_COLOR, pos);
+    rect.params.color2 = key_state.color2.lerp(palette, &HOVER_COLOR, pos);
 
-    // fade to accent color
-    rect.params.color2 = key_state
-        .color2
-        .lerp(palette, &WguiColorName::Primary.into(), pos);
-
-    // fade to white
     let cur_border_color = key_state.cur_border_color.get();
-    rect.params.border_color = cur_border_color.lerp(
-        palette,
-        &drawing::Color::new(1.0, 1.0, 1.0, 1.0).into(),
-        pos,
-    );
-
+    rect.params.border_color = cur_border_color.lerp(palette, &HOVER_BORDER_COLOR, pos);
     rect.params.border = key_state.border.lerp(key_state.border * 1.5, pos);
 }
 
@@ -375,6 +403,33 @@ fn on_enter_anim(
         Box::new(move |common, data| {
             let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap();
             set_anim_color(&common.globals().palette, &key_state, rect, data.pos);
+
+            for child in key_state.labels.iter() {
+                let mut widget = common
+                    .state
+                    .widgets
+                    .get_as::<WidgetLabel>(child.id)
+                    .unwrap();
+                let color =
+                    child
+                        .base_color
+                        .lerp(&common.globals().palette, &HOVER_TEXT_COLOR, data.pos);
+                widget.set_color(common, color, true);
+            }
+
+            for child in key_state.sprites.iter() {
+                let mut widget = common
+                    .state
+                    .widgets
+                    .get_as::<WidgetSprite>(child.id)
+                    .unwrap();
+                let color =
+                    child
+                        .base_color
+                        .lerp(&common.globals().palette, &HOVER_TEXT_COLOR, data.pos);
+                widget.set_color(common, color);
+            }
+
             data.data.transform =
                 get_anim_transform(data.pos, data.widget_boundary.size, width_mult);
             common.alterables.mark_redraw();
@@ -396,6 +451,35 @@ fn on_leave_anim(
         Box::new(move |common, data| {
             let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap();
             set_anim_color(&common.globals().palette, &key_state, rect, 1.0 - data.pos);
+
+            for child in key_state.labels.iter() {
+                let color = child.base_color.lerp(
+                    &common.globals().palette,
+                    &HOVER_TEXT_COLOR,
+                    1.0 - data.pos,
+                );
+                let mut widget = common
+                    .state
+                    .widgets
+                    .get_as::<WidgetLabel>(child.id)
+                    .unwrap();
+                widget.set_color(common, color, true);
+            }
+
+            for child in key_state.sprites.iter() {
+                let color = child.base_color.lerp(
+                    &common.globals().palette,
+                    &HOVER_TEXT_COLOR,
+                    1.0 - data.pos,
+                );
+                let mut widget = common
+                    .state
+                    .widgets
+                    .get_as::<WidgetSprite>(child.id)
+                    .unwrap();
+                widget.set_color(common, color);
+            }
+
             data.data.transform =
                 get_anim_transform(1.0 - data.pos, data.widget_boundary.size, width_mult);
             common.alterables.mark_redraw();
@@ -412,9 +496,7 @@ fn on_press_anim(
         return;
     }
     let rect = data.obj.get_as_mut::<WidgetRectangle>().unwrap();
-    key_state
-        .cur_border_color
-        .set(drawing::Color::new(1.0, 1.0, 1.0, 1.0).into());
+    key_state.cur_border_color.set(PRESS_BORDER_COLOR);
     rect.params.border_color = key_state.cur_border_color.get();
     common.alterables.mark_redraw();
     key_state.drawn_state.set(true);

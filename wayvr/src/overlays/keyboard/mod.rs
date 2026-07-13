@@ -30,9 +30,11 @@ use anyhow::Context;
 use glam::{Affine3A, Quat, Vec3, vec3};
 use regex::Regex;
 use slotmap::{SlotMap, new_key_type};
+use smallvec::SmallVec;
 use wgui::{
     color::WguiColor,
     event::{InternalStateChangeEvent, MouseButtonEvent, MouseButtonIndex},
+    layout::WidgetID,
 };
 use wlx_common::windowing::{OverlayWindowState, Positioning};
 use wlx_common::{
@@ -355,6 +357,11 @@ fn play_key_click(app: &mut AppState) {
         .play_sample(&mut app.audio_system, "key_click");
 }
 
+struct ChildWidget {
+    id: WidgetID,
+    base_color: WguiColor,
+}
+
 struct KeyState {
     button_state: KeyButtonData,
     color: WguiColor,
@@ -363,6 +370,8 @@ struct KeyState {
     cur_border_color: Cell<WguiColor>,
     border: f32,
     drawn_state: Cell<bool>,
+    labels: SmallVec<[ChildWidget; 3]>,
+    sprites: SmallVec<[ChildWidget; 1]>,
 }
 
 #[derive(Debug)]

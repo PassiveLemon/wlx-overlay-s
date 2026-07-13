@@ -25,6 +25,8 @@ pub struct WidgetLabelParams {
 	pub parent_color: ParentColor,
 }
 
+const DEFAULT_COLOR: WguiColor = WguiColorName::OnBackground.to_wgui_color();
+
 pub struct WidgetLabel {
 	id: WidgetID,
 
@@ -39,7 +41,7 @@ impl WidgetLabel {
 
 	pub fn create_ex(globals: &mut Globals, mut params: WidgetLabelParams) -> WidgetState {
 		if params.style.color.is_none() {
-			params.style.color = Some(WguiColorName::OnPrimary.into());
+			params.style.color = Some(DEFAULT_COLOR);
 		}
 
 		let metrics = Metrics::from(&params.style);
@@ -125,6 +127,10 @@ impl WidgetLabel {
 			self.update_attrs(&common.globals().palette);
 			common.mark_widget_dirty(self.id);
 		}
+	}
+
+	pub fn get_color(&self) -> WguiColor {
+		self.params.style.color.unwrap() // create_ex populates this
 	}
 
 	pub fn parent_color(&self) -> ParentColor {
