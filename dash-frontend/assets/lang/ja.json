@@ -184,7 +184,8 @@
 		"WHISPER_MODEL": "文字起こしモデル",
 		"WHISPER_MODEL_HELP": "使用するWhisperモデル。\nモデルが大きいほど精度は向上しますが、\nVRAMの消費量が増加します。",
 		"DEFAULT_OVERLAY_SCALE": "デフォルトのオーバーレイサイズ",
-		"DEFAULT_OVERLAY_SCALE_HELP": "新しいオーバーレイをこのスケールで生成します。"
+		"DEFAULT_OVERLAY_SCALE_HELP": "新しいオーバーレイをこのスケールで生成します。",
+		"COLOR_PALETTE": "カラーパレット"
 	},
 	"HELLO": "こんにちは！",
 	"AUDIO": {

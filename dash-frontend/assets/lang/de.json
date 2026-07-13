@@ -184,7 +184,8 @@
 		"WHISPER_MODEL": "Sprach-zu-Text-Modell",
 		"WHISPER_MODEL_HELP": "Zu verwendendes Whisper-Modell.\nGrößere Modelle liefern genauere\nErgebnisse, verbrauchen jedoch mehr VRAM.",
 		"DEFAULT_OVERLAY_SCALE": "Standardgröße des Overlays",
-		"DEFAULT_OVERLAY_SCALE_HELP": "Neue Overlays werden in dieser Skalierung erstellt."
+		"DEFAULT_OVERLAY_SCALE_HELP": "Neue Overlays werden in dieser Skalierung erstellt.",
+		"COLOR_PALETTE": "Farbpalette"
 	},
 	"HELLO": "Hallo!",
 	"AUDIO": {

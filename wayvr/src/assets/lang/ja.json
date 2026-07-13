@@ -107,12 +107,12 @@
 		"NO_SET_SELECTED": "セットが選択されていません。",
 		"LAST_EXISTING_SET": "これが最後の設定です。",
 		"EMPTY_SET": "空のセットです！",
-		"LETS_ADD_OVERLAYS": "ウォッチからオーバーレイを追加しましょう！",
 		"ONE_CONTROLLER_ON_FLOOR": "コントローラーを床に置いてください！",
 		"CANNOT_ADD_SET": "セットを追加できません！",
 		"MAXIMUM_SETS_REACHED": "最大セット数に達しました。",
 		"FIXING_FLOOR_IN_X_SECS": "{SECONDS}秒で床を固定中...",
-		"TITLE_SCREENCAST_FAIL": "スクリーンキャストのソースを開始できませんでした！"
+		"TITLE_SCREENCAST_FAIL": "スクリーンキャストのソースを開始できませんでした！",
+		"LETS_ADD_OVERLAYS": "タスクバーからオーバーレイを追加しましょう！"
 	},
 	"DONE": "完了",
 	"WHISPER": {

@@ -107,12 +107,12 @@
 		"NO_SET_SELECTED": "Nie wybrano żadnego zestawu.",
 		"LAST_EXISTING_SET": "To jest ostatni istniejący zestaw.",
 		"EMPTY_SET": "Pusty zestaw!",
-		"LETS_ADD_OVERLAYS": "Dodajmy kilka nakładek z zegarka!",
 		"ONE_CONTROLLER_ON_FLOOR": "Umieść jeden kontroler na podłodze!",
 		"CANNOT_ADD_SET": "Nie można dodać zestawu!",
 		"MAXIMUM_SETS_REACHED": "Osiągnięto maksymalną liczbę zestawów.",
 		"FIXING_FLOOR_IN_X_SECS": "Naprawianie podłogi za {SECONDS} sekund(y)...",
-		"TITLE_SCREENCAST_FAIL": "Nie udało się uruchomić źródła przesyłania obrazu z ekranu!"
+		"TITLE_SCREENCAST_FAIL": "Nie udało się uruchomić źródła przesyłania obrazu z ekranu!",
+		"LETS_ADD_OVERLAYS": "Dodajmy kilka nakładek z paska zadań!"
 	},
 	"DONE": "Gotowe",
 	"WHISPER": {

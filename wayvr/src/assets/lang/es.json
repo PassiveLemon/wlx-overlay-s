@@ -109,12 +109,12 @@
 		"NO_SET_SELECTED": "No se ha seleccionado ningún conjunto.",
 		"LAST_EXISTING_SET": "Este es el último conjunto existente.",
 		"EMPTY_SET": "¡Conjunto vacío!",
-		"LETS_ADD_OVERLAYS": "¡Añadamos algunos overlays desde el reloj!",
 		"ONE_CONTROLLER_ON_FLOOR": "¡Coloca un mando en el suelo!",
 		"CANNOT_ADD_SET": "¡No se puede agregar el conjunto!",
 		"MAXIMUM_SETS_REACHED": "Se ha alcanzado el número máximo de sets.",
 		"FIXING_FLOOR_IN_X_SECS": "Corrigiendo el suelo en {SECONDS} segundo(s)...",
-		"TITLE_SCREENCAST_FAIL": "¡No se pudo iniciar la fuente de transmisión de pantalla!"
+		"TITLE_SCREENCAST_FAIL": "¡No se pudo iniciar la fuente de transmisión de pantalla!",
+		"LETS_ADD_OVERLAYS": "¡Añadamos algunas superposiciones desde la barra de tareas!"
 	},
 	"DONE": "Hecho",
 	"WHISPER": {

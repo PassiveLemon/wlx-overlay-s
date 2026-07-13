@@ -205,7 +205,8 @@
 		"WHISPER_MODEL": "Modello di sintesi vocale (speech-to-text)",
 		"WHISPER_MODEL_HELP": "Modello Whisper da utilizzare.\nI modelli più grandi producono risultati\npiù accurati, ma consumano più VRAM.",
 		"DEFAULT_OVERLAY_SCALE": "Dimensioni overlay predefinite",
-		"DEFAULT_OVERLAY_SCALE_HELP": "Genera nuovi overlay con questa scala."
+		"DEFAULT_OVERLAY_SCALE_HELP": "Genera nuovi overlay con questa scala.",
+		"COLOR_PALETTE": "Tavolozza colori"
 	},
 	"APPLICATION_LAUNCHER": "Lanciatore applicazioni",
 	"APPLICATION_STARTED": "Applicazione avviata",

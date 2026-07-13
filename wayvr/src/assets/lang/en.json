@@ -105,7 +105,7 @@
 		"ERROR": "Error",
 		"FIXING_FLOOR_IN_X_SECS": "Fixing floor in {SECONDS} second(s)...",
 		"LAST_EXISTING_SET": "This is the last existing set.",
-		"LETS_ADD_OVERLAYS": "Let's add some overlays from the watch!",
+		"LETS_ADD_OVERLAYS": "Let's add some overlays from the taskbar!",
 		"MAXIMUM_SETS_REACHED": "Maximum number of sets reached.",
 		"NO_SET_SELECTED": "No set is selected.",
 		"ONE_CONTROLLER_ON_FLOOR": "Place one controller on the floor!"

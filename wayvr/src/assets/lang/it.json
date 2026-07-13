@@ -97,10 +97,10 @@
 		"NO_SET_SELECTED": "Nessun set è selezionato.",
 		"LAST_EXISTING_SET": "Questo è l'ultimo set esistente.",
 		"EMPTY_SET": "Set vuoto!",
-		"LETS_ADD_OVERLAYS": "Aggiungiamo degli overlay dal Watch!",
 		"ONE_CONTROLLER_ON_FLOOR": "Posiziona un controller a terra!",
 		"FIXING_FLOOR_IN_X_SECS": "Correzione del pavimento in {SECONDS} secondo/i...",
-		"TITLE_SCREENCAST_FAIL": "Impossibile avviare la sorgente dello screen cast!"
+		"TITLE_SCREENCAST_FAIL": "Impossibile avviare la sorgente dello screen cast!",
+		"LETS_ADD_OVERLAYS": "Aggiungiamo alcuni overlay dalla barra delle applicazioni!"
 	},
 	"WATCH": {
 		"ADD_NEW_SET": "Aggiungi un nuovo set",

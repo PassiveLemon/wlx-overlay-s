@@ -179,7 +179,8 @@
 		"WHISPER_MODEL": "Model mowy na tekst",
 		"WHISPER_MODEL_HELP": "Model Whisper do wykorzystania.\nWiększe modele dają dokładniejsze\nwyniki, ale zużywają więcej pamięci VRAM.",
 		"DEFAULT_OVERLAY_SCALE": "Domyślny rozmiar nakładki",
-		"DEFAULT_OVERLAY_SCALE_HELP": "Twórz nowe nakładki w tej skali."
+		"DEFAULT_OVERLAY_SCALE_HELP": "Twórz nowe nakładki w tej skali.",
+		"COLOR_PALETTE": "Paleta kolorów"
 	},
 	"APPLICATION_LAUNCHER": "Uruchamiacz aplikacji",
 	"APPLICATIONS": "Aplikacje",

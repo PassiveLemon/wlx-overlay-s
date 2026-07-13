@@ -184,7 +184,8 @@
 		"WHISPER_MODEL": "Modelo de voz a texto",
 		"WHISPER_MODEL_HELP": "Modelo de Whisper a utilizar.\nLos modelos más grandes producen\nresultados más precisos, pero consumen más VRAM.",
 		"DEFAULT_OVERLAY_SCALE": "Tamaño de la superposición predeterminado",
-		"DEFAULT_OVERLAY_SCALE_HELP": "Genera nuevas capas de superposición con esta escala."
+		"DEFAULT_OVERLAY_SCALE_HELP": "Genera nuevas capas de superposición con esta escala.",
+		"COLOR_PALETTE": "Paleta de colores"
 	},
 	"HELLO": "¡Hola!",
 	"AUDIO": {

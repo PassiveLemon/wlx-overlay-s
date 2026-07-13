@@ -109,12 +109,12 @@
 		"NO_SET_SELECTED": "Kein Set ausgewählt.",
 		"LAST_EXISTING_SET": "Dies ist das letzte vorhandene Set.",
 		"EMPTY_SET": "Leeres Set!",
-		"LETS_ADD_OVERLAYS": "Lass uns ein paar Overlays von der Uhr hinzufügen!",
 		"ONE_CONTROLLER_ON_FLOOR": "Lege einen Controller auf den Boden!",
 		"CANNOT_ADD_SET": "Satz kann nicht hinzugefügt werden!",
 		"MAXIMUM_SETS_REACHED": "Maximale Anzahl an Sets erreicht.",
 		"FIXING_FLOOR_IN_X_SECS": "Boden wird in {SECONDS} Sekunde(n) repariert...",
-		"TITLE_SCREENCAST_FAIL": "Bildschirmübertragungsquelle konnte nicht gestartet werden!"
+		"TITLE_SCREENCAST_FAIL": "Bildschirmübertragungsquelle konnte nicht gestartet werden!",
+		"LETS_ADD_OVERLAYS": "Lass uns einige Overlays aus der Taskleiste hinzufügen!"
 	},
 	"DONE": "Erledigt",
 	"WHISPER": {
