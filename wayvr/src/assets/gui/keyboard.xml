@@ -113,7 +113,7 @@
   <!-- An app with a single icon. -->
   <template name="App">
     <Button macro="button_style" id="overlay_${idx}" tooltip_str="${name}" _context_name="${name}" _press_left="::ContextMenuOpen menu_app" _press_right="::OverlayToggle ${name}">  
-      <sprite width="38" height="38" src_ext="${icon}" />
+      <sprite width="38" height="38" src_ext="${icon}" parent_color="ignore" />
     </Button>
   </template>
 
