@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
 	animation::Animations,
-	components::{self, Component, ComponentWeak, FocusChangeData, RefreshData},
+	components::{self, Component, ComponentWeak, DestroyData, FocusChangeData, RefreshData},
 	drawing::{
 		self, ANSI_BOLD_CODE, ANSI_RESET_CODE, Boundary, PushScissorStackResult, push_scissor_stack, push_transform_stack,
 	},
@@ -283,21 +283,35 @@ impl Layout {
 		})
 	}
 
-	pub fn collect_children_ids_recursive(&self, widget_id: WidgetID, out: &mut Vec<(WidgetID, taffy::NodeId)>) {
+	pub fn collect_children_ids_recursive(&self, widget_id: WidgetID, out: &mut Vec<WidgetID>) {
 		let Some(node_id) = self.state.nodes.get(widget_id) else {
 			return;
 		};
 
 		for child_id in self.state.tree.child_ids(*node_id) {
 			let child_widget_id = self.state.tree.get_node_context(child_id).unwrap();
-			out.push((*child_widget_id, child_id));
+			out.push(*child_widget_id);
 			self.collect_children_ids_recursive(*child_widget_id, out);
 		}
 	}
 
-	fn remove_widget_single(&mut self, widget_id: WidgetID, node_id: Option<taffy::NodeId>) {
+	fn remove_widget_single(&mut self, widget_id: WidgetID) {
 		self.state.widgets.remove_single(widget_id);
-		self.state.nodes.remove(widget_id);
+		let node_id = self.state.nodes.remove(widget_id);
+
+		if let Some(component_weak) = self.state.components_by_widget_id.remove(widget_id)
+			&& let Some(component) = component_weak.upgrade()
+		{
+			let mut destroy_widgets = vec![];
+			component.destroy(&mut DestroyData {
+				layout: self,
+				destroy_widgets: &mut destroy_widgets,
+			});
+			for wid in destroy_widgets {
+				self.remove_widget_single(wid);
+			}
+		}
+
 		if let Some(node_id) = node_id {
 			self.registered_components_to_refresh.remove(&node_id);
 			let _ = self.state.tree.remove(node_id);
@@ -313,16 +327,15 @@ impl Layout {
 			self.mark_redraw();
 		}
 
-		for (widget_id, node_id) in ids {
-			self.remove_widget_single(widget_id, Some(node_id));
+		for widget_id in ids {
+			self.remove_widget_single(widget_id);
 		}
 	}
 
 	// remove widget and its children, recursively
 	pub fn remove_widget(&mut self, widget_id: WidgetID) {
 		self.remove_children(widget_id);
-		let node_id = self.state.nodes.get(widget_id);
-		self.remove_widget_single(widget_id, node_id.copied());
+		self.remove_widget_single(widget_id);
 		self.mark_redraw();
 	}
 

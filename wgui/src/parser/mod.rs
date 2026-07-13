@@ -97,7 +97,11 @@ pub trait Fetchable {
 	fn fetch_component_as<T: 'static>(&self, id: &str) -> anyhow::Result<Rc<T>>;
 
 	/// Fetch a component by widget ID and down‑cast it to a concrete component type `T` (see `components/mod.rs`)
-	fn fetch_component_from_widget_id_as<T: 'static>(&self, state: &LayoutState, widget_id: WidgetID) -> anyhow::Result<Rc<T>>;
+	fn fetch_component_from_widget_id_as<T: 'static>(
+		&self,
+		state: &LayoutState,
+		widget_id: WidgetID,
+	) -> anyhow::Result<Rc<T>>;
 
 	/// Return a widget by its string ID
 	fn get_widget_id(&self, id: &str) -> anyhow::Result<WidgetID>;
@@ -168,7 +172,11 @@ impl Fetchable for ParserData {
 		state.fetch_component_by_widget_id(widget_id)
 	}
 
-	fn fetch_component_from_widget_id_as<T: 'static>(&self, state: &LayoutState, widget_id: WidgetID) -> anyhow::Result<Rc<T>> {
+	fn fetch_component_from_widget_id_as<T: 'static>(
+		&self,
+		state: &LayoutState,
+		widget_id: WidgetID,
+	) -> anyhow::Result<Rc<T>> {
 		state.fetch_component_from_widget_id_as(widget_id)
 	}
 
@@ -381,7 +389,11 @@ impl Fetchable for ParserState {
 		self.data.fetch_component_by_widget_id(state, widget_id)
 	}
 
-	fn fetch_component_from_widget_id_as<T: 'static>(&self, state: &LayoutState, widget_id: WidgetID) -> anyhow::Result<Rc<T>> {
+	fn fetch_component_from_widget_id_as<T: 'static>(
+		&self,
+		state: &LayoutState,
+		widget_id: WidgetID,
+	) -> anyhow::Result<Rc<T>> {
 		self.data.fetch_component_from_widget_id_as(state, widget_id)
 	}
 

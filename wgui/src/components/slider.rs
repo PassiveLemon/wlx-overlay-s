@@ -7,7 +7,7 @@ use crate::{
 	animation::{Animation, AnimationCallback, AnimationEasing},
 	color::{WguiColor, WguiColorName},
 	components::{
-		Component, ComponentBase, ComponentTrait, RefreshData,
+		Component, ComponentBase, ComponentTrait, DestroyData, RefreshData,
 		tooltip::{self, ComponentTooltip, TooltipTrait},
 	},
 	event::{
@@ -159,6 +159,13 @@ impl ComponentTrait for ComponentSlider {
 
 	fn base_mut(&mut self) -> &mut ComponentBase {
 		&mut self.base
+	}
+
+	fn destroy(&self, data: &mut DestroyData) {
+		if let Some(comp) = self.state.borrow_mut().active_tooltip.take() {
+			comp.destroy(data);
+			data.destroy_widgets.push(comp.base().id);
+		}
 	}
 }
 

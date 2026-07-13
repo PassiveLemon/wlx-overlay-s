@@ -11,7 +11,7 @@ use crate::{
 	animation::{Animation, AnimationEasing},
 	color::{WguiColor, WguiColorName},
 	components::{
-		Component, ComponentBase, ComponentTrait, RefreshData,
+		Component, ComponentBase, ComponentTrait, DestroyData, RefreshData,
 		radio_group::ComponentRadioGroup,
 		tooltip::{self, ComponentTooltip, TooltipTrait},
 	},
@@ -110,6 +110,13 @@ impl ComponentTrait for ComponentCheckbox {
 
 	fn refresh(&self, _data: &mut RefreshData) {
 		// nothing to do
+	}
+
+	fn destroy(&self, data: &mut DestroyData) {
+		if let Some(comp) = self.state.borrow_mut().active_tooltip.take() {
+			comp.destroy(data);
+			data.destroy_widgets.push(comp.base().id);
+		}
 	}
 }
 

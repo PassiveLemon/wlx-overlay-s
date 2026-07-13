@@ -341,7 +341,7 @@ fn find_children<S>(
         .layout
         .collect_children_ids_recursive(widget_id, &mut children);
 
-    for (child, _) in children {
+    for child in children {
         if let Some(widget) = panel.layout.state.widgets.get_as::<WidgetSprite>(child) {
             sprites.push(ChildWidget {
                 id: child,

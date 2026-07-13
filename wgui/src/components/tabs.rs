@@ -2,7 +2,7 @@ use crate::{
 	assets::AssetPathRc,
 	color::WguiColor,
 	components::{
-		Component, ComponentBase, ComponentTrait, RefreshData,
+		Component, ComponentBase, ComponentTrait, DestroyData, RefreshData,
 		button::{self, ComponentButton},
 	},
 	event::CallbackDataCommon,
@@ -70,6 +70,13 @@ impl ComponentTrait for ComponentTabs {
 
 	fn refresh(&self, _data: &mut RefreshData) {
 		// nothing to do
+	}
+
+	fn destroy(&self, data: &mut DestroyData) {
+		for e in self.state.borrow_mut().mounted_entries.drain(..) {
+			e.button.destroy(data);
+			data.destroy_widgets.push(e.button.base().id);
+		}
 	}
 }
 

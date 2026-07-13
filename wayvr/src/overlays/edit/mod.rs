@@ -372,8 +372,8 @@ fn make_edit_panel(app: &mut AppState) -> anyhow::Result<EditModeWrapPanel> {
     let anim_mult = app.wgui_theme.animation_mult;
 
     let on_custom_attrib: OnCustomAttribFunc = Box::new(move |layout, parser, attribs, _app| {
-        let Ok(button) =
-            parser.fetch_component_from_widget_id_as::<ComponentButton>(&layout.state, attribs.widget_id)
+        let Ok(button) = parser
+            .fetch_component_from_widget_id_as::<ComponentButton>(&layout.state, attribs.widget_id)
         else {
             return;
         };

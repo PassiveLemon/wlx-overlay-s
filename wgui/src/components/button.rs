@@ -143,7 +143,7 @@ impl ComponentTrait for ComponentButton {
 				.layout
 				.collect_children_ids_recursive(self.data.id_rect, &mut children);
 
-			for (child, _) in children {
+			for child in children {
 				if let Some(mut widget) = data.layout.state.widgets.get_as::<WidgetSprite>(child) {
 					if !state.id_sprite.is_null() && state.id_sprite != child {
 						log::error!("Button with more than one sprite!");
@@ -182,6 +182,13 @@ impl ComponentTrait for ComponentButton {
 			} else {
 				debug_assert!(false);
 			}
+		}
+	}
+
+	fn destroy(&self, data: &mut components::DestroyData) {
+		if let Some(comp) = self.state.borrow_mut().active_tooltip.take() {
+			comp.destroy(data);
+			data.destroy_widgets.push(comp.base().id);
 		}
 	}
 }

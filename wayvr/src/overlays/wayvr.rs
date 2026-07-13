@@ -204,9 +204,10 @@ impl WvrWindowBackend {
 
         let on_custom_attrib: OnCustomAttribFunc =
             Box::new(move |layout, parser, attribs, _app| {
-                let Ok(button) =
-                    parser.fetch_component_from_widget_id_as::<ComponentButton>(&layout.state, attribs.widget_id)
-                else {
+                let Ok(button) = parser.fetch_component_from_widget_id_as::<ComponentButton>(
+                    &layout.state,
+                    attribs.widget_id,
+                ) else {
                     return;
                 };
 
