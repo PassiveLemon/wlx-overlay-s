@@ -125,7 +125,7 @@ static DEFAULT: &WguiColorPalette = &WguiColorPalette {
 		hex("#002e43"), // Background
 		hex("#e4f5f6"), // OnBackground
 		hex("#0c5170"), // OackgroundVariant
-		hex("#e2fdff"), // OnBackgroundVariant
+		hex("#b5cacc"), // OnBackgroundVariant
 		hex("#00131c"), // BackgroundContrast
 		hex("#e4edf6"), // OnBackgroundContrast
 		hex("#1c6788"), // Outline
