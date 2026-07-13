@@ -247,6 +247,17 @@ impl PlayspaceMover {
         pose.position.x += input.hmd.translation.x;
         pose.position.z += input.hmd.translation.z;
 
+        let forward = input.hmd.transform_vector3a(Vec3A::NEG_Z);
+        let horizontal_len_sq = forward.x.mul_add(forward.x, forward.z * forward.z);
+
+        // if hmd is so vertical that we can't tell where forward is, don't touch rotation
+        if horizontal_len_sq > 1e-8 {
+            let yaw = (-forward.x).atan2(-forward.z);
+            let current_rotation: Quat = pose.orientation.into();
+
+            pose.orientation = (current_rotation * Quat::from_rotation_y(yaw)).into();
+        }
+
         let _ = monado
             .set_reference_space_offset(ReferenceSpaceType::Stage, pose)
             .inspect_err(|e| log::warn!("Could not recenter due to libmonado error: {e:?}"));
