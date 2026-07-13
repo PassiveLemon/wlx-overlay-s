@@ -4,12 +4,12 @@ use crate::{
 };
 
 use super::{
-	ContentType, FontSystem, GlyphDetails, GpuCacheStatus, SwashCache, TextArea,
 	custom_glyph::{CustomGlyphCacheKey, RasterizeCustomGlyphRequest, RasterizedCustomGlyph},
 	text_atlas::{GlyphVertex, TextAtlas, TextPipeline},
+	ContentType, FontSystem, GlyphDetails, GpuCacheStatus, SwashCache, TextArea,
 };
 use cosmic_text::{Color, SubpixelBin, SwashContent};
-use etagere::{AllocId, size2};
+use etagere::{size2, AllocId};
 use glam::{Mat4, Vec2, Vec3};
 use std::collections::HashSet;
 
@@ -158,6 +158,14 @@ impl TextRenderer {
 
 				start_y_physical <= text_area.bounds.bottom && text_area.bounds.top <= end_y_physical
 			};
+
+			// ensure layout is up to date before reading
+			// `set_size()` in draw() sets dirty flags but doesn't trigger shape_until_scroll
+			// without this, layout_runs() on &Buffer returns stale layouts
+			{
+				let mut buf = text_area.buffer.borrow_mut();
+				buf.shape_until_scroll(font_system, false);
+			}
 
 			let buffer = text_area.buffer.borrow();
 
