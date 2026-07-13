@@ -79,7 +79,6 @@ struct ParserFile {
 #[derive(Default, Clone)]
 pub struct ParserData {
 	pub components_by_id: HashMap<Rc<str>, ComponentWeak>,
-	pub components_by_widget_id: HashMap<WidgetID, ComponentWeak>,
 	pub components: Vec<Component>,
 	pub ids: HashMap<Rc<str>, WidgetID>,
 	pub templates: HashMap<Rc<str>, Rc<Template>>,
@@ -91,14 +90,14 @@ pub trait Fetchable {
 	/// Return a component by its string ID
 	fn fetch_component_by_id(&self, id: &str) -> anyhow::Result<Component>;
 
-	/// Return a component by the ID of the widget that owns it
-	fn fetch_component_by_widget_id(&self, widget_id: WidgetID) -> anyhow::Result<Component>;
+	/// Fetch a component by widget ID (returns Component)
+	fn fetch_component_by_widget_id(&self, state: &LayoutState, widget_id: WidgetID) -> anyhow::Result<Component>;
 
 	/// Fetch a component by string ID and down‑cast it to a concrete component type `T` (see `components/mod.rs`)
 	fn fetch_component_as<T: 'static>(&self, id: &str) -> anyhow::Result<Rc<T>>;
 
 	/// Fetch a component by widget ID and down‑cast it to a concrete component type `T` (see `components/mod.rs`)
-	fn fetch_component_from_widget_id_as<T: 'static>(&self, widget_id: WidgetID) -> anyhow::Result<Rc<T>>;
+	fn fetch_component_from_widget_id_as<T: 'static>(&self, state: &LayoutState, widget_id: WidgetID) -> anyhow::Result<Rc<T>>;
 
 	/// Return a widget by its string ID
 	fn get_widget_id(&self, id: &str) -> anyhow::Result<WidgetID>;
@@ -137,7 +136,6 @@ impl ParserData {
 		let ids = std::mem::take(&mut from.ids);
 		let components = std::mem::take(&mut from.components);
 		let components_by_id = std::mem::take(&mut from.components_by_id);
-		let components_by_widget_id = std::mem::take(&mut from.components_by_widget_id);
 
 		for (id, key) in ids {
 			self.ids.insert(id, key);
@@ -149,10 +147,6 @@ impl ParserData {
 
 		for (k, v) in components_by_id {
 			self.components_by_id.insert(k, v);
-		}
-
-		for (k, v) in components_by_widget_id {
-			self.components_by_widget_id.insert(k, v);
 		}
 	}
 }
@@ -170,16 +164,12 @@ impl Fetchable for ParserData {
 		Ok(Component(component))
 	}
 
-	fn fetch_component_by_widget_id(&self, widget_id: WidgetID) -> anyhow::Result<Component> {
-		let Some(weak) = self.components_by_widget_id.get(&widget_id) else {
-			anyhow::bail!("Component by widget ID \"{widget_id:?}\" doesn't exist");
-		};
+	fn fetch_component_by_widget_id(&self, state: &LayoutState, widget_id: WidgetID) -> anyhow::Result<Component> {
+		state.fetch_component_by_widget_id(widget_id)
+	}
 
-		let Some(component) = weak.upgrade() else {
-			anyhow::bail!("Component by widget ID \"{widget_id:?}\" has disappeared");
-		};
-
-		Ok(Component(component))
+	fn fetch_component_from_widget_id_as<T: 'static>(&self, state: &LayoutState, widget_id: WidgetID) -> anyhow::Result<Rc<T>> {
+		state.fetch_component_from_widget_id_as(widget_id)
 	}
 
 	fn fetch_component_as<T: 'static>(&self, id: &str) -> anyhow::Result<Rc<T>> {
@@ -187,17 +177,6 @@ impl Fetchable for ParserData {
 
 		if !(*component.0).as_any().is::<T>() {
 			anyhow::bail!("fetch_component_as({id}): type not matching");
-		}
-
-		// safety: we just checked the type
-		unsafe { Ok(Rc::from_raw(Rc::into_raw(component.0).cast())) }
-	}
-
-	fn fetch_component_from_widget_id_as<T: 'static>(&self, widget_id: WidgetID) -> anyhow::Result<Rc<T>> {
-		let component = self.fetch_component_by_widget_id(widget_id)?;
-
-		if !(*component.0).as_any().is::<T>() {
-			anyhow::bail!("fetch_component_by_widget_id({widget_id:?}): type not matching");
 		}
 
 		// safety: we just checked the type
@@ -398,16 +377,16 @@ impl Fetchable for ParserState {
 		self.data.fetch_component_by_id(id)
 	}
 
-	fn fetch_component_by_widget_id(&self, widget_id: WidgetID) -> anyhow::Result<Component> {
-		self.data.fetch_component_by_widget_id(widget_id)
+	fn fetch_component_by_widget_id(&self, state: &LayoutState, widget_id: WidgetID) -> anyhow::Result<Component> {
+		self.data.fetch_component_by_widget_id(state, widget_id)
+	}
+
+	fn fetch_component_from_widget_id_as<T: 'static>(&self, state: &LayoutState, widget_id: WidgetID) -> anyhow::Result<Rc<T>> {
+		self.data.fetch_component_from_widget_id_as(state, widget_id)
 	}
 
 	fn fetch_component_as<T: 'static>(&self, id: &str) -> anyhow::Result<Rc<T>> {
 		self.data.fetch_component_as(id)
-	}
-
-	fn fetch_component_from_widget_id_as<T: 'static>(&self, widget_id: WidgetID) -> anyhow::Result<Rc<T>> {
-		self.data.fetch_component_from_widget_id_as(widget_id)
 	}
 
 	fn get_widget_id(&self, id: &str) -> anyhow::Result<WidgetID> {
@@ -499,7 +478,8 @@ impl ParserContext<'_> {
 
 	fn insert_component(&mut self, widget_id: WidgetID, component: Component, id: Option<Rc<str>>) {
 		self
-			.data_local
+			.layout
+			.state
 			.components_by_widget_id
 			.insert(widget_id, component.weak());
 

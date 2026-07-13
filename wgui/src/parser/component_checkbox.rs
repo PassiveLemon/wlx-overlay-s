@@ -3,7 +3,7 @@ use crate::{
 	i18n::Translation,
 	layout::WidgetID,
 	parser::{
-		AttribPair, Fetchable, ParserContext,
+		AttribPair, ParserContext,
 		helpers::{TooltipAttribs, parse_attrib_tooltip},
 		process_component,
 		style::parse_style,
@@ -66,7 +66,8 @@ pub fn parse_component_checkbox(
 
 		while let Some(parent_id) = maybe_parent_id {
 			if let Ok(radio) = ctx
-				.data_local
+				.layout
+				.state
 				.fetch_component_from_widget_id_as::<ComponentRadioGroup>(parent_id)
 			{
 				radio_group = Some(radio);

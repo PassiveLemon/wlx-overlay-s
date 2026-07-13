@@ -128,6 +128,7 @@ pub struct LayoutState {
 	pub widgets: WidgetMap,
 	pub nodes: WidgetNodeMap,
 	pub tree: taffy::tree::TaffyTree<WidgetID>,
+	pub components_by_widget_id: SecondaryMap<WidgetID, ComponentWeak>,
 }
 
 pub struct ModifyLayoutStateData<'a> {
@@ -553,6 +554,7 @@ impl Layout {
 			nodes: WidgetNodeMap::default(),
 			globals,
 			theme: params.theme,
+			components_by_widget_id: SecondaryMap::default(),
 		};
 
 		let size = if params.resize_to_parent {
@@ -988,5 +990,28 @@ impl LayoutState {
 
 	pub fn get_widget_style(&self, id: WidgetID) -> Option<&taffy::Style> {
 		self.get_node_style(*self.nodes.get(id)?)
+	}
+
+	pub fn fetch_component_by_widget_id(&self, widget_id: WidgetID) -> anyhow::Result<Component> {
+		let Some(weak) = self.components_by_widget_id.get(widget_id) else {
+			anyhow::bail!("Component by widget ID \"{widget_id:?}\" doesn't exist");
+		};
+
+		let Some(component) = weak.upgrade() else {
+			anyhow::bail!("Component by widget ID \"{widget_id:?}\" has disappeared");
+		};
+
+		Ok(Component(component))
+	}
+
+	pub fn fetch_component_from_widget_id_as<T: 'static>(&self, widget_id: WidgetID) -> anyhow::Result<Rc<T>> {
+		let component = self.fetch_component_by_widget_id(widget_id)?;
+
+		if !(*component.0).as_any().is::<T>() {
+			anyhow::bail!("fetch_component_from_widget_id_as({widget_id:?}): type not matching");
+		}
+
+		// safety: we just checked the type
+		unsafe { Ok(Rc::from_raw(Rc::into_raw(component.0).cast())) }
 	}
 }

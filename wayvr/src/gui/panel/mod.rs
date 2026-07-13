@@ -206,7 +206,7 @@ impl<S: 'static> GuiPanel<S> {
                 setup_custom_label::<S>(&mut self.layout, &self.parser_state, elem, app);
             } else if let Ok(button) = self
                 .parser_state
-                .fetch_component_from_widget_id_as::<ComponentButton>(elem.widget_id)
+                .fetch_component_from_widget_id_as::<ComponentButton>(&self.layout.state, elem.widget_id)
             {
                 setup_custom_button::<S>(
                     &mut self.layout,
