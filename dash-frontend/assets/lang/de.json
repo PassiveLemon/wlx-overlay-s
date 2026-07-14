@@ -192,7 +192,9 @@
 		"APPLY_CHANGES_RESTART": "WayVR neu starten, um die Änderungen zu übernehmen?",
 		"COLOR_PALETTE_HELP": "Klicken, um Farbpaletten zu durchsuchen.\nUm eigene zu erstellen, besuche die Webseite!",
 		"COLOR_PALETTE_CUSTOM_URL": "Füge dein eigenes benutzerdefiniertes Thema hinzu!",
-		"COLOR_PALETTE_CUSTOM_URL2": "Klicken Sie hier, um das Web-Handbuch zu öffnen."
+		"COLOR_PALETTE_CUSTOM_URL2": "Klicken Sie hier, um das Web-Handbuch zu öffnen.",
+		"SNAP_ANGLE_DEG": "Snap-Winkel für Fensterneigung und Rollwinkel",
+		"SNAP_ANGLE_DEG_HELP": "Gegriffene Fenster rasten in diesem Winkel auf der Nick- und Rollachse ein."
 	},
 	"HELLO": "Hallo!",
 	"AUDIO": {

@@ -888,7 +888,12 @@ where
                 app.anchor.translation =
                     pointer.pose.transform_point3a(grab_data.offset.translation);
                 let scale = scalar_scale(&app.anchor);
-                realign(&mut app.anchor, &app.input_state.hmd, scale);
+                realign(
+                    &mut app.anchor,
+                    &app.input_state.hmd,
+                    scale,
+                    app.session.config.snap_angle_deg,
+                );
             }
         } else {
             // single grab resize
@@ -912,7 +917,12 @@ where
                 let scale = scalar_scale(&overlay_state.transform);
                 overlay_state.transform.translation =
                     pointer.pose.transform_point3a(grab_data.offset.translation);
-                realign(&mut overlay_state.transform, &app.input_state.hmd, scale);
+                realign(
+                    &mut overlay_state.transform,
+                    &app.input_state.hmd,
+                    scale,
+                    app.session.config.snap_angle_deg,
+                );
             }
             overlay.config.pause_movement = true;
             overlay.config.dirty = true;

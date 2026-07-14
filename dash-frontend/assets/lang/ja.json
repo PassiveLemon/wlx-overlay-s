@@ -192,7 +192,9 @@
 		"APPLY_CHANGES_RESTART": "変更を適用するためにWayVRを再起動しますか？",
 		"COLOR_PALETTE_HELP": "クリックしてカラーパレットを選択してください。\nカスタムパレットの作成については、ウェブサイトを参照してください！",
 		"COLOR_PALETTE_CUSTOM_URL": "カスタムテーマを追加しましょう！",
-		"COLOR_PALETTE_CUSTOM_URL2": "クリックしてウェブマニュアルを開く。"
+		"COLOR_PALETTE_CUSTOM_URL2": "クリックしてウェブマニュアルを開く。",
+		"SNAP_ANGLE_DEG": "ウィンドウのピッチ・ロールのスナップ角度",
+		"SNAP_ANGLE_DEG_HELP": "掴んでいるウィンドウが、ピッチ軸とロール軸でこの角度にスナップします。"
 	},
 	"HELLO": "こんにちは！",
 	"AUDIO": {

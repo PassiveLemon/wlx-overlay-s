@@ -475,4 +475,7 @@ pub struct GeneralConfig {
 
 	#[serde(default = "def_default")]
 	pub color_palette: Arc<str>,
+
+	#[serde(default)]
+	pub snap_angle_deg: f32,
 }

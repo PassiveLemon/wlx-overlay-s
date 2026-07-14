@@ -10,10 +10,10 @@ use crate::util::popup_manager::PopupHolder;
 use crate::{
 	frontend::FrontendTasks,
 	tab::settings::{
-		SettingType, SettingsMountParams, SettingsTab,
 		macros::{options_category, options_checkbox, options_dropdown, options_slider_f32, options_slider_i32},
+		SettingType, SettingsMountParams, SettingsTab,
 	},
-	views::{ViewUpdateParams, input_profiles},
+	views::{input_profiles, ViewUpdateParams},
 };
 
 #[derive(Clone)]
@@ -104,6 +104,7 @@ impl State {
 		options_checkbox(par.mp, c, SettingType::InvertScrollDirectionY)?;
 		options_slider_f32(par.mp, c, SettingType::ScrollSpeed, 0.1, 5.0, 0.1)?;
 		options_slider_f32(par.mp, c, SettingType::LongPressDuration, 0.1, 2.0, 0.1)?;
+		options_slider_f32(par.mp, c, SettingType::SnapAngleDeg, 0., 45., 5.)?;
 
 		if par.feats.openxr {
 			options_slider_f32(par.mp, c, SettingType::PointerLerpFactor, 0.1, 1.0, 0.1)?;

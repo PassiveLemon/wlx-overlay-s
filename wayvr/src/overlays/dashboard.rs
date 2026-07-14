@@ -329,7 +329,7 @@ fn tutorial_spawn_effect(app: &mut AppState) -> anyhow::Result<()> {
                 let hmd = &app.input_state.hmd;
                 let pos = hmd.translation + hmd.z_axis * -2.0;
                 let mut transform = Affine3A::from_rotation_translation(Quat::IDENTITY, pos.into());
-                realign(&mut transform, hmd, 1.0);
+                realign(&mut transform, hmd, 1.0, app.session.config.snap_angle_deg);
 
                 owc.active_state = Some(OverlayWindowState {
                     saved_transform: Some(Affine3A::from_translation(vec3(0., -0.1, -0.9))),

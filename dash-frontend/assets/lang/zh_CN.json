@@ -213,7 +213,9 @@
 		"APPLY_CHANGES_RESTART": "重启 WayVR 以应用更改吗？",
 		"COLOR_PALETTE_HELP": "点击浏览配色方案。\n如需创建自定义配色，请参阅网站！",
 		"COLOR_PALETTE_CUSTOM_URL": "添加自定义主题！",
-		"COLOR_PALETTE_CUSTOM_URL2": "点击打开网页版手册。"
+		"COLOR_PALETTE_CUSTOM_URL2": "点击打开网页版手册。",
+		"SNAP_ANGLE_DEG": "窗口俯仰与翻滚捕捉角度",
+		"SNAP_ANGLE_DEG_HELP": "抓取的窗口在俯仰轴和翻滚轴上将对齐到此角度。"
 	},
 	"APPLICATION_LAUNCHER": "应用启动器",
 	"APPLICATION_STARTED": "应用已启动",

@@ -174,6 +174,8 @@
 		"SCREEN_RENDER_DOWN_HELP": "Helps with aliasing on high-res screens",
 		"SCROLL_SPEED": "Scroll speed",
 		"SELECT_VARIANT": "Select variant",
+		"SNAP_ANGLE_DEG": "Window pitch & roll snap angle",
+		"SNAP_ANGLE_DEG_HELP": "Grabbed windows snap to this angle on pitch and roll axis.",
 		"ENABLE_WATCH": "Enable watch",
 		"SETS_ON_WATCH": "Sets on watch",
 		"SHOW_WELCOME_SCREEN": "Show welcome screen",

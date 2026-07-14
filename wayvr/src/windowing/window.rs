@@ -1,4 +1,4 @@
-use glam::{Affine3A, Mat3A, Quat, Vec3, Vec3A};
+use glam::{Affine3A, EulerRot, Mat3A, Quat, Vec3, Vec3A};
 use idmap_derive::IntegerId;
 use std::{f32::consts::PI, sync::Arc};
 use wlx_common::windowing::{OverlayWindowState, Positioning};
@@ -192,7 +192,12 @@ impl OverlayWindowConfig {
         };
 
         if align_to_hmd {
-            realign(&mut state.transform, &app.input_state.hmd, scale);
+            realign(
+                &mut state.transform,
+                &app.input_state.hmd,
+                scale,
+                app.session.config.snap_angle_deg,
+            );
         }
 
         self.dirty = true;
@@ -250,13 +255,18 @@ impl OverlayWindowConfig {
 
         if align_to_hmd || (state.grabbable && hard_reset) {
             let scale = scalar_scale(&cur_transform);
-            realign(&mut state.transform, &app.input_state.hmd, scale);
+            realign(
+                &mut state.transform,
+                &app.input_state.hmd,
+                scale,
+                app.session.config.snap_angle_deg,
+            );
         }
         self.dirty = true;
     }
 }
 
-pub fn realign(transform: &mut Affine3A, hmd: &Affine3A, scale: f32) {
+pub fn realign(transform: &mut Affine3A, hmd: &Affine3A, scale: f32, snap_angle: f32) {
     let to_hmd = hmd.translation - transform.translation;
     let up_dir: Vec3A;
 
@@ -289,8 +299,20 @@ pub fn realign(transform: &mut Affine3A, hmd: &Affine3A, scale: f32) {
     let col_y = col_z.cross(col_x).normalize();
     let col_x = col_x.normalize();
 
-    let rot = Mat3A::from_quat(Quat::from_axis_angle(Vec3::Y, PI));
-    transform.matrix3 = Mat3A::from_cols(col_x, col_y, col_z).mul_scalar(scale) * rot;
+    let flip = Mat3A::from_quat(Quat::from_axis_angle(Vec3::Y, PI));
+    let mut rotation = Mat3A::from_cols(col_x, col_y, col_z) * flip;
+
+    if snap_angle > f32::EPSILON {
+        let snap_step = snap_angle.to_radians();
+        let (yaw, pitch, roll) = rotation.to_euler(EulerRot::YXZ);
+
+        let pitch = (pitch / snap_step).round() * snap_step;
+        let roll = (roll / snap_step).round() * snap_step;
+
+        rotation = Mat3A::from_euler(EulerRot::YXZ, yaw, pitch, roll);
+    }
+
+    transform.matrix3 = rotation.mul_scalar(scale);
 }
 
 pub fn scalar_scale(a: &Affine3A) -> f32 {
