@@ -10,10 +10,10 @@ use crate::util::popup_manager::PopupHolder;
 use crate::{
 	frontend::FrontendTasks,
 	tab::settings::{
-		macros::{options_category, options_checkbox, options_dropdown, options_slider_f32, options_slider_i32},
 		SettingType, SettingsMountParams, SettingsTab,
+		macros::{options_category, options_checkbox, options_dropdown, options_slider_f32, options_slider_i32},
 	},
-	views::{input_profiles, ViewUpdateParams},
+	views::{ViewUpdateParams, input_profiles},
 };
 
 #[derive(Clone)]
