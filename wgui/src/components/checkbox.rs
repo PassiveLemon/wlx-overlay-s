@@ -221,13 +221,13 @@ fn register_event_mouse_enter(
 ) -> EventListenerID {
 	listeners.register(
 		EventListenerKind::MouseEnter,
-		Box::new(move |common, event_data, (), ()| {
+		Box::new(move |common, _event_data, (), ()| {
 			common.alterables.trigger_haptics();
 			common
 				.alterables
 				.animate(anim_hover_in(state.clone(), data.clone(), anim_mult));
 
-			ComponentTooltip::register_hover_in(common, &tooltip_info, event_data.widget_id, state.clone());
+			ComponentTooltip::register_hover_in(common, &tooltip_info, data.id_container, state.clone());
 
 			let checked = {
 				let mut state = state.borrow_mut();

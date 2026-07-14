@@ -1,10 +1,10 @@
 use std::{fs::File, io::BufReader};
 
-use serde::{de::Error as _, Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, de::Error as _};
 use wgui::{
 	drawing,
 	log::LogErr,
-	palette::{WguiColorPalette, PALETTES},
+	palette::{PALETTES, WguiColorPalette},
 };
 
 use crate::config_io;
