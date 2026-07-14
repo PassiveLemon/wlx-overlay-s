@@ -28,16 +28,16 @@ use crate::{
 
 #[derive(Clone)]
 enum TabNameEnum {
-	GeneralSettings,
 	ProcessList,
+	GeneralSettings,
 	DebugTimings,
 }
 
 impl TabNameEnum {
 	fn from_string(s: &str) -> Option<Self> {
 		match s {
-			"general_settings" => Some(TabNameEnum::GeneralSettings),
 			"process_list" => Some(TabNameEnum::ProcessList),
+			"general_settings" => Some(TabNameEnum::GeneralSettings),
 			"debug_timings" => Some(TabNameEnum::DebugTimings),
 			_ => None,
 		}
@@ -126,8 +126,8 @@ struct SubtabDebugTimings {
 #[allow(clippy::large_enum_variant)]
 enum Subtab {
 	Empty,
-	GeneralSettings(SubtabGeneralSettings),
 	ProcessList(SubtabProcessList),
+	GeneralSettings(SubtabGeneralSettings),
 	DebugTimings(SubtabDebugTimings),
 }
 
@@ -184,6 +184,10 @@ impl<T> Tab<T> for TabMonado<T> {
 				Task::SetTab(tab) => {
 					frontend.layout.remove_children(self.id_content);
 					match tab {
+						TabNameEnum::ProcessList => {
+							self.tasks.push(Task::ProcessListRefresh);
+							self.subtab = Subtab::ProcessList(SubtabProcessList::new(self.id_content, frontend)?)
+						}
 						TabNameEnum::GeneralSettings => {
 							self.subtab = Subtab::GeneralSettings(SubtabGeneralSettings::new(
 								self.id_content,
@@ -191,10 +195,6 @@ impl<T> Tab<T> for TabMonado<T> {
 								data,
 								&self.tasks,
 							)?)
-						}
-						TabNameEnum::ProcessList => {
-							self.tasks.push(Task::ProcessListRefresh);
-							self.subtab = Subtab::ProcessList(SubtabProcessList::new(self.id_content, frontend)?)
 						}
 						TabNameEnum::DebugTimings => {
 							self.subtab = Subtab::DebugTimings(SubtabDebugTimings::new(self.id_content, frontend, &self.tasks)?)
@@ -206,7 +206,6 @@ impl<T> Tab<T> for TabMonado<T> {
 
 		match &mut self.subtab {
 			Subtab::Empty => {}
-			Subtab::GeneralSettings(_) => {}
 			Subtab::ProcessList(_) => {
 				// every few seconds
 				if let Subtab::ProcessList(_) = &self.subtab
@@ -215,6 +214,7 @@ impl<T> Tab<T> for TabMonado<T> {
 					self.tasks.push(Task::ProcessListRefresh);
 				}
 			}
+			Subtab::GeneralSettings(_) => {}
 			Subtab::DebugTimings(timings) => {
 				timings.update(&self.tasks, data, frontend)?;
 			}
