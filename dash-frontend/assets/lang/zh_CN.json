@@ -284,8 +284,6 @@
 	"WELCOME": {
 		"ALL_SET": "你已准备就绪！",
 		"BASICS": "这些基础知识将帮助您轻松开始使用 WayVR。",
-		"CENTER_MARKER": "中心标记确定了您 Set 的中心位置。",
-		"DOUBLE_PRESS_TO_TOGGLE": "双击 B（Index 控制器）或 Y（Meta 控制器）来切换工作区显示。立即尝试一下。",
 		"FEATURES_DOCUMENTATION": "还有许多其他值得自定义的功能。欲了解更多信息，请查看文档：",
 		"FINISH_TUTORIAL": "完成教程",
 		"GRAB_BOTH_HANDS": "如果你想移动 Set 中的特定叠加层，请用双手抓取。",
@@ -304,7 +302,9 @@
 		"RIGHT_CLICK_MODE_ORANGE_LASER": "— 右键模式：橙色激光",
 		"THANKS_FOR_INSTALLING": "感谢安装 WayVR！",
 		"WATCH": "Watch",
-		"WORKING_SET": "工作集"
+		"WORKING_SET": "工作集",
+		"DOUBLE_PRESS_TO_TOGGLE": "双击 B 键 (Index) 或 Y 键 (Meta) 以显示、重新居中或隐藏您的集合。现在就试一下吧。",
+		"CENTER_MARKER": "中心标记是重新居中时出现在你面前的标志。请将覆盖层放置在它周围！"
 	},
 	"DOWNLOAD": "下载",
 	"SAVED_TO_FAVOURITES": "已保存至收藏夹",

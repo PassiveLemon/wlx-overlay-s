@@ -284,8 +284,6 @@
 	"WELCOME": {
 		"ALL_SET": "準備完了です！",
 		"BASICS": "これらの基本操作を学ぶことで、WayVRを簡単に使い始めることができます。",
-		"CENTER_MARKER": "センターマーカーは、セットの中心を決定します。",
-		"DOUBLE_PRESS_TO_TOGGLE": "Bボタン (Index) または Yボタン (Meta) をダブルプレスして、ワークスペースの表示/非表示を切り替えます。今すぐ試してみてください。",
 		"FEATURES_DOCUMENTATION": "他にもカスタマイズする価値のある機能がたくさんあります。詳細については、以下のドキュメントを確認してください。",
 		"FINISH_TUTORIAL": "チュートリアルを終了する",
 		"GRAB_BOTH_HANDS": "セット内の特定のオーバーレイを移動させたい場合は、両手で掴んでください。",
@@ -304,7 +302,9 @@
 		"RIGHT_CLICK_MODE_ORANGE_LASER": "— 右クリックモード：オレンジ色のレーザー",
 		"THANKS_FOR_INSTALLING": "WayVRをインストールしていただきありがとうございます！",
 		"WATCH": "Watch",
-		"WORKING_SET": "ワーキングセット"
+		"WORKING_SET": "ワーキングセット",
+		"DOUBLE_PRESS_TO_TOGGLE": "Bボタン（Index）またはYボタン（Meta）を2回押して、セットの表示・中心合わせ・非表示を切り替えてください。今すぐ試してみましょう。",
+		"CENTER_MARKER": "リセンタリング時に目の前に表示されるのがセンターマーカーです。このマーカーを中心にオーバーレイを配置してください！"
 	},
 	"DOWNLOAD": "ダウンロード",
 	"SAVED_TO_FAVOURITES": "お気に入りに保存しました",

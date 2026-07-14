@@ -284,8 +284,6 @@
 	"WELCOME": {
 		"ALL_SET": "¡Todo listo!",
 		"BASICS": "Estos conceptos básicos te permitirán empezar a usar WayVR con facilidad.",
-		"CENTER_MARKER": "El marcador central determina el centro de tu set.",
-		"DOUBLE_PRESS_TO_TOGGLE": "Pulsa dos veces B (en Index) o Y (en Meta) para alternar la visibilidad de tu espacio de trabajo. Pruébalo ahora.",
 		"FEATURES_DOCUMENTATION": "Hay muchas otras funciones que merece la pena personalizar. Para más información, consulta la documentación en",
 		"FINISH_TUTORIAL": "Finalizar tutorial",
 		"GRAB_BOTH_HANDS": "Agarra el elemento con ambas manos si quieres mover un overlay específico en tu set.",
@@ -304,7 +302,9 @@
 		"RIGHT_CLICK_MODE_ORANGE_LASER": "— Modo de clic derecho: Láser naranja",
 		"THANKS_FOR_INSTALLING": "¡Gracias por instalar WayVR!",
 		"WATCH": "Watch",
-		"WORKING_SET": "Set de trabajo"
+		"WORKING_SET": "Set de trabajo",
+		"DOUBLE_PRESS_TO_TOGGLE": "Presiona dos veces B (en Index) o Y (en Meta) para mostrar, recentrar u ocultar tu set. Pruébalo ahora.",
+		"CENTER_MARKER": "El marcador de centrado es lo que aparecerá frente a ti al recentrar. ¡Coloca las capas alrededor de él!"
 	},
 	"DOWNLOAD": "Descargar",
 	"SAVED_TO_FAVOURITES": "Guardado en favoritos",

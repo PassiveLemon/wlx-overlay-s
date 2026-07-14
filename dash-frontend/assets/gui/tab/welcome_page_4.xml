@@ -10,7 +10,7 @@
           <label shadow="#000000" size="14" weight="bold" wrap="1" color="#aaffcc" translation="WELCOME.GRAB_ONE_HAND"/>
           <label shadow="#000000" size="14" weight="bold" wrap="1" color="#ccaaff" translation="WELCOME.GRAB_BOTH_HANDS"/>
           <div align_items="center" gap="8">
-            <sprite src_builtin="dashboard/info.svg" width="24" height="24" color="#ffff00"/>
+            <sprite src_builtin="dashboard/info.svg" min_width="48" min_height="48" max_width="48" max_height="48" color="#ffff00"/>
             <label shadow="#000000" size="16" weight="bold" wrap="1" color="#ffff00" translation="WELCOME.CENTER_MARKER"/>
           </div>
         </div>

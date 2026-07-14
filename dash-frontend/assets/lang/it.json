@@ -284,8 +284,6 @@
 	"WELCOME": {
 		"ALL_SET": "Sei pronto!",
 		"BASICS": "Queste nozioni di base ti permetteranno di iniziare a usare WayVR con facilità.",
-		"CENTER_MARKER": "Il marker centrale determina il centro del tuo set.",
-		"DOUBLE_PRESS_TO_TOGGLE": "Premi due volte B (su Index) o Y (su Meta) per attivare/disattivare la visibilità del tuo workspace. Provalo subito.",
 		"FEATURES_DOCUMENTATION": "Ci sono molte altre funzioni che vale la pena personalizzare. Per ulteriori informazioni, consulta la documentazione all'indirizzo",
 		"FINISH_TUTORIAL": "Termina tutorial",
 		"GRAB_BOTH_HANDS": "Afferralo con entrambe le mani se vuoi spostare un overlay specifico nel tuo set.",
@@ -304,7 +302,9 @@
 		"RIGHT_CLICK_MODE_ORANGE_LASER": "— Modalità tasto destro: Laser arancione",
 		"THANKS_FOR_INSTALLING": "Grazie per aver installato WayVR!",
 		"WATCH": "Watch",
-		"WORKING_SET": "Set di lavoro"
+		"WORKING_SET": "Set di lavoro",
+		"DOUBLE_PRESS_TO_TOGGLE": "Premi due volte B (su Index) o Y (su Meta) per mostrare, ricentrare o nascondere il tuo set. Provalo ora.",
+		"CENTER_MARKER": "Il marker di centraggio è ciò che apparirà davanti a te durante il ricentramento. Posiziona gli overlay intorno ad esso!"
 	},
 	"DOWNLOAD": "Scarica",
 	"SAVED_TO_FAVOURITES": "Salvato nei preferiti",

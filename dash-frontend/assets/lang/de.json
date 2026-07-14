@@ -284,8 +284,6 @@
 	"WELCOME": {
 		"ALL_SET": "Du bist startklar!",
 		"BASICS": "Diese Grundlagen ermöglichen Ihnen einen einfachen Einstieg in die Nutzung von WayVR.",
-		"CENTER_MARKER": "Der Mittelpunkt-Marker bestimmt das Zentrum Ihres Sets.",
-		"DOUBLE_PRESS_TO_TOGGLE": "Drücken Sie zweimal B (auf Index) oder Y (auf Meta), um die Sichtbarkeit Ihres Arbeitsbereichs umzuschalten. Probieren Sie es jetzt aus.",
 		"FEATURES_DOCUMENTATION": "Es gibt viele weitere Funktionen, die es wert sind, angepasst zu werden. Weitere Informationen finden Sie in der Dokumentation unter",
 		"FINISH_TUTORIAL": "Tutorial beenden",
 		"GRAB_BOTH_HANDS": "Greifen Sie es mit beiden Händen, wenn Sie ein bestimmtes Overlay in Ihrem Set bewegen möchten.",
@@ -304,7 +302,9 @@
 		"RIGHT_CLICK_MODE_ORANGE_LASER": "— Rechtsklick-Modus: Oranger Laser",
 		"THANKS_FOR_INSTALLING": "Vielen Dank für die Installation von WayVR!",
 		"WATCH": "Watch",
-		"WORKING_SET": "Arbeits-Set"
+		"WORKING_SET": "Arbeits-Set",
+		"DOUBLE_PRESS_TO_TOGGLE": "Drücke B (beim Index) oder Y (beim Meta) doppelt, um dein Set anzuzeigen, neu zu zentrieren oder auszublenden. Probier es jetzt aus.",
+		"CENTER_MARKER": "Der Zentrierungsmarker ist das, was bei der Neuzentrierung vor dir erscheint. Platziere Overlays darum herum!"
 	},
 	"DOWNLOAD": "Herunterladen",
 	"SAVED_TO_FAVOURITES": "Zu Favoriten hinzugefügt",

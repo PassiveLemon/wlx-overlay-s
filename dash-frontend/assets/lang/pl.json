@@ -284,8 +284,6 @@
 	"WELCOME": {
 		"ALL_SET": "Wszystko gotowe!",
 		"BASICS": "Te podstawowe informacje pozwolą Ci z łatwością zacząć korzystać z WayVR.",
-		"CENTER_MARKER": "Znacznik środka określa środek Twojego zestawu.",
-		"DOUBLE_PRESS_TO_TOGGLE": "Naciśnij dwukrotnie przycisk B (na Index) lub Y (na Meta), aby przełączyć widoczność swojej przestrzeni roboczej. Spróbuj teraz.",
 		"FEATURES_DOCUMENTATION": "Istnieje wiele innych funkcji, które warto spersonalizować. Aby uzyskać więcej informacji, sprawdź dokumentację pod adresem:",
 		"FINISH_TUTORIAL": "Zakończ samouczek",
 		"GRAB_BOTH_HANDS": "Chwyć to obiema rękami, jeśli chcesz przenieść konkretny overlay ze swojego zestawu.",
@@ -304,7 +302,9 @@
 		"RIGHT_CLICK_MODE_ORANGE_LASER": "— Tryb prawego przycisku: Pomarańczowy laser",
 		"THANKS_FOR_INSTALLING": "Dziękujemy za zainstalowanie WayVR!",
 		"WATCH": "Watch",
-		"WORKING_SET": "Aktywny zestaw"
+		"WORKING_SET": "Aktywny zestaw",
+		"DOUBLE_PRESS_TO_TOGGLE": "Naciśnij dwukrotnie przycisk B (na Index) lub Y (na Meta), aby wyświetlić, wycentrować lub ukryć swój zestaw. Wypróbuj to teraz.",
+		"CENTER_MARKER": "Znacznik środka to punkt, który pojawi się przed Tobą podczas centrowania. Umieść wokół niego nakładki!"
 	},
 	"DOWNLOAD": "Pobierz",
 	"SAVED_TO_FAVOURITES": "Dodano do ulubionych",
