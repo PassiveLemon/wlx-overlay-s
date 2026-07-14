@@ -1,4 +1,4 @@
-use glam::{Affine3A, Quat, Vec3A, vec3a};
+use glam::{Affine3A, Quat, Vec3, Vec3A, vec3a};
 use libmonado::{MndResult, Monado, Pose, ReferenceSpaceType};
 use wgui::log::LogErr;
 
@@ -244,18 +244,33 @@ impl PlayspaceMover {
             return;
         };
 
-        pose.position.x += input.hmd.translation.x;
-        pose.position.z += input.hmd.translation.z;
+        let cur_rot: Quat = pose.orientation.into();
+        let cur_pos: Vec3 = pose.position.into();
 
-        let forward = input.hmd.transform_vector3a(Vec3A::NEG_Z);
-        let horizontal_len_sq = forward.x.mul_add(forward.x, forward.z * forward.z);
+        let mut stage_offset = Affine3A::from_rotation_translation(cur_rot, cur_pos);
 
-        // if hmd is so vertical that we can't tell where forward is, don't touch rotation
-        if horizontal_len_sq > 1e-8 {
-            let yaw = (-forward.x).atan2(-forward.z);
-            let current_rotation: Quat = pose.orientation.into();
+        let horiz_hmd_pos = Vec3::new(input.hmd.translation.x, 0.0, input.hmd.translation.z);
 
-            pose.orientation = (current_rotation * Quat::from_rotation_y(yaw)).into();
+        let fwd = input.hmd.transform_vector3a(Vec3A::NEG_Z);
+        let horiz_len_sq = fwd.x.mul_add(fwd.x, fwd.z * fwd.z);
+
+        let hmd_yaw = if horiz_len_sq > f32::EPSILON {
+            let yaw = (-fwd.x).atan2(-fwd.z);
+            Quat::from_rotation_y(yaw)
+        } else {
+            Quat::IDENTITY
+        };
+
+        let recenter_offset = Affine3A::from_rotation_translation(hmd_yaw, horiz_hmd_pos);
+
+        stage_offset *= recenter_offset;
+
+        let (_, new_rot, new_pos) = stage_offset.to_scale_rotation_translation();
+
+        pose.position = new_pos.into();
+
+        if horiz_len_sq > f32::EPSILON {
+            pose.orientation = new_rot.into();
         }
 
         let _ = monado
