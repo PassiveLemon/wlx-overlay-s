@@ -56,6 +56,7 @@ pub struct ScreenPipeline {
     offsetf: [f32; 2],
     transform: wlx_frame::Transform,
     stereo: StereoMode,
+    stereo_adjust_mouse: bool,
 }
 
 impl ScreenPipeline {
@@ -84,6 +85,7 @@ impl ScreenPipeline {
             offsetf,
             transform,
             stereo,
+            stereo_adjust_mouse: false,
         };
         me.ensure_stereo(stereo);
         Ok(me)
@@ -96,6 +98,10 @@ impl ScreenPipeline {
 
         self.stereo = stereo;
         self.pass.clear(); // ensure_depth will repopulate
+    }
+
+    pub fn set_stereo_adjust_mouse(&mut self, adjust: bool) {
+        self.stereo_adjust_mouse = adjust;
     }
 
     pub const fn transform(&self) -> wlx_frame::Transform {
@@ -253,12 +259,22 @@ impl ScreenPipeline {
             let size = CURSOR_SIZE * self.extentf[1];
             let half_size = size * 0.5;
 
+            let (x_scale, y_scale) = if self.stereo_adjust_mouse {
+                match self.stereo {
+                    StereoMode::LeftRight | StereoMode::RightLeft => (2.0, 1.0),
+                    StereoMode::TopBottom | StereoMode::BottomTop => (1.0, 2.0),
+                    _ => (1.0, 1.0),
+                }
+            } else {
+                (1.0, 1.0)
+            };
+
             upload_quad_vertices(
                 &mut self.mouse.buf_vert,
                 self.extentf[0],
                 self.extentf[1],
-                mouse.x.mul_add(self.extentf[0], -half_size),
-                mouse.y.mul_add(self.extentf[1], -half_size),
+                mouse.x.mul_add(self.extentf[0] * x_scale, -half_size),
+                mouse.y.mul_add(self.extentf[1] * y_scale, -half_size),
                 size,
                 size,
             )?;

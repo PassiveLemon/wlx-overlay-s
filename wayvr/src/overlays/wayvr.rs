@@ -343,24 +343,30 @@ impl WvrWindowBackend {
         self.interaction_transform = Some(ui_transform(meta.extent));
 
         let mut scale = vec2(
-            ((meta.extent[0] + BORDER_SIZE * 2) as f32) / (meta.extent[0] as f32),
-            ((meta.extent[1] + BORDER_SIZE * 2 + BAR_SIZE) as f32) / (meta.extent[1] as f32),
+            ((meta.extent[0] + BORDER_SIZE * 2) as f32) / meta.extent[0] as f32,
+            ((meta.extent[1] + BORDER_SIZE * 2 + BAR_SIZE) as f32) / meta.extent[1] as f32,
+        );
+
+        let mut translation = vec2(
+            -(BORDER_SIZE as f32) / meta.extent[0] as f32,
+            -((BORDER_SIZE + BAR_SIZE) as f32) / meta.extent[1] as f32,
         );
 
         if self.stereo_adjust_mouse
             && let Some(stereo) = self.stereo
         {
             match stereo {
-                StereoMode::LeftRight | StereoMode::RightLeft => scale.x *= 0.5,
-                StereoMode::TopBottom | StereoMode::BottomTop => scale.y *= 0.5,
+                StereoMode::LeftRight | StereoMode::RightLeft => {
+                    scale.x *= 0.5;
+                    translation.x *= 0.5;
+                }
+                StereoMode::TopBottom | StereoMode::BottomTop => {
+                    scale.y *= 0.5;
+                    translation.y *= 0.5;
+                }
                 _ => {}
             }
         }
-
-        let translation = vec2(
-            -(BORDER_SIZE as f32) / (meta.extent[0] as f32),
-            -((BORDER_SIZE + BAR_SIZE) as f32) / (meta.extent[1] as f32),
-        );
 
         self.mouse_transform = Affine2::from_scale_angle_translation(scale, 0.0, translation);
         self.uv_range = translation[0]..=(1.0 - translation[0]);
@@ -1022,6 +1028,9 @@ impl OverlayBackend for WvrWindowBackend {
                 if let Some(stereo) = self.stereo.as_mut() {
                     log::debug!("{}: stereo: {stereo:?} → {new:?}", self.name);
                     *stereo = new;
+                    if let Some(meta) = self.meta.clone() {
+                        let _ = self.apply_extent(app, &meta);
+                    }
                     if let Some(pipeline) = self.pipeline.as_mut() {
                         pipeline.ensure_stereo(new);
                     }
@@ -1039,6 +1048,9 @@ impl OverlayBackend for WvrWindowBackend {
                 if let Some(meta) = self.meta.take() {
                     let _ = self.apply_extent(app, &meta);
                     self.meta = Some(meta);
+                }
+                if let Some(pipeline) = self.pipeline.as_mut() {
+                    pipeline.set_stereo_adjust_mouse(new);
                 }
                 true
             }
