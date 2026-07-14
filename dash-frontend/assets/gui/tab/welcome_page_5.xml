@@ -12,7 +12,7 @@
         <label size="16" wrap="1" translation="WELCOME.BASICS"/>
         <label size="16" wrap="1" translation="WELCOME.FEATURES_DOCUMENTATION"/>
         <Button id="btn_wayvr_org" align_self="baseline" min_height="32">
-          <sprite src_builtin="dashboard/globe.svg" width="24" height="24" color="primary" margin="8"/>
+          <sprite src_builtin="dashboard/globe.svg" width="24" height="24" margin="8"/>
           <label size="18" weight="bold" text="wayvr.org" margin_right="8" />
         </Button>
 

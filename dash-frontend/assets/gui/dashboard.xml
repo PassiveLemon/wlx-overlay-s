@@ -17,7 +17,7 @@
       tooltip="${tooltip}"
       tooltip_side="${tooltip_side}"
     >
-      <sprite src_builtin="${src_builtin}" width="~side_sprite_size" height="~side_sprite_size" color="on_background_contrast" />
+      <sprite src_builtin="${src_builtin}" width="~side_sprite_size" height="~side_sprite_size" />
     </Button>
   </template>
 
