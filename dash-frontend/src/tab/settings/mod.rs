@@ -23,7 +23,7 @@ use wgui::{
 use wlx_common::{
 	config::GeneralConfig,
 	config_io::ConfigRoot,
-	dash_interface::{ConfigChangeKind, InterfaceFeats, RecenterMode},
+	dash_interface::{ConfigChangeKind, InterfaceFeats, DashPlayspaceTask},
 };
 
 use crate::{
@@ -201,7 +201,7 @@ impl<T> Tab<T> for TabSettings<T> {
 					std::fs::create_dir(&path)?;
 				}
 				Task::ResetPlayspace => {
-					frontend.interface.recenter_playspace(data, RecenterMode::Reset)?;
+					frontend.interface.playspace(data, DashPlayspaceTask::Reset)?;
 					return Ok(());
 				}
 				Task::RestartSoftware => {

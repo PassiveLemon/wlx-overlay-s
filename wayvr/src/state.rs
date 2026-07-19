@@ -336,3 +336,22 @@ pub fn load_pw_token_config() -> anyhow::Result<PwTokenMap> {
     let conf: TokenConf = serde_yaml::from_str(yaml.as_str())?;
     Ok(conf.pw_tokens)
 }
+
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
+pub struct PlayspaceState {
+    pub openvr_space_center: Affine3A,
+    pub openxr_space_center: Affine3A,
+}
+
+pub fn load_playspace_state() -> anyhow::Result<PlayspaceState> {
+    let json = std::fs::read_to_string(config_io::get_config_file_path("playspace.json5"))?;
+    let state: PlayspaceState = serde_json5::from_str(json.as_str())?;
+    Ok(state)
+}
+
+pub fn save_playspace_state(state: &PlayspaceState) -> anyhow::Result<()> {
+    let json = serde_json5::to_string(state)?;
+    std::fs::write(config_io::get_config_file_path("playspace.json5"), json)?;
+    Ok(())
+}

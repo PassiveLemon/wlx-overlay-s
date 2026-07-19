@@ -8,7 +8,7 @@ use crate::{
         playspace_common::{self, SpaceGravity, SpaceGravityUpdateParams},
         task::PlayspaceTask,
     },
-    state::AppState,
+    state::{AppState, PlayspaceState, load_playspace_state},
     windowing::manager::OverlayWindowManager,
 };
 
@@ -25,6 +25,7 @@ pub(super) struct PlayspaceMover {
     rotate: Option<MoverData<Quat>>,
     gravity: SpaceGravity,
     floor_y: f32,
+    playspace_state: PlayspaceState,
 }
 
 impl PlayspaceMover {
@@ -42,6 +43,7 @@ impl PlayspaceMover {
             rotate: None,
             gravity: SpaceGravity::new(),
             floor_y: pose.position.y,
+            playspace_state: load_playspace_state().unwrap_or_default(),
         })
     }
 
@@ -60,6 +62,7 @@ impl PlayspaceMover {
             PlayspaceTask::Recenter => {
                 self.recenter(&app.input_state, &mut monado.ipc);
             }
+            PlayspaceTask::SaveCenter => { /* OpenVR only */ }
         }
     }
 
@@ -324,6 +327,28 @@ impl PlayspaceMover {
         let _ = monado
             .set_reference_space_offset(ReferenceSpaceType::Stage, pose)
             .inspect_err(|e| log::warn!("Could not fix floor due to libmonado error: {e:?}"));
+    }
+
+    pub fn save_center(&mut self, monado: &mut Monado) {
+        if self.drag.is_some() {
+            log::info!("Space drag interrupted by save center");
+            self.drag = None;
+        }
+        if self.rotate.is_some() {
+            log::info!("Space rotate interrupted by save center");
+            self.rotate = None;
+        }
+
+        let Ok(mut pose) = monado
+            .get_reference_space_offset(ReferenceSpaceType::Stage)
+            .inspect_err(|e| log::warn!("Could not fix floor due to libmonado error: {e:?}"))
+        else {
+            return;
+        };
+
+        self.playspace_state.openxr_space_center = mat;
+        let _ =
+            save_playspace_state(&self.playspace_state).log_err("Could not save playspace state");
     }
 }
 

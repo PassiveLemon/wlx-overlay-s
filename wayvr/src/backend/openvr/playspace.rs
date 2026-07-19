@@ -4,10 +4,12 @@ use ovr_overlay::{
     compositor::CompositorManager,
     sys::{EChaperoneConfigFile, ETrackingUniverseOrigin, HmdMatrix34_t},
 };
+use wgui::log::LogErr;
+use wlx_common::config::GeneralConfig;
 
 use crate::{
     backend::{input::InputState, playspace_common, task::PlayspaceTask},
-    state::AppState,
+    state::{AppState, PlayspaceState, load_playspace_state, save_playspace_state},
     windowing::manager::OverlayWindowManager,
 };
 
@@ -24,6 +26,7 @@ pub(super) struct PlayspaceMover {
     drag: Option<MoverData<Vec3A>>,
     rotate: Option<MoverData<Quat>>,
     floor_y: Option<f32>,
+    playspace_state: PlayspaceState,
 }
 
 impl PlayspaceMover {
@@ -33,6 +36,7 @@ impl PlayspaceMover {
             drag: None,
             rotate: None,
             floor_y: None,
+            playspace_state: load_playspace_state().unwrap_or_default(),
         }
     }
 
@@ -51,6 +55,9 @@ impl PlayspaceMover {
             }
             PlayspaceTask::Recenter => {
                 self.recenter(chaperone_mgr, &app.input_state);
+            }
+            PlayspaceTask::SaveCenter => {
+                self.save_center(chaperone_mgr);
             }
         }
     }
@@ -304,6 +311,26 @@ impl PlayspaceMover {
 
     pub fn get_universe(&self) -> ETrackingUniverseOrigin {
         self.universe.clone()
+    }
+
+    pub fn save_center(&mut self, chaperone_mgr: &mut ChaperoneSetupManager) {
+        if self.drag.is_some() {
+            log::info!("Space drag interrupted by save center");
+            self.drag = None;
+        }
+        if self.rotate.is_some() {
+            log::info!("Space rotate interrupted by save center");
+            self.rotate = None;
+        }
+
+        let Some(mat) = get_working_copy(&self.universe, chaperone_mgr) else {
+            log::warn!("Can't save center - failed to get zero pose");
+            return;
+        };
+
+        self.playspace_state.openvr_space_center = mat;
+        let _ =
+            save_playspace_state(&self.playspace_state).log_err("Could not save playspace state");
     }
 }
 

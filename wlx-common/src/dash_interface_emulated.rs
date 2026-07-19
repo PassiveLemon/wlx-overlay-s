@@ -5,7 +5,7 @@ use wayvr_ipc::{
 
 use crate::{
 	config::GeneralConfig,
-	dash_interface::{self, ConfigChangeKind, DashInterface, RecenterMode},
+	dash_interface::{self, ConfigChangeKind, DashInterface, DashPlayspaceTask},
 	desktop_finder::DesktopFinder,
 	gen_id,
 };
@@ -217,7 +217,7 @@ impl DashInterface<()> for DashInterfaceEmulated {
 		}
 	}
 
-	fn recenter_playspace(&mut self, _: &mut (), _: RecenterMode) -> anyhow::Result<()> {
+	fn playspace(&mut self, _: &mut (), _: DashPlayspaceTask) -> anyhow::Result<()> {
 		// stub!
 		Ok(())
 	}

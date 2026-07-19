@@ -22,7 +22,7 @@ use wgui::{
 use wlx_common::{
 	async_executor::AsyncExecutor,
 	audio,
-	dash_interface::{BoxDashInterface, ConfigChangeKind, RecenterMode},
+	dash_interface::{BoxDashInterface, ConfigChangeKind, DashPlayspaceTask},
 	locale::WayVRLangProvider,
 	palette::load_palette,
 	timestep::{self, Timestep},
@@ -31,8 +31,8 @@ use wlx_common::{
 use crate::{
 	assets,
 	tab::{
-		Tab, TabType, apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado,
-		settings::TabSettings, welcome::TabWelcome,
+		apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado, settings::TabSettings,
+		welcome::TabWelcome, Tab, TabType,
 	},
 	util::{
 		popup_manager::{MountPopupOnceParams, PopupManager, PopupManagerParams},
@@ -553,7 +553,7 @@ impl<T: 'static> Frontend<T> {
 	}
 
 	fn action_recenter_playspace(&mut self, data: &mut T) -> anyhow::Result<()> {
-		self.interface.recenter_playspace(data, RecenterMode::Recenter)?;
+		self.interface.playspace(data, DashPlayspaceTask::Recenter)?;
 		Ok(())
 	}
 

@@ -20,7 +20,7 @@ use wgui::{
     widget::EventResult,
 };
 use wlx_common::{
-    dash_interface::{self, ConfigChangeKind, DashInterface, RecenterMode},
+    dash_interface::{self, ConfigChangeKind, DashInterface, DashPlayspaceTask},
     locale::WayVRLangProvider,
     overlays::{BackendAttrib, BackendAttribValue},
 };
@@ -504,11 +504,17 @@ impl DashInterface<AppState> for DashInterfaceLive {
         Ok(())
     }
 
-    fn recenter_playspace(&mut self, app: &mut AppState, mode: RecenterMode) -> anyhow::Result<()> {
+    fn playspace_task(
+        &mut self,
+        app: &mut AppState,
+        mode: DashPlayspaceTask,
+    ) -> anyhow::Result<()> {
         let task = match mode {
-            RecenterMode::FixFloor => PlayspaceTask::FixFloor,
-            RecenterMode::Recenter => PlayspaceTask::Recenter,
-            RecenterMode::Reset => PlayspaceTask::Reset,
+            DashPlayspaceTask::FixFloor => PlayspaceTask::FixFloor,
+            DashPlayspaceTask::Recenter => PlayspaceTask::Recenter,
+            DashPlayspaceTask::Reset => PlayspaceTask::Reset,
+            #[cfg(feature = "openvr")]
+            DashPlayspaceTask::SaveCenter => PlayspaceTask::SaveCenter,
         };
         app.tasks.enqueue(TaskType::Playspace(task));
         Ok(())

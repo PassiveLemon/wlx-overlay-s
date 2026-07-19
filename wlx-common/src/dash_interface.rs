@@ -37,10 +37,11 @@ pub struct MonadoDumpSessionFrame {
 }
 
 #[derive(Clone, Copy)]
-pub enum RecenterMode {
+pub enum DashPlayspaceTask {
 	FixFloor,
 	Recenter,
 	Reset,
+	SaveCenter,
 }
 
 #[derive(Clone, Copy)]
@@ -69,7 +70,7 @@ pub trait DashInterface<T> {
 	fn monado_brightness_set(&mut self, data: &mut T, brightness: f32) -> Option<()>;
 	fn monado_metrics_set_enabled(&mut self, data: &mut T, enabled: bool) -> bool;
 	fn monado_metrics_dump_session_frames(&mut self, data: &mut T) -> Vec<MonadoDumpSessionFrame>;
-	fn recenter_playspace(&mut self, data: &mut T, mode: RecenterMode) -> anyhow::Result<()>;
+	fn playspace_task(&mut self, data: &mut T, mode: DashPlayspaceTask) -> anyhow::Result<()>;
 	fn desktop_finder<'a>(&'a mut self, data: &'a mut T) -> &'a mut DesktopFinder;
 	fn general_config<'a>(&'a mut self, data: &'a mut T) -> &'a mut GeneralConfig;
 	fn config_changed(&mut self, data: &mut T, kind: ConfigChangeKind);
