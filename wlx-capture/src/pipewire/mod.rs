@@ -484,9 +484,9 @@ impl ScreenCastManager {
                 ))?;
 
                 let requested_types = if params.screens_only {
-                    SOURCE_MONITOR | SOURCE_WINDOW | SOURCE_VIRTUAL
-                } else {
                     SOURCE_MONITOR
+                } else {
+                    SOURCE_MONITOR | SOURCE_WINDOW | SOURCE_VIRTUAL
                 };
 
                 let source_types = requested_types & globals.source_types;
