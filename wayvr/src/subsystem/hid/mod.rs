@@ -71,7 +71,7 @@ pub const CTRL: KeyModifier = 0x04;
 pub const ALT: KeyModifier = 0x08;
 pub const NUM_LOCK: KeyModifier = 0x10;
 pub const SUPER: KeyModifier = 0x40;
-pub const META: KeyModifier = 0x80;
+pub const ALTGR: KeyModifier = 0x80;
 
 #[allow(non_camel_case_types)]
 #[repr(u16)]
@@ -173,7 +173,8 @@ pub enum VirtualKey {
     RCtrl,
     KP_Divide,
     Print,
-    Meta, // Right Alt aka AltGr
+    #[strum(serialize = "AltGr", serialize = "Meta")]
+    AltGr,
     Home = 110,
     Up,
     Prior,
@@ -242,7 +243,7 @@ pub static KEYS_TO_MODS: LazyLock<IdMap<VirtualKey, KeyModifier>> = LazyLock::ne
         VirtualKey::NumLock => NUM_LOCK,
         VirtualKey::LSuper => SUPER,
         VirtualKey::RSuper => SUPER,
-        VirtualKey::Meta => META,
+        VirtualKey::AltGr => ALTGR,
     }
 });
 
@@ -254,7 +255,7 @@ pub static MODS_TO_KEYS: LazyLock<IdMap<KeyModifier, Vec<VirtualKey>>> = LazyLoc
         ALT => vec![VirtualKey::LAlt],
         NUM_LOCK => vec![VirtualKey::NumLock],
         SUPER => vec![VirtualKey::LSuper, VirtualKey::RSuper],
-        META => vec![VirtualKey::Meta],
+        ALTGR => vec![VirtualKey::AltGr],
     }
 });
 
@@ -353,7 +354,7 @@ impl XkbKeymap {
         let state0 = xkb::State::new(&self.inner);
         let mut state1 = xkb::State::new(&self.inner);
         state1.update_key(
-            xkb::Keycode::from(VirtualKey::Meta as u32),
+            xkb::Keycode::from(VirtualKey::AltGr as u32),
             xkb::KeyDirection::Down,
         );
 

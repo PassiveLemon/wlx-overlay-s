@@ -71,7 +71,8 @@ pub enum AltModifier {
 	Ctrl,
 	Alt,
 	Super,
-	Meta,
+	#[serde(alias = "Meta")]
+	AltGr,
 }
 
 #[derive(Debug, Default, Clone, Copy, Serialize, Deserialize, AsRefStr, EnumString, EnumProperty, VariantArray)]

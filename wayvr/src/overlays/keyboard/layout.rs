@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     config::{ConfigType, load_known_yaml},
     subsystem::hid::{
-        KEYS_TO_MODS, KeyType, META, NUM_LOCK, SHIFT, VirtualKey, XkbKeymap, get_key_type,
+        ALTGR, KEYS_TO_MODS, KeyType, NUM_LOCK, SHIFT, VirtualKey, XkbKeymap, get_key_type,
     },
 };
 
@@ -83,7 +83,7 @@ impl Layout {
                             label.push(label1);
                             if has_altgr {
                                 cap_type = KeyCapType::LetterAltGr;
-                                label.push(keymap.label_for_key(vk, META));
+                                label.push(keymap.label_for_key(vk, ALTGR));
                             } else {
                                 cap_type = KeyCapType::Letter;
                             }
@@ -91,7 +91,7 @@ impl Layout {
                             label.push(label0);
                             label.push(label1);
                             if has_altgr {
-                                label.push(keymap.label_for_key(vk, META));
+                                label.push(keymap.label_for_key(vk, ALTGR));
                                 cap_type = KeyCapType::SymbolAltGr;
                             } else {
                                 cap_type = KeyCapType::Symbol;

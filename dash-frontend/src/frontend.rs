@@ -31,8 +31,8 @@ use wlx_common::{
 use crate::{
 	assets,
 	tab::{
-		apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado, settings::TabSettings,
-		welcome::TabWelcome, Tab, TabType,
+		Tab, TabType, apps::TabApps, donate::TabDonate, games::TabGames, home::TabHome, monado::TabMonado,
+		settings::TabSettings, welcome::TabWelcome,
 	},
 	util::{
 		popup_manager::{MountPopupOnceParams, PopupManager, PopupManagerParams},

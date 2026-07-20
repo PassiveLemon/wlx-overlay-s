@@ -17,7 +17,7 @@ use crate::{
     subsystem::{
         dbus::DbusConnector,
         hid::{
-            ALT, CTRL, KeyModifier, META, SHIFT, SUPER, VirtualKey, WheelDelta, XkbKeymap,
+            ALT, ALTGR, CTRL, KeyModifier, SHIFT, SUPER, VirtualKey, WheelDelta, XkbKeymap,
             get_keymap_wl, get_keymap_x11,
         },
     },
@@ -46,7 +46,7 @@ pub mod builder;
 mod layout;
 
 pub const KEYBOARD_NAME: &str = "kbd";
-const AUTO_RELEASE_MODS: [KeyModifier; 5] = [SHIFT, CTRL, ALT, SUPER, META];
+const AUTO_RELEASE_MODS: [KeyModifier; 5] = [SHIFT, CTRL, ALT, SUPER, ALTGR];
 const SYSTEM_LAYOUT_ALIASES: [&str; 5] = ["mozc", "pinyin", "hangul", "sayura", "unikey"];
 
 pub fn create_keyboard(app: &mut AppState, wayland: bool) -> anyhow::Result<OverlayWindowConfig> {
@@ -127,7 +127,7 @@ const fn alt_modifier_to_key(m: AltModifier) -> KeyModifier {
         AltModifier::Ctrl => CTRL,
         AltModifier::Alt => ALT,
         AltModifier::Super => SUPER,
-        AltModifier::Meta => META,
+        AltModifier::AltGr => ALTGR,
         _ => 0,
     }
 }

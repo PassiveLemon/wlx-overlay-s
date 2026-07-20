@@ -23,7 +23,7 @@ use wgui::{
 use wlx_common::{
 	config::GeneralConfig,
 	config_io::ConfigRoot,
-	dash_interface::{ConfigChangeKind, InterfaceFeats, DashPlayspaceTask},
+	dash_interface::{ConfigChangeKind, DashPlayspaceTask, InterfaceFeats},
 };
 
 use crate::{

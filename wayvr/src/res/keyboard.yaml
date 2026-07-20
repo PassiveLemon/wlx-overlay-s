@@ -26,9 +26,9 @@ key_sizes:
     - [1.25, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2.75,    1.5,    1, 1.5,       1, 1, 1, 1]
     - [1.25, 1.25, 1.25, 6.25, 1.25, 1.25, 1.25, 1.25, 0.5, 1, 1, 1, 0.5,    2,    1, 1]
 
-# The main (blue) layout of the keyboard.
+# The layout of the keyboard.
 # Accepted are:
-# - virtual keys. For a full list, look at enum VirtualKey in https://github.com/galister/wlx-overlay-s/blob/main/src/hid.rs
+# - virtual keys. For a full list, see https://github.com/wayvr-org/wayvr/blob/786660a4d54b73714399c9433a68c8cc35eb55f4/wayvr/src/subsystem/hid/mod.rs#L79
 # - exec_commands (defined below)
 # - macros (defined below)
 # - ~ (null) will leave an empty space with the corresponding size from key_sizes
@@ -38,19 +38,19 @@ main_layout:
     - ["Tab", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "Oem4", "Oem6", "Oem5", ~, "Delete", "End", "Next", ~, "KP_7", "KP_8", "KP_9", "KP_Add"]
     - ["XF86Favorites", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Oem1", "Oem7", "Return", ~, "KP_4", "KP_5", "KP_6", ~]
     - ["LShift", "Oem102", "Z", "X", "C", "V", "B", "N", "M", "Comma", "Period", "Oem2", "RShift", ~, "Up", ~, "KP_1", "KP_2", "KP_3", "KP_Enter"]
-    - ["LCtrl", "LSuper", "LAlt", "Space", "Meta", "RSuper", "Menu", "RCtrl", ~, "Left", "Down", "Right", ~, "KP_0", "KP_Decimal", "MAP"]
+    - ["LCtrl", "LSuper", "LAlt", "Space", "AltGr", "RSuper", "Menu", "RCtrl", ~, "Left", "Down", "Right", ~, "KP_0", "KP_Decimal", "MAP"]
 
 # Shell commands to be used in a layout.
 # Value is an array of string arguments.
 exec_commands:
     STT: [ "whisper_stt", "--lang", "en" ]
+    MAP: [ "killall", "-USR1", "wayvr"] # reloads keymap
 
 # Series of keypresses to be used in a layout.
 # Format: keyName [DOWN|UP]
 # keyName must be a valid virtual key from the VirtualKey enum (see above)
 # DOWN|UP: can be omitted for an implicit "keyName DOWN, keyName UP"
 macros:
-    MAP: [ "killall", "-USR1", "wayvr"] # reloads keymap
     KILL: [ "LSuper DOWN", "LCtrl DOWN", "Escape", "LCtrl UP", "LSuper UP" ]
     COPY: [ "LCtrl DOWN", "C", "LCtrl UP" ]
     PASTE: [ "LCtrl DOWN", "V", "LCtrl UP" ]
