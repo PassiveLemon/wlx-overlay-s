@@ -8,7 +8,7 @@ use crate::{
         playspace_common::{self, SpaceGravity, SpaceGravityUpdateParams},
         task::PlayspaceTask,
     },
-    state::{AppState, PlayspaceState, load_playspace_state},
+    state::{AppState, PlayspaceState, load_playspace_state, save_playspace_state},
     windowing::manager::OverlayWindowManager,
 };
 
@@ -62,7 +62,9 @@ impl PlayspaceMover {
             PlayspaceTask::Recenter => {
                 self.recenter(&app.input_state, &mut monado.ipc);
             }
-            PlayspaceTask::SaveCenter => { /* OpenVR only */ }
+            PlayspaceTask::SaveCenter => {
+                self.save_center(&mut monado.ipc);
+            }
         }
     }
 
@@ -339,14 +341,18 @@ impl PlayspaceMover {
             self.rotate = None;
         }
 
-        let Ok(mut pose) = monado
+        let Ok(pose) = monado
             .get_reference_space_offset(ReferenceSpaceType::Stage)
             .inspect_err(|e| log::warn!("Could not fix floor due to libmonado error: {e:?}"))
         else {
             return;
         };
 
-        self.playspace_state.openxr_space_center = mat;
+        let cur_rot: Quat = pose.orientation.into();
+        let cur_pos: Vec3 = pose.position.into();
+
+        let stage_offset = Affine3A::from_rotation_translation(cur_rot, cur_pos);
+        self.playspace_state.openxr_space_center = stage_offset;
         let _ =
             save_playspace_state(&self.playspace_state).log_err("Could not save playspace state");
     }

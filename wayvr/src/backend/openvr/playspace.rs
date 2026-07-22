@@ -5,7 +5,6 @@ use ovr_overlay::{
     sys::{EChaperoneConfigFile, ETrackingUniverseOrigin, HmdMatrix34_t},
 };
 use wgui::log::LogErr;
-use wlx_common::config::GeneralConfig;
 
 use crate::{
     backend::{input::InputState, playspace_common, task::PlayspaceTask},
