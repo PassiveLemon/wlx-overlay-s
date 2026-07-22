@@ -58,6 +58,9 @@ impl PlayspaceMover {
             PlayspaceTask::SaveCenter => {
                 self.save_center(chaperone_mgr);
             }
+            PlayspaceTask::ResetCenter => {
+                self.playspace_state.openvr_space_center = Affine3A::IDENTITY;
+            }
         }
     }
 

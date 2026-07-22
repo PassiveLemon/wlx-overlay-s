@@ -194,7 +194,11 @@
 		"COLOR_PALETTE_CUSTOM_URL": "Füge dein eigenes benutzerdefiniertes Thema hinzu!",
 		"COLOR_PALETTE_CUSTOM_URL2": "Klicken Sie hier, um das Web-Handbuch zu öffnen.",
 		"SNAP_ANGLE_DEG": "Snap-Winkel für Fensterneigung und Rollwinkel",
-		"SNAP_ANGLE_DEG_HELP": "Gegriffene Fenster rasten in diesem Winkel auf der Nick- und Rollachse ein."
+		"SNAP_ANGLE_DEG_HELP": "Gegriffene Fenster rasten in diesem Winkel auf der Nick- und Rollachse ein.",
+		"SAVE_PLAYSPACE_CENTER": "Playspace-Zentrum speichern",
+		"SAVE_PLAYSPACE_CENTER_HELP": "Nutzen Sie den aktuellen Playspace für die Zuweisung zum Zurücksetzen des Playspaces.",
+		"RESET_PLAYSPACE_CENTER": "Playspace-Zentrum zurücksetzen",
+		"RESET_PLAYSPACE_CENTER_HELP": "Zuvor festgelegtes Playspace-Zentrum zurücksetzen."
 	},
 	"HELLO": "Hallo!",
 	"AUDIO": {

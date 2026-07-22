@@ -194,7 +194,11 @@
 		"COLOR_PALETTE_CUSTOM_URL": "¡Añade tu propio tema personalizado!",
 		"COLOR_PALETTE_CUSTOM_URL2": "Haz clic para abrir el manual web.",
 		"SNAP_ANGLE_DEG": "Ángulo de ajuste de cabeceo y alabeo de la ventana",
-		"SNAP_ANGLE_DEG_HELP": "Las ventanas agarradas se ajustan a este ángulo en los ejes de cabeceo y balanceo."
+		"SNAP_ANGLE_DEG_HELP": "Las ventanas agarradas se ajustan a este ángulo en los ejes de cabeceo y balanceo.",
+		"SAVE_PLAYSPACE_CENTER": "Guardar centro del playspace",
+		"SAVE_PLAYSPACE_CENTER_HELP": "Usa el playspace actual para el comando de restablecer playspace.",
+		"RESET_PLAYSPACE_CENTER": "Reiniciar centro del playspace",
+		"RESET_PLAYSPACE_CENTER_HELP": "Borra el centro del playspace establecido previamente."
 	},
 	"HELLO": "¡Hola!",
 	"AUDIO": {

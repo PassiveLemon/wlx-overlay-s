@@ -189,7 +189,11 @@
 		"COLOR_PALETTE_CUSTOM_URL": "Dodaj własny motyw!",
 		"COLOR_PALETTE_CUSTOM_URL2": "Kliknij, aby otworzyć instrukcję internetową.",
 		"SNAP_ANGLE_DEG": "Kąt przyciągania pochylenia i przechyłu okna",
-		"SNAP_ANGLE_DEG_HELP": "Chwycone okna przyciągają się do tego kąta na osi pochylenia i obrotu."
+		"SNAP_ANGLE_DEG_HELP": "Chwycone okna przyciągają się do tego kąta na osi pochylenia i obrotu.",
+		"SAVE_PLAYSPACE_CENTER": "Zapisz centrum obszaru gry",
+		"SAVE_PLAYSPACE_CENTER_HELP": "Użyj aktualnego obszaru gry dla przypisania resetowania obszaru gry.",
+		"RESET_PLAYSPACE_CENTER": "Zresetuj środek obszaru gry",
+		"RESET_PLAYSPACE_CENTER_HELP": "Wyczyść poprzednio ustawiony środek obszaru playspace."
 	},
 	"APPLICATION_LAUNCHER": "Uruchamiacz aplikacji",
 	"APPLICATIONS": "Aplikacje",

@@ -18,13 +18,6 @@ impl State {
 		options_danger_button(
 			par.mp,
 			c,
-			"APP_SETTINGS.RESET_PLAYSPACE",
-			"dashboard/recenter.svg",
-			Task::ResetPlayspace,
-		)?;
-		options_danger_button(
-			par.mp,
-			c,
 			"APP_SETTINGS.CLEAR_PIPEWIRE_TOKENS",
 			"dashboard/display.svg",
 			Task::ClearPipewireTokens,

@@ -65,6 +65,9 @@ impl PlayspaceMover {
             PlayspaceTask::SaveCenter => {
                 self.save_center(&mut monado.ipc);
             }
+            PlayspaceTask::ResetCenter => {
+                self.playspace_state.openxr_space_center = Affine3A::IDENTITY;
+            }
         }
     }
 

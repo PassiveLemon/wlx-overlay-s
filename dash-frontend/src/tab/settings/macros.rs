@@ -336,6 +336,36 @@ pub fn options_danger_button(
 	Ok(())
 }
 
+pub fn options_button(
+	mp: &mut MacroParams,
+	parent: WidgetID,
+	translation: &str,
+	icon: &str,
+	task: Task,
+) -> anyhow::Result<()> {
+	let id = mp.idx.to_string();
+	mp.idx += 1;
+
+	let mut params = TemplateParams::new();
+	params.insert("id", &id);
+	params.insert("translation", translation);
+	params.insert("icon", icon);
+
+	mp.parser_state
+		.instantiate_template(mp.doc_params, "ButtonText", mp.layout, parent, params)?;
+
+	let btn = mp.parser_state.fetch_component_as::<ComponentButton>(&id)?;
+	btn.on_click(Rc::new({
+		let tasks = mp.tasks.clone();
+		move |_common, _e| {
+			tasks.push(task.clone());
+			Ok(())
+		}
+	}));
+
+	Ok(())
+}
+
 pub fn options_autostart_app(
 	mp: &mut MacroParams,
 	parent: WidgetID,

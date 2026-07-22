@@ -194,7 +194,11 @@
 		"COLOR_PALETTE_CUSTOM_URL": "カスタムテーマを追加しましょう！",
 		"COLOR_PALETTE_CUSTOM_URL2": "クリックしてウェブマニュアルを開く。",
 		"SNAP_ANGLE_DEG": "ウィンドウのピッチ・ロールのスナップ角度",
-		"SNAP_ANGLE_DEG_HELP": "掴んでいるウィンドウが、ピッチ軸とロール軸でこの角度にスナップします。"
+		"SNAP_ANGLE_DEG_HELP": "掴んでいるウィンドウが、ピッチ軸とロール軸でこの角度にスナップします。",
+		"SAVE_PLAYSPACE_CENTER": "プレイスペースの中心を保存",
+		"SAVE_PLAYSPACE_CENTER_HELP": "現在のプレイスペースを、プレイスペースのリセットバインディングに使用します。",
+		"RESET_PLAYSPACE_CENTER": "playspaceの中心をリセット",
+		"RESET_PLAYSPACE_CENTER_HELP": "previously set playspace center をリセットします。"
 	},
 	"HELLO": "こんにちは！",
 	"AUDIO": {

@@ -215,7 +215,11 @@
 		"COLOR_PALETTE_CUSTOM_URL": "Aggiungi il tuo tema personalizzato!",
 		"COLOR_PALETTE_CUSTOM_URL2": "Clicca per aprire il manuale web.",
 		"SNAP_ANGLE_DEG": "Angolo di scatto beccheggio e rollio finestra",
-		"SNAP_ANGLE_DEG_HELP": "Le finestre afferrate si allineano a questo angolo sugli assi di beccheggio e rollio."
+		"SNAP_ANGLE_DEG_HELP": "Le finestre afferrate si allineano a questo angolo sugli assi di beccheggio e rollio.",
+		"SAVE_PLAYSPACE_CENTER": "Salva centro playspace",
+		"SAVE_PLAYSPACE_CENTER_HELP": "Usa il playspace corrente per il comando di reset del playspace.",
+		"RESET_PLAYSPACE_CENTER": "Ripristina centro playspace",
+		"RESET_PLAYSPACE_CENTER_HELP": "Ripristina il centro del playspace impostato precedentemente."
 	},
 	"APPLICATION_LAUNCHER": "Lanciatore applicazioni",
 	"APPLICATION_STARTED": "Applicazione avviata",

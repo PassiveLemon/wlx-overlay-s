@@ -513,8 +513,8 @@ impl DashInterface<AppState> for DashInterfaceLive {
             DashPlayspaceTask::FixFloor => PlayspaceTask::FixFloor,
             DashPlayspaceTask::Recenter => PlayspaceTask::Recenter,
             DashPlayspaceTask::Reset => PlayspaceTask::Reset,
-            #[cfg(feature = "openvr")]
             DashPlayspaceTask::SaveCenter => PlayspaceTask::SaveCenter,
+            DashPlayspaceTask::ResetCenter => PlayspaceTask::ResetCenter,
         };
         app.tasks.enqueue(TaskType::Playspace(task));
         Ok(())

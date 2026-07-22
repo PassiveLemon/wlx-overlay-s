@@ -78,7 +78,9 @@ pub(crate) enum Task {
 	OpenContextMenu(Vec2, Vec<context_menu::Cell>),
 	RemoveAutostartApp(Rc<str>),
 	ResetPlayspace,
+	ResetPlayspaceCenter,
 	RestartSoftware,
+	SavePlayspaceCenter,
 	SetTab(TabNameEnum),
 	SettingUpdated(SettingType),
 	UpdateBool(SettingType, bool),
@@ -199,6 +201,16 @@ impl<T> Tab<T> for TabSettings<T> {
 					let path = ConfigRoot::Generic.get_conf_d_path();
 					std::fs::remove_dir_all(&path)?;
 					std::fs::create_dir(&path)?;
+				}
+				Task::SavePlayspaceCenter => {
+					frontend.interface.playspace_task(data, DashPlayspaceTask::SaveCenter)?;
+					return Ok(());
+				}
+				Task::ResetPlayspaceCenter => {
+					frontend
+						.interface
+						.playspace_task(data, DashPlayspaceTask::ResetCenter)?;
+					return Ok(());
 				}
 				Task::ResetPlayspace => {
 					frontend.interface.playspace_task(data, DashPlayspaceTask::Reset)?;

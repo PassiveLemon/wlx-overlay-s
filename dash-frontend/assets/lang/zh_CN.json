@@ -215,7 +215,11 @@
 		"COLOR_PALETTE_CUSTOM_URL": "添加自定义主题！",
 		"COLOR_PALETTE_CUSTOM_URL2": "点击打开网页版手册。",
 		"SNAP_ANGLE_DEG": "窗口俯仰与翻滚捕捉角度",
-		"SNAP_ANGLE_DEG_HELP": "抓取的窗口在俯仰轴和翻滚轴上将对齐到此角度。"
+		"SNAP_ANGLE_DEG_HELP": "抓取的窗口在俯仰轴和翻滚轴上将对齐到此角度。",
+		"SAVE_PLAYSPACE_CENTER": "保存 Playspace 中心",
+		"SAVE_PLAYSPACE_CENTER_HELP": "将当前活动空间用于重置活动空间的绑定。",
+		"RESET_PLAYSPACE_CENTER": "重置游玩区域中心",
+		"RESET_PLAYSPACE_CENTER_HELP": "清除之前设置的 Playspace 中心。"
 	},
 	"APPLICATION_LAUNCHER": "应用启动器",
 	"APPLICATION_STARTED": "应用已启动",

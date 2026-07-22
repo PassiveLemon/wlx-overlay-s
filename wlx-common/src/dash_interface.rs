@@ -42,6 +42,7 @@ pub enum DashPlayspaceTask {
 	Recenter,
 	Reset,
 	SaveCenter,
+	ResetCenter,
 }
 
 #[derive(Clone, Copy)]

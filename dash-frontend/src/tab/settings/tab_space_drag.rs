@@ -8,7 +8,7 @@ use wgui::{
 use crate::{
 	tab::settings::{
 		SettingType, SettingsMountParams, SettingsTab,
-		macros::{options_category, options_checkbox, options_slider_f32},
+		macros::{options_button, options_category, options_checkbox, options_slider_f32},
 	},
 	util::wgui_simple,
 };
@@ -56,6 +56,31 @@ impl State {
 
 		if !par.feats.openxr || par.feats.monado {
 			// monado or openvr
+
+			options_button(
+				par.mp,
+				c,
+				"APP_SETTINGS.RESET_PLAYSPACE",
+				"dashboard/refresh.svg",
+				super::Task::ResetPlayspace,
+			)?;
+
+			options_button(
+				par.mp,
+				c,
+				"APP_SETTINGS.SAVE_PLAYSPACE_CENTER",
+				"dashboard/recenter.svg",
+				super::Task::SavePlayspaceCenter,
+			)?;
+
+			options_button(
+				par.mp,
+				c,
+				"APP_SETTINGS.RESET_PLAYSPACE_CENTER",
+				"dashboard/trash.svg",
+				super::Task::ResetPlayspaceCenter,
+			)?;
+
 			options_checkbox(par.mp, id_common_options_parent, SettingType::SpaceDragUnlocked)?;
 
 			options_slider_f32(

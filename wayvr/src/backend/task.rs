@@ -63,8 +63,8 @@ pub enum PlayspaceTask {
     Recenter,
     Reset,
     FixFloor,
-    #[cfg(feature = "openvr")]
     SaveCenter,
+    ResetCenter,
 }
 
 #[derive(Debug, Clone)]
