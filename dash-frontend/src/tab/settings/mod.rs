@@ -201,7 +201,7 @@ impl<T> Tab<T> for TabSettings<T> {
 					std::fs::create_dir(&path)?;
 				}
 				Task::ResetPlayspace => {
-					frontend.interface.playspace(data, DashPlayspaceTask::Reset)?;
+					frontend.interface.playspace_task(data, DashPlayspaceTask::Reset)?;
 					return Ok(());
 				}
 				Task::RestartSoftware => {

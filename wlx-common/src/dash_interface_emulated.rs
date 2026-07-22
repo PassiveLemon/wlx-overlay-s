@@ -217,7 +217,7 @@ impl DashInterface<()> for DashInterfaceEmulated {
 		}
 	}
 
-	fn playspace(&mut self, _: &mut (), _: DashPlayspaceTask) -> anyhow::Result<()> {
+	fn playspace_task(&mut self, _: &mut (), _: DashPlayspaceTask) -> anyhow::Result<()> {
 		// stub!
 		Ok(())
 	}

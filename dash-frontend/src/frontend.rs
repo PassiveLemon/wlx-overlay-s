@@ -553,7 +553,7 @@ impl<T: 'static> Frontend<T> {
 	}
 
 	fn action_recenter_playspace(&mut self, data: &mut T) -> anyhow::Result<()> {
-		self.interface.playspace(data, DashPlayspaceTask::Recenter)?;
+		self.interface.playspace_task(data, DashPlayspaceTask::Recenter)?;
 		Ok(())
 	}
 
