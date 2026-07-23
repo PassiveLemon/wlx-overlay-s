@@ -24,6 +24,8 @@ use std::{
     time::{Duration, Instant},
 };
 
+use crate::subsystem::dbus::DbusConnector;
+
 const IGNORE_PREFIX: &str = "WayVR";
 const WATCHDOG_TIMEOUT: Duration = Duration::from_millis(5000);
 const POLL_TIMEOUT_MS: i32 = 20;
@@ -486,7 +488,16 @@ fn worker_main(
                     }
                 }
                 Err(error) => {
-                    log::warn!("Could not grab input devices after Super+Tab: {error}");
+                    //TODO: translate
+                    let _ = DbusConnector::notify_send(
+                        "Could not capture input",
+                        &format!("Linux user must be in input group!\n Error: \n{error}"),
+                        1,
+                        5000,
+                        0,
+                        true,
+                    );
+                    log::warn!("Could not grab input devices: {error}");
                 }
             }
         }

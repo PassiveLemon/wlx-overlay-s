@@ -896,7 +896,7 @@ impl WvrServerState {
                     audio_sample_player.play_sample(audio_system, "input_grab");
                     if !self.grab_toast_sent {
                         self.grab_toast_sent = true;
-                        //TODO: toast
+                        //TODO: translate
                         let _ = DbusConnector::notify_send(
                             "WayVR has your keyboard and mouse!",
                             "Super+Z to release",
