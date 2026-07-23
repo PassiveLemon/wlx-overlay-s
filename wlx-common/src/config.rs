@@ -416,6 +416,9 @@ pub struct GeneralConfig {
 	pub space_drag_unlocked: bool,
 
 	#[serde(default)]
+	pub space_drag_affects_world: bool,
+
+	#[serde(default)]
 	pub space_rotate_unlocked: bool,
 
 	#[serde(default)]

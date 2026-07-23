@@ -149,7 +149,9 @@ impl PlayspaceMover {
             let overlay_offset = data.pose.inverse().transform_vector3a(relative_pos) * -1.0;
             let before_pose = data.pose;
             data.pose.translation += relative_pos;
-            playspace_common::shift_world(overlays, &mut app.anchor, &before_pose, &data.pose);
+            if !app.session.config.space_drag_affects_world {
+                playspace_common::shift_world(overlays, &mut app.anchor, &before_pose, &data.pose);
+            }
             data.hand_pose = new_hand;
 
             if self.universe == ETrackingUniverseOrigin::TrackingUniverseStanding {

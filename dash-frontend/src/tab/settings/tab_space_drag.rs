@@ -83,6 +83,8 @@ impl State {
 
 			options_checkbox(par.mp, id_common_options_parent, SettingType::SpaceDragUnlocked)?;
 
+			options_checkbox(par.mp, id_common_options_parent, SettingType::SpaceDragAffectsWorld)?;
+
 			options_slider_f32(
 				par.mp,
 				id_common_options_parent,

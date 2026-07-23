@@ -207,7 +207,8 @@
 		"POINTER_ACCELERATION": "Aceleración del ratón",
 		"POINTER_ACCELERATION_HELP": "Activado: Aceleración adaptativa del ratón\nDesactivado: Velocidad constante",
 		"POINTER_SPEED": "Velocidad del ratón",
-		"INPUT_CAPTURE_METHOD_HELP": "Permite usar periféricos físicos dentro de WayVR.\n Super+Z: Cambiar la entrada entre WayVR y el escritorio real\n Super+X: Cambiar entre aplicaciones de WayVR"
+		"INPUT_CAPTURE_METHOD_HELP": "Permite usar periféricos físicos dentro de WayVR.\n Super+Z: Cambiar la entrada entre WayVR y el escritorio real\n Super+X: Cambiar entre aplicaciones de WayVR",
+		"SPACE_DRAG_AFFECTS_WORLD": "Space-drag mueve las superposiciones"
 	},
 	"HELLO": "¡Hola!",
 	"AUDIO": {
