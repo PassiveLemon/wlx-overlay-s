@@ -1,6 +1,5 @@
 use glam::Affine3A;
 use idmap::IdMap;
-#[cfg(feature = "pipewire")]
 use serde::{Deserialize, Serialize};
 use smallvec::{SmallVec, smallvec};
 use std::path::PathBuf;
