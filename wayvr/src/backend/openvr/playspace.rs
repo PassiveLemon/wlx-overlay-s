@@ -7,7 +7,7 @@ use ovr_overlay::{
 use wgui::log::LogErr;
 
 use crate::{
-    backend::{input::InputState, playspace_common, task::PlayspaceTask},
+    backend::{playspace_common, task::PlayspaceTask},
     state::{AppState, PlayspaceState, load_playspace_state, save_playspace_state},
     windowing::manager::OverlayWindowManager,
 };
@@ -39,19 +39,20 @@ impl PlayspaceMover {
 
     pub fn handle_task(
         &mut self,
-        app: &AppState,
+        app: &mut AppState,
         chaperone_mgr: &mut ChaperoneSetupManager,
+        overlays: &mut OverlayWindowManager<OpenVrOverlayData>,
         task: PlayspaceTask,
     ) {
         match task {
             PlayspaceTask::FixFloor => {
-                self.fix_floor(chaperone_mgr, &app.input_state);
+                self.fix_floor(chaperone_mgr, app, overlays);
             }
             PlayspaceTask::Reset => {
-                self.reset_offset(chaperone_mgr);
+                self.reset_offset(chaperone_mgr, overlays, &mut app.anchor);
             }
             PlayspaceTask::Recenter => {
-                self.recenter(chaperone_mgr, &app.input_state);
+                self.recenter(chaperone_mgr, app, overlays);
             }
             PlayspaceTask::SaveCenter => {
                 self.save_center(chaperone_mgr);
@@ -178,14 +179,24 @@ impl PlayspaceMover {
 
         for pointer in &app.input_state.pointers {
             if pointer.now.space_reset && !pointer.before.space_reset {
-                self.reset_offset(chaperone_mgr);
+                self.reset_offset(chaperone_mgr, overlays, &mut app.anchor);
                 log::info!("Space reset");
                 return;
             }
         }
     }
 
-    pub fn reset_offset(&mut self, chaperone_mgr: &mut ChaperoneSetupManager) {
+    pub fn reset_offset(
+        &mut self,
+        chaperone_mgr: &mut ChaperoneSetupManager,
+        overlays: &mut OverlayWindowManager<OpenVrOverlayData>,
+        anchor: &mut Affine3A,
+    ) {
+        let Some(before) = get_working_copy(&self.universe, chaperone_mgr) else {
+            log::warn!("Can't reset offset - failed to get zero pose");
+            return;
+        };
+
         let mut xform = self.playspace_state.openvr_space_center;
         if self.universe == ETrackingUniverseOrigin::TrackingUniverseSeated {
             xform.translation.y -= 1.7;
@@ -193,6 +204,8 @@ impl PlayspaceMover {
 
         set_working_copy(&self.universe, chaperone_mgr, &xform);
         chaperone_mgr.commit_working_copy(EChaperoneConfigFile::EChaperoneConfigFile_Live);
+
+        playspace_common::shift_world(overlays, anchor, &before, &xform);
 
         if self.drag.is_some() {
             log::info!("Space drag interrupted by manual reset");
@@ -204,7 +217,14 @@ impl PlayspaceMover {
         }
     }
 
-    pub fn fix_floor(&mut self, chaperone_mgr: &mut ChaperoneSetupManager, input: &InputState) {
+    pub fn fix_floor(
+        &mut self,
+        chaperone_mgr: &mut ChaperoneSetupManager,
+        app: &mut AppState,
+        overlays: &mut OverlayWindowManager<OpenVrOverlayData>,
+    ) {
+        let input = &app.input_state;
+        let anchor = &mut app.anchor;
         let y1 = input.pointers[0].pose.translation.y;
         let y2 = input.pointers[1].pose.translation.y;
         let Some(mut mat) = get_working_copy(&self.universe, chaperone_mgr) else {
@@ -212,11 +232,14 @@ impl PlayspaceMover {
             return;
         };
         let offset = y1.min(y2) - 0.03;
+        let before = mat;
         mat.translation.y += offset;
         self.playspace_state.openvr_space_center.translation.y = mat.translation.y;
 
         set_working_copy(&self.universe, chaperone_mgr, &mat);
         chaperone_mgr.commit_working_copy(EChaperoneConfigFile::EChaperoneConfigFile_Live);
+
+        playspace_common::shift_world(overlays, anchor, &before, &mat);
 
         if self.drag.is_some() {
             log::info!("Space drag interrupted by fix floor");
@@ -228,7 +251,12 @@ impl PlayspaceMover {
         }
     }
 
-    pub fn recenter(&mut self, chaperone_mgr: &mut ChaperoneSetupManager, input: &InputState) {
+    pub fn recenter(
+        &mut self,
+        chaperone_mgr: &mut ChaperoneSetupManager,
+        app: &mut AppState,
+        overlays: &mut OverlayWindowManager<OpenVrOverlayData>,
+    ) {
         if self.drag.is_some() {
             log::info!("Space drag interrupted by recenter");
             self.drag = None;
@@ -238,10 +266,15 @@ impl PlayspaceMover {
             self.rotate = None;
         }
 
+        let input = &app.input_state;
+        let anchor = &mut app.anchor;
+
         let Some(mat) = get_working_copy(&self.universe, chaperone_mgr) else {
             log::warn!("Can't recenter - failed to get zero pose");
             return;
         };
+
+        let before = mat;
 
         let cur_rot: Quat = Quat::from_affine3(&mat);
         let cur_pos: Vec3 = Vec3::from(mat.translation);
@@ -276,6 +309,8 @@ impl PlayspaceMover {
 
         set_working_copy(&self.universe, chaperone_mgr, &new_mat);
         chaperone_mgr.commit_working_copy(EChaperoneConfigFile::EChaperoneConfigFile_Live);
+
+        playspace_common::shift_world(overlays, anchor, &before, &new_mat);
     }
 
     pub fn playspace_changed(

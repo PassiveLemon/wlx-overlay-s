@@ -4,7 +4,6 @@ use wgui::log::LogErr;
 
 use crate::{
     backend::{
-        input::InputState,
         playspace_common::{self, SpaceGravity, SpaceGravityUpdateParams},
         task::PlayspaceTask,
     },
@@ -39,20 +38,25 @@ impl PlayspaceMover {
         })
     }
 
-    pub fn handle_task(&mut self, app: &mut AppState, task: PlayspaceTask) {
+    pub fn handle_task(
+        &mut self,
+        app: &mut AppState,
+        overlays: &mut OverlayWindowManager<OpenXrOverlayData>,
+        task: PlayspaceTask,
+    ) {
         let Some(monado) = &mut app.monado_state else {
             return; // monado not available
         };
 
         match task {
             PlayspaceTask::FixFloor => {
-                self.fix_floor(&app.input_state, &mut monado.ipc);
+                self.fix_floor(app, overlays);
             }
             PlayspaceTask::Reset => {
-                self.reset_offset(&mut monado.ipc);
+                self.reset_offset(app, overlays);
             }
             PlayspaceTask::Recenter => {
-                self.recenter(&app.input_state, &mut monado.ipc);
+                self.recenter(app, overlays);
             }
             PlayspaceTask::SaveCenter => {
                 self.save_center(&mut monado.ipc);
@@ -76,7 +80,7 @@ impl PlayspaceMover {
             if pointer.now.space_reset {
                 if !pointer.before.space_reset {
                     log::info!("Space reset");
-                    self.reset_offset(&mut monado.ipc);
+                    self.reset_offset(app, overlays);
                 }
                 return;
             }
@@ -226,7 +230,15 @@ impl PlayspaceMover {
         }
     }
 
-    pub fn recenter(&mut self, input: &InputState, monado: &mut Monado) {
+    pub fn recenter(
+        &mut self,
+        app: &mut AppState,
+        overlays: &mut OverlayWindowManager<OpenXrOverlayData>,
+    ) {
+        let Some(monado) = &mut app.monado_state else {
+            return;
+        };
+
         if self.drag.is_some() {
             log::info!("Space drag interrupted by recenter");
             self.drag = None;
@@ -236,12 +248,19 @@ impl PlayspaceMover {
             self.rotate = None;
         }
 
+        let input = &app.input_state;
+        let anchor = &mut app.anchor;
+
         let Ok(mut pose) = monado
+            .ipc
             .get_reference_space_offset(ReferenceSpaceType::Stage)
             .inspect_err(|e| log::warn!("Could not recenter due to libmonado error: {e:?}"))
         else {
             return;
         };
+
+        let before =
+            Affine3A::from_rotation_translation(pose.orientation.into(), pose.position.into());
 
         let cur_rot: Quat = pose.orientation.into();
         let cur_pos: Vec3 = pose.position.into();
@@ -273,13 +292,26 @@ impl PlayspaceMover {
         }
 
         let _ = monado
+            .ipc
             .set_reference_space_offset(ReferenceSpaceType::Stage, pose)
             .inspect_err(|e| log::warn!("Could not recenter due to libmonado error: {e:?}"));
 
         self.gravity.reset();
+
+        let after =
+            Affine3A::from_rotation_translation(pose.orientation.into(), pose.position.into());
+        playspace_common::shift_world(overlays, anchor, &before, &after);
     }
 
-    pub fn reset_offset(&mut self, monado: &mut Monado) {
+    pub fn reset_offset(
+        &mut self,
+        app: &mut AppState,
+        overlays: &mut OverlayWindowManager<OpenXrOverlayData>,
+    ) {
+        let Some(monado) = &mut app.monado_state else {
+            return;
+        };
+
         if self.drag.is_some() {
             log::info!("Space drag interrupted by manual reset");
             self.drag = None;
@@ -289,12 +321,34 @@ impl PlayspaceMover {
             self.rotate = None;
         }
 
+        let Ok(pose) = monado
+            .ipc
+            .get_reference_space_offset(ReferenceSpaceType::Stage)
+            .inspect_err(|e| log::warn!("Could not reset offset due to libmonado error: {e:?}"))
+        else {
+            return;
+        };
+
+        let before =
+            Affine3A::from_rotation_translation(pose.orientation.into(), pose.position.into());
+
         self.gravity.reset();
         let offset = self.playspace_state.openxr_space_center;
-        apply_offset(offset, monado);
+        apply_offset(offset, &mut monado.ipc);
+
+        let after = offset;
+        playspace_common::shift_world(overlays, &mut app.anchor, &before, &after);
     }
 
-    pub fn fix_floor(&mut self, input: &InputState, monado: &mut Monado) {
+    pub fn fix_floor(
+        &mut self,
+        app: &mut AppState,
+        overlays: &mut OverlayWindowManager<OpenXrOverlayData>,
+    ) {
+        let Some(monado) = &mut app.monado_state else {
+            return;
+        };
+
         if self.drag.is_some() {
             log::info!("Space drag interrupted by fix floor");
             self.drag = None;
@@ -304,12 +358,19 @@ impl PlayspaceMover {
             self.rotate = None;
         }
 
+        let input = &app.input_state;
+        let anchor = &mut app.anchor;
+
         let Ok(mut pose) = monado
+            .ipc
             .get_reference_space_offset(ReferenceSpaceType::Stage)
             .inspect_err(|e| log::warn!("Could not fix floor due to libmonado error: {e:?}"))
         else {
             return;
         };
+
+        let before =
+            Affine3A::from_rotation_translation(pose.orientation.into(), pose.position.into());
 
         let y1 = input.pointers[0].raw_pose.translation.y;
         let y2 = input.pointers[1].raw_pose.translation.y;
@@ -320,8 +381,13 @@ impl PlayspaceMover {
         self.playspace_state.openxr_space_center.translation.y = pose.position.y;
 
         let _ = monado
+            .ipc
             .set_reference_space_offset(ReferenceSpaceType::Stage, pose)
             .inspect_err(|e| log::warn!("Could not fix floor due to libmonado error: {e:?}"));
+
+        let after =
+            Affine3A::from_rotation_translation(pose.orientation.into(), pose.position.into());
+        playspace_common::shift_world(overlays, anchor, &before, &after);
     }
 
     pub fn save_center(&mut self, monado: &mut Monado) {

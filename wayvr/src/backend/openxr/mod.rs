@@ -484,7 +484,7 @@ pub fn openxr_run(args: &Args) -> Result<(), BackendError> {
                 }
                 TaskType::Playspace(task) => {
                     if let Some(playspace_mover) = playspace_mover.as_mut() {
-                        playspace_mover.handle_task(&mut app, task);
+                        playspace_mover.handle_task(&mut app, &mut overlays, task);
                     }
                 }
                 TaskType::OpenXR(task) => {
