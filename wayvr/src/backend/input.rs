@@ -646,8 +646,10 @@ fn handle_scroll<O>(hit: &PointerHit, hovered: &mut OverlayWindowData<O>, app: &
     }
 
     let config = &app.session.config;
+    let scroll_factor = 90.0 * app.delta_time;
 
     let scroll_x = pointer.now.scroll_x
+        * scroll_factor
         * config.scroll_speed
         * if config.invert_scroll_direction_x {
             -1.0
@@ -655,6 +657,7 @@ fn handle_scroll<O>(hit: &PointerHit, hovered: &mut OverlayWindowData<O>, app: &
             1.0
         };
     let scroll_y = pointer.now.scroll_y
+        * scroll_factor
         * config.scroll_speed
         * if config.invert_scroll_direction_x {
             -1.0
@@ -889,16 +892,25 @@ where
             return;
         };
 
+        let scroll_factor = 90.0 * app.delta_time;
+
         if grab_anchor {
             if pointer.now.click {
                 pointer.interaction.mode = PointerMode::Special;
                 let grab_dist = grab_data.offset.translation.length().clamp(0.5, 5.0) * 0.2 + 0.4;
-                handle_scale(&mut app.anchor, pointer.now.scroll_y * grab_dist);
-                handle_scale(&mut grab_data.offset, pointer.now.scroll_y * grab_dist);
+                handle_scale(
+                    &mut app.anchor,
+                    pointer.now.scroll_y * grab_dist * scroll_factor,
+                );
+                handle_scale(
+                    &mut grab_data.offset,
+                    pointer.now.scroll_y * grab_dist * scroll_factor,
+                );
             } else if app.session.config.allow_sliding && pointer.now.scroll_y.is_finite() {
                 // single grab push/pull
                 let grab_dist = grab_data.offset.translation.length().clamp(0.5, 5.0);
-                grab_data.offset.translation.z -= pointer.now.scroll_y * 0.02 * grab_dist;
+                grab_data.offset.translation.z -=
+                    pointer.now.scroll_y * scroll_factor * 0.02 * grab_dist;
                 grab_data.offset.translation.z = grab_data.offset.translation.z.min(-0.05);
             }
             if pointer.now.click_modifier_right {
@@ -921,13 +933,17 @@ where
                 let grab_dist = grab_data.offset.translation.length().clamp(0.5, 5.0) * 0.2 + 0.4;
                 handle_scale(
                     &mut overlay_state.transform,
-                    pointer.now.scroll_y * grab_dist,
+                    pointer.now.scroll_y * grab_dist * scroll_factor,
                 );
-                handle_scale(&mut grab_data.offset, pointer.now.scroll_y * grab_dist);
+                handle_scale(
+                    &mut grab_data.offset,
+                    pointer.now.scroll_y * grab_dist * scroll_factor,
+                );
             } else if app.session.config.allow_sliding && pointer.now.scroll_y.is_finite() {
                 // single grab push/pull
                 let grab_dist = grab_data.offset.translation.length().clamp(0.5, 5.0);
-                grab_data.offset.translation.z -= pointer.now.scroll_y * 0.02 * grab_dist;
+                grab_data.offset.translation.z -=
+                    pointer.now.scroll_y * scroll_factor * 0.02 * grab_dist;
                 grab_data.offset.translation.z = grab_data.offset.translation.z.min(-0.05);
             }
             if pointer.now.click_modifier_right {
