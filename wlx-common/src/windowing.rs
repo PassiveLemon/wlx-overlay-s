@@ -28,9 +28,6 @@ pub enum Positioning {
 }
 
 impl Positioning {
-	pub const fn moves_with_space(self) -> bool {
-		matches!(self, Self::Floating | Self::Anchored | Self::Static)
-	}
 	pub const fn get_lerp(self) -> Option<f32> {
 		match self {
 			Self::FollowHead { lerp } => Some(lerp),

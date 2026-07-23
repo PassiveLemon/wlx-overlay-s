@@ -1,4 +1,4 @@
-use glam::Vec3A;
+use glam::{Affine3A, Vec3A};
 use wlx_common::config::GeneralConfig;
 
 use crate::windowing::manager::OverlayWindowManager;
@@ -15,17 +15,20 @@ pub struct SpaceGravity {
     space_pos: Vec3A,
 }
 
-pub fn shift_overlays<OverlayData>(
+pub fn shift_world<OverlayData>(
     overlays: &mut OverlayWindowManager<OverlayData>,
-    overlay_offset: Vec3A,
+    anchor: &mut Affine3A,
+    before: &Affine3A,
+    after: &Affine3A,
 ) {
+    let correction = after.inverse() * before;
+    *anchor = correction * *anchor;
+
     overlays.values_mut().for_each(|overlay| {
         let Some(state) = overlay.config.active_state.as_mut() else {
             return;
         };
-        if state.positioning.moves_with_space() {
-            state.transform.translation += overlay_offset;
-        }
+        state.transform = correction * state.transform;
         overlay.config.dirty = true;
     });
 }

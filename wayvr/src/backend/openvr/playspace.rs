@@ -67,7 +67,7 @@ impl PlayspaceMover {
         &mut self,
         chaperone_mgr: &mut ChaperoneSetupManager,
         overlays: &mut OverlayWindowManager<OpenVrOverlayData>,
-        app: &AppState,
+        app: &mut AppState,
     ) {
         let universe = self.universe.clone();
 
@@ -146,9 +146,9 @@ impl PlayspaceMover {
             }
 
             let overlay_offset = data.pose.inverse().transform_vector3a(relative_pos) * -1.0;
-            playspace_common::shift_overlays(overlays, overlay_offset);
-
+            let before_pose = data.pose;
             data.pose.translation += relative_pos;
+            playspace_common::shift_world(overlays, &mut app.anchor, &before_pose, &data.pose);
             data.hand_pose = new_hand;
 
             if self.universe == ETrackingUniverseOrigin::TrackingUniverseStanding {

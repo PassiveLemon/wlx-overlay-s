@@ -279,7 +279,7 @@ pub fn openvr_run(args: &Args) -> Result<(), BackendError> {
 
         overlays.values_mut().for_each(|o| o.config.tick(&mut app));
 
-        playspace.update(&mut chaperone_mgr, &mut overlays, &app);
+        playspace.update(&mut chaperone_mgr, &mut overlays, &mut app);
 
         current_lines.clear();
 

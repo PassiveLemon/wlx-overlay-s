@@ -174,10 +174,9 @@ impl PlayspaceMover {
                 return;
             }
 
-            let overlay_offset = data.pose.inverse().transform_vector3a(relative_pos) * -1.0;
-            playspace_common::shift_overlays(overlays, overlay_offset);
-
+            let before_pose = data.pose;
             data.pose.translation += relative_pos;
+            playspace_common::shift_world(overlays, &mut app.anchor, &before_pose, &data.pose);
             data.hand_pose = new_hand;
 
             apply_offset(data.pose, &mut monado.ipc);
@@ -218,12 +217,12 @@ impl PlayspaceMover {
             config: &app.session.config,
             floor_height: app.session.config.space_gravity_floor_height,
         }) {
-            apply_offset(
-                Affine3A::from_translation(res.playspace_pos.into()),
-                &mut monado.ipc,
-            );
+            let prev_playspace_pos = res.playspace_pos - res.playspace_pos_offset;
+            let before_pose = Affine3A::from_translation(prev_playspace_pos.into());
+            let after_pose = Affine3A::from_translation(res.playspace_pos.into());
+            apply_offset(after_pose, &mut monado.ipc);
 
-            playspace_common::shift_overlays(overlays, -res.playspace_pos_offset);
+            playspace_common::shift_world(overlays, &mut app.anchor, &before_pose, &after_pose);
         }
     }
 
