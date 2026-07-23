@@ -1,5 +1,5 @@
 use glam::{Affine3A, Quat, Vec3, Vec3A, vec3a};
-use libmonado::{MndResult, Monado, Pose, ReferenceSpaceType};
+use libmonado::{Monado, Pose, ReferenceSpaceType};
 use wgui::log::LogErr;
 
 use crate::{
@@ -24,25 +24,17 @@ pub(super) struct PlayspaceMover {
     drag: Option<MoverData<Vec3A>>,
     rotate: Option<MoverData<Quat>>,
     gravity: SpaceGravity,
-    floor_y: f32,
     playspace_state: PlayspaceState,
 }
 
 impl PlayspaceMover {
-    pub fn new(monado: &mut Monado) -> anyhow::Result<Self> {
+    pub fn new() -> anyhow::Result<Self> {
         log::info!("Monado: using space offset API");
-
-        let pose = match monado.get_reference_space_offset(ReferenceSpaceType::Stage) {
-            Err(MndResult::ErrorInvalidVersion) => anyhow::bail!("Space offsets not supported."),
-            Err(e) => anyhow::bail!("Could not initialize space mover: {e:?}"),
-            Ok(pose) => pose,
-        };
 
         Ok(Self {
             drag: None,
             rotate: None,
             gravity: SpaceGravity::new(),
-            floor_y: pose.position.y,
             playspace_state: load_playspace_state().unwrap_or_default(),
         })
     }
@@ -299,8 +291,7 @@ impl PlayspaceMover {
         }
 
         self.gravity.reset();
-        let mut offset = Affine3A::IDENTITY;
-        offset.translation.y = self.floor_y;
+        let offset = self.playspace_state.openxr_space_center;
         apply_offset(offset, monado);
     }
 
@@ -327,7 +318,7 @@ impl PlayspaceMover {
 
         pose.position.y += delta;
 
-        self.floor_y = pose.position.y;
+        self.playspace_state.openxr_space_center.translation.y = pose.position.y;
 
         let _ = monado
             .set_reference_space_offset(ReferenceSpaceType::Stage, pose)

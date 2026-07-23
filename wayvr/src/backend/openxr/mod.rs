@@ -89,7 +89,7 @@ pub fn openxr_run(args: &Args) -> Result<(), BackendError> {
     app.late_init();
 
     let mut playspace_mover = app.monado_state.as_mut().and_then(|m| {
-        playspace::PlayspaceMover::new(&mut m.ipc)
+        playspace::PlayspaceMover::new()
             .map_err(|e| log::warn!("Will not use Monado playspace mover: {e}"))
             .ok()
     });
