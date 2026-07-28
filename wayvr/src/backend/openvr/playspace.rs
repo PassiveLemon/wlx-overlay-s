@@ -95,7 +95,11 @@ impl PlayspaceMover {
                 * -1.0;
             space_transform.translation = offset;
 
+            let before_pose = data.pose;
             data.pose *= space_transform;
+            if !app.session.config.space_drag_affects_world {
+                playspace_common::shift_world(overlays, &mut app.anchor, &before_pose, &data.pose);
+            }
             data.hand_pose = new_hand;
 
             if self.universe == ETrackingUniverseOrigin::TrackingUniverseStanding {
@@ -243,7 +247,9 @@ impl PlayspaceMover {
         set_working_copy(&self.universe, chaperone_mgr, &mat);
         chaperone_mgr.commit_working_copy(EChaperoneConfigFile::EChaperoneConfigFile_Live);
 
-        playspace_common::shift_world(overlays, anchor, &before, &mat);
+        if !app.session.config.space_drag_affects_world {
+            playspace_common::shift_world(overlays, anchor, &before, &mat);
+        }
 
         if self.drag.is_some() {
             log::info!("Space drag interrupted by fix floor");
@@ -314,7 +320,9 @@ impl PlayspaceMover {
         set_working_copy(&self.universe, chaperone_mgr, &new_mat);
         chaperone_mgr.commit_working_copy(EChaperoneConfigFile::EChaperoneConfigFile_Live);
 
-        playspace_common::shift_world(overlays, anchor, &before, &new_mat);
+        if !app.session.config.space_drag_affects_world {
+            playspace_common::shift_world(overlays, anchor, &before, &new_mat);
+        }
     }
 
     pub fn playspace_changed(
