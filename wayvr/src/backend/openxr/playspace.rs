@@ -338,8 +338,10 @@ impl PlayspaceMover {
         let offset = self.playspace_state.openxr_space_center;
         apply_offset(offset, &mut monado.ipc);
 
-        let after = offset;
-        playspace_common::shift_world(overlays, &mut app.anchor, &before, &after);
+        if !app.session.config.space_drag_affects_world {
+            let after = offset;
+            playspace_common::shift_world(overlays, &mut app.anchor, &before, &after);
+        }
     }
 
     pub fn fix_floor(

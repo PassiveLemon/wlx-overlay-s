@@ -49,7 +49,7 @@ impl PlayspaceMover {
                 self.fix_floor(chaperone_mgr, app, overlays);
             }
             PlayspaceTask::Reset => {
-                self.reset_offset(chaperone_mgr, overlays, &mut app.anchor);
+                self.reset_offset(chaperone_mgr, app, overlays);
             }
             PlayspaceTask::Recenter => {
                 self.recenter(chaperone_mgr, app, overlays);
@@ -181,7 +181,7 @@ impl PlayspaceMover {
 
         for pointer in &app.input_state.pointers {
             if pointer.now.space_reset && !pointer.before.space_reset {
-                self.reset_offset(chaperone_mgr, overlays, &mut app.anchor);
+                self.reset_offset(chaperone_mgr, app, overlays);
                 log::info!("Space reset");
                 return;
             }
@@ -191,8 +191,8 @@ impl PlayspaceMover {
     pub fn reset_offset(
         &mut self,
         chaperone_mgr: &mut ChaperoneSetupManager,
+        app: &mut AppState,
         overlays: &mut OverlayWindowManager<OpenVrOverlayData>,
-        anchor: &mut Affine3A,
     ) {
         let Some(before) = get_working_copy(&self.universe, chaperone_mgr) else {
             log::warn!("Can't reset offset - failed to get zero pose");
@@ -207,7 +207,9 @@ impl PlayspaceMover {
         set_working_copy(&self.universe, chaperone_mgr, &xform);
         chaperone_mgr.commit_working_copy(EChaperoneConfigFile::EChaperoneConfigFile_Live);
 
-        playspace_common::shift_world(overlays, anchor, &before, &xform);
+        if !app.session.config.space_drag_affects_world {
+            playspace_common::shift_world(overlays, &mut app.anchor, &before, &xform);
+        }
 
         if self.drag.is_some() {
             log::info!("Space drag interrupted by manual reset");
