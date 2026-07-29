@@ -31,7 +31,6 @@ keyvalues-parser = {
   rev = "fc6dcbea9eb13cacb98dea40063f6f56cde6e145"
 }
 lz4_flex = { version = "0.13.1", features = ["frame"] }
-smol-hyper = "0.1.1"
 ureq = "3.3.0"
 
 [features]
