@@ -249,7 +249,7 @@ impl SteamUtils {
 			PathBuf::from(&app_entry.root_path).join(format!("steamapps/appmanifest_{}.acf", app_entry.app_id));
 
 		let vdf_data = std::fs::read_to_string(manifest_path)?;
-		let vdf_root = keyvalues_parser::Vdf::parse(&vdf_data)?;
+		let vdf_root = keyvalues_parser::parse(&vdf_data)?.into_vdf();
 
 		let Some(manifest) = vdf_parse_appstate(app_entry.app_id.clone(), &vdf_root) else {
 			anyhow::bail!("Failed to parse AppState");
@@ -262,7 +262,7 @@ impl SteamUtils {
 		let path = self.get_dir_steamapps().join("libraryfolders.vdf");
 		let vdf_data = std::fs::read_to_string(path)?;
 
-		let vdf_root = keyvalues_parser::Vdf::parse(&vdf_data)?;
+		let vdf_root = keyvalues_parser::parse(&vdf_data)?.into_vdf();
 
 		let Some(apps) = vdf_parse_libraryfolders(&vdf_root) else {
 			anyhow::bail!("Failed to fetch installed Steam apps");
