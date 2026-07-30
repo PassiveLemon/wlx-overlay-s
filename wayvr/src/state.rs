@@ -267,6 +267,7 @@ impl AppState {
     }
 
     pub fn tick(&mut self) {
+        while self.executor.try_tick() {}
         self.dbus.tick();
 
         for toast in self.notifications.drain_pending(&self.session) {

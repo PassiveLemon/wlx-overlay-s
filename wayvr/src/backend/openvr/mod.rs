@@ -247,7 +247,6 @@ pub fn openvr_run(args: &Args) -> Result<(), BackendError> {
 
         let universe = playspace.get_universe();
 
-        while app.executor.try_tick() {}
         app.input_state.pre_update();
         input_source.update(
             universe.clone(),
