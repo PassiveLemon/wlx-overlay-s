@@ -62,6 +62,14 @@
               </div>
               <div flex_direction="row" width="100%">
                 <div width="90">
+                  <label text="T" color="secondary" size="20" padding_left="16" padding_right="8" />
+                </div>
+                <div>
+                  <label translation="ALTTAB.KEYBOARD" color="on_background" wrap="1" size="20" padding_left="8" padding_right="16" />
+                </div>
+              </div>
+              <div flex_direction="row" width="100%">
+                <div width="90">
                   <label text="R" color="secondary" size="20" padding_left="16" padding_right="8" />
                 </div>
                 <div>

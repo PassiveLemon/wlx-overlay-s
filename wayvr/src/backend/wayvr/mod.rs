@@ -77,6 +77,7 @@ use crate::{
     ipc::{event_queue::SyncEventQueue, ipc_server},
     overlays::{
         anchor::ALTTAB_HELP_NAME,
+        keyboard::KEYBOARD_NAME,
         wayvr::{WvrCommand, create_wl_window_overlay},
     },
     state::AppState,
@@ -820,19 +821,42 @@ impl WvrServerState {
                             tasks.enqueue(TaskType::Overlay(OverlayTask::ToggleEditMode));
                         } else if (hid::VirtualKey::D as u32) == vk && pressed {
                             tasks.enqueue(TaskType::Overlay(OverlayTask::ToggleDashboard));
+                        } else if (hid::VirtualKey::T as u32) == vk && pressed {
+                            tasks.enqueue(TaskType::Overlay(OverlayTask::ToggleOverlay(
+                                OverlaySelector::Name(KEYBOARD_NAME.into()),
+                                ToggleMode::Toggle,
+                            )));
                         } else if (hid::VirtualKey::R as u32) == vk && pressed {
                             tasks.enqueue(TaskType::Overlay(OverlayTask::ShowHide));
-                        } else if (hid::VirtualKey::N1 as u32) == vk && pressed {
+                        } else if ((hid::VirtualKey::N1 as u32) == vk
+                            || (hid::VirtualKey::KP_1 as u32) == vk)
+                            && pressed
+                        {
                             tasks.enqueue(TaskType::Overlay(OverlayTask::ToggleSet(0)))
-                        } else if (hid::VirtualKey::N2 as u32) == vk && pressed {
+                        } else if ((hid::VirtualKey::N2 as u32) == vk
+                            || (hid::VirtualKey::KP_2 as u32) == vk)
+                            && pressed
+                        {
                             tasks.enqueue(TaskType::Overlay(OverlayTask::ToggleSet(1)))
-                        } else if (hid::VirtualKey::N3 as u32) == vk && pressed {
+                        } else if ((hid::VirtualKey::N3 as u32) == vk
+                            || (hid::VirtualKey::KP_3 as u32) == vk)
+                            && pressed
+                        {
                             tasks.enqueue(TaskType::Overlay(OverlayTask::ToggleSet(2)))
-                        } else if (hid::VirtualKey::N4 as u32) == vk && pressed {
+                        } else if ((hid::VirtualKey::N4 as u32) == vk
+                            || (hid::VirtualKey::KP_4 as u32) == vk)
+                            && pressed
+                        {
                             tasks.enqueue(TaskType::Overlay(OverlayTask::ToggleSet(3)))
-                        } else if (hid::VirtualKey::N5 as u32) == vk && pressed {
+                        } else if ((hid::VirtualKey::N5 as u32) == vk
+                            || (hid::VirtualKey::KP_5 as u32) == vk)
+                            && pressed
+                        {
                             tasks.enqueue(TaskType::Overlay(OverlayTask::ToggleSet(4)))
-                        } else if (hid::VirtualKey::N6 as u32) == vk && pressed {
+                        } else if ((hid::VirtualKey::N6 as u32) == vk
+                            || (hid::VirtualKey::KP_6 as u32) == vk)
+                            && pressed
+                        {
                             tasks.enqueue(TaskType::Overlay(OverlayTask::ToggleSet(5)))
                         }
                     } else if self.has_input_focus {
