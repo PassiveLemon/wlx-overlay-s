@@ -14,14 +14,13 @@ use wlx_common::windowing::{OverlayWindowState, Positioning};
 
 use crate::backend::task::{InputTask, OverlayTask};
 use crate::overlays::anchor::{ANCHOR_NAME, GRAB_HELP_NAME};
-use crate::overlays::keyboard::KEYBOARD_NAME;
 use crate::overlays::watch::WATCH_NAME;
 use crate::state::{AppSession, AppState};
 use crate::subsystem::hid::WheelDelta;
 use crate::subsystem::input::InputFocus;
 use crate::windowing::backend::OverlayEventData;
 use crate::windowing::manager::OverlayWindowManager;
-use crate::windowing::window::{self, OverlayWindowData, realign, scalar_scale};
+use crate::windowing::window::{self, OverlayCategory, OverlayWindowData, realign, scalar_scale};
 use crate::windowing::{OverlayID, OverlaySelector};
 
 use super::task::TaskType;
@@ -281,6 +280,7 @@ pub struct InteractionState {
     pub hovered_id: Option<OverlayID>,
     pub should_block_input: bool,
     pub should_block_poses: bool,
+    pub kbd_block_activated: bool,
 }
 
 impl Default for InteractionState {
@@ -292,6 +292,7 @@ impl Default for InteractionState {
             hovered_id: None,
             should_block_input: false,
             should_block_poses: false,
+            kbd_block_activated: false,
         }
     }
 }
@@ -490,6 +491,7 @@ where
     if !pointer.tracked {
         pointer.interaction.should_block_input = false;
         pointer.interaction.should_block_poses = false;
+        pointer.interaction.kbd_block_activated = false;
         return (None, pending_haptics); // no hit
     }
 
@@ -554,7 +556,8 @@ where
 
         pointer.interaction.should_block_poses = state.block_input
             && app.session.config.block_poses_on_kbd_interaction
-            && hovered.config.name.as_ref() == KEYBOARD_NAME;
+            && hovered.config.category == OverlayCategory::Keyboard
+            && pointer.interaction.kbd_block_activated;
     } else {
         pointer.interaction.should_block_input = false;
         pointer.interaction.should_block_poses = false;
@@ -598,6 +601,9 @@ where
     let pointer = &mut app.input_state.pointers[hit.pointer];
     if pointer.now.click && !pointer.before.click {
         pointer.interaction.clicked_id = Some(hit.overlay);
+        if hovered.config.category == OverlayCategory::Keyboard {
+            pointer.interaction.kbd_block_activated = true;
+        }
         update_focus(app, hovered.config.input_focus);
         hovered.config.backend.on_pointer(app, &hit, true);
     } else if !pointer.now.click && pointer.before.click {
@@ -634,6 +640,7 @@ fn handle_no_hit<O>(
     let pointer = &mut app.input_state.pointers[pointer_idx];
     pointer.interaction.should_block_input = false;
     pointer.interaction.should_block_poses = false;
+    pointer.interaction.kbd_block_activated = false;
 
     // in case click released while not aiming at anything
     // send release event to overlay that was originally clicked
