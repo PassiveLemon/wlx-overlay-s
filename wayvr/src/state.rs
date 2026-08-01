@@ -27,7 +27,7 @@ use wlx_common::{
 #[cfg(feature = "openxr")]
 use crate::backend;
 use crate::backend::wayvr::WvrServerState;
-use wlx_common::DesktopBackend;
+use wlx_common::dash_interface::InterfaceFeats;
 
 use crate::subsystem::notifications::NotificationManager;
 #[cfg(feature = "osc")]
@@ -36,7 +36,6 @@ use crate::subsystem::osc::OscSender;
 #[cfg(feature = "whisper")]
 use crate::subsystem::whisper_stt::WhisperStt;
 use crate::{
-    XrBackend,
     backend::{input::InputState, task::TaskContainer},
     config::load_general_config,
     graphics::WGfxExtras,
@@ -72,8 +71,7 @@ pub struct AppState {
 
     pub dbus: DbusConnector,
 
-    pub xr_backend: XrBackend,
-    pub desktop_backend: DesktopBackend,
+    pub feats: InterfaceFeats,
 
     pub ipc_server: ipc_server::WayVRServer,
     pub wayvr_signals: SyncEventQueue<WayVRSignal>,
@@ -102,7 +100,7 @@ impl AppState {
     pub fn from_graphics(
         gfx: Arc<WGfx>,
         gfx_extras: WGfxExtras,
-        xr_backend: XrBackend,
+        feats: InterfaceFeats,
     ) -> anyhow::Result<Self> {
         // insert shared resources
         let mut tasks = TaskContainer::new();
@@ -218,10 +216,9 @@ impl AppState {
             wgui_theme: Rc::new(theme),
             executor,
             dbus,
-            xr_backend,
+            feats,
             ipc_server,
             wayvr_signals: wvr_signals,
-            desktop_backend: DesktopBackend::Headless, // set by OverlayWindowManager
             desktop_finder,
             notifications: NotificationManager::new(),
 
@@ -253,7 +250,7 @@ impl AppState {
         self.notifications.run_udp();
 
         #[cfg(feature = "openxr")]
-        if self.xr_backend.is_open_xr() {
+        if self.feats.xr_backend.is_open_xr() {
             use crate::backend::openxr::monado_state::MonadoState;
 
             log::debug!("Connecting to Monado IPC");
@@ -262,9 +259,11 @@ impl AppState {
             match MonadoState::new() {
                 Ok(m) => {
                     self.monado_state = Some(m);
+                    self.feats.monado = true;
                 }
                 Err(e) => {
                     log::error!("Will not use libmonado: {e:?}");
+                    self.feats.monado = false;
                 }
             }
         }

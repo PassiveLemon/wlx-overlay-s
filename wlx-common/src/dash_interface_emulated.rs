@@ -238,6 +238,7 @@ impl DashInterface<()> for DashInterfaceEmulated {
 			xr_backend: crate::XrBackend::OpenXR,
 			desktop_backend: crate::DesktopBackend::Wayland,
 			monado: true,
+			passthru: false,
 			whisper: true,
 		}
 	}

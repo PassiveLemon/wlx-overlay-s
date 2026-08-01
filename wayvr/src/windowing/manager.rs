@@ -89,7 +89,7 @@ where
             // OverlayWindowManager::restore_layout down below
             match create_screens(app) {
                 Ok((data, backend)) => {
-                    app.desktop_backend = backend;
+                    app.feats.desktop_backend = backend;
                     let last_idx = data.screens.len() - 1;
                     for (idx, (meta, mut config)) in data.screens.into_iter().enumerate() {
                         config.show_on_spawn = true;

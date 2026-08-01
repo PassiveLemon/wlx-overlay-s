@@ -85,8 +85,12 @@ pub fn new_mirror(name: Arc<str>, app: &mut AppState) -> anyhow::Result<OverlayW
         capture: Box<dyn WlxCapture<WlxCaptureIn, WlxCaptureOut>>,
         app: &mut AppState,
     ) -> Box<dyn OverlayBackend> {
-        let renderer =
-            ScreenBackend::new_raw(name.clone(), app.xr_backend, CaptureType::PipeWire, capture);
+        let renderer = ScreenBackend::new_raw(
+            name.clone(),
+            app.feats.xr_backend,
+            CaptureType::PipeWire,
+            capture,
+        );
 
         let backend = MirrorBackend(renderer);
 

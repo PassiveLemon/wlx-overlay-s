@@ -12,7 +12,7 @@ use ovr_overlay::{
 };
 use smallvec::smallvec;
 use vulkano::{Handle, VulkanObject, device::physical::PhysicalDevice};
-use wlx_common::overlays::ToastTopic;
+use wlx_common::{dash_interface::InterfaceFeats, overlays::ToastTopic};
 
 use crate::{
     Args, FRAME_COUNTER, RUNNING, XrBackend,
@@ -87,9 +87,11 @@ pub fn openvr_run(args: &Args) -> Result<(), BackendError> {
         names.iter().map(std::string::String::as_str).collect()
     };
 
+    let feats = InterfaceFeats::default_for_backend(XrBackend::OpenVR);
+
     let mut app = {
         let (gfx, gfx_extras) = init_openvr_graphics(instance_extensions, device_extensions_fn)?;
-        AppState::from_graphics(gfx, gfx_extras, XrBackend::OpenVR)?
+        AppState::from_graphics(gfx, gfx_extras, feats)?
     };
 
     app.session.no_autostart = args.no_autostart;

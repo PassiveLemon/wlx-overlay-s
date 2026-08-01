@@ -70,7 +70,7 @@ pub fn create_keyboard(app: &mut AppState) -> anyhow::Result<OverlayWindowConfig
         active_layout: KeyboardPanelKey::default(),
         default_state,
         wlx_layout: layout,
-        wayland: app.desktop_backend.is_wayland(),
+        wayland: app.feats.desktop_backend.is_wayland(),
         re_fcitx: Regex::new(r"^keyboard-([^-]+)(?:-([^-]+))?$").unwrap(),
     };
 

@@ -10,7 +10,10 @@ use input::OpenXrInputSource;
 use openxr as xr;
 use skybox::{Skybox, create_skybox};
 use vulkano::{Handle, VulkanObject};
-use wlx_common::overlays::{StereoMode, ToastTopic};
+use wlx_common::{
+    dash_interface::InterfaceFeats,
+    overlays::{StereoMode, ToastTopic},
+};
 
 use crate::{
     Args, FRAME_COUNTER, RUNNING, XrBackend,
@@ -63,9 +66,17 @@ pub fn openxr_run(args: &Args) -> Result<(), BackendError> {
         }
     };
 
+    let feats = InterfaceFeats {
+        passthru: xr_instance
+            .exts()
+            .fb_composition_layer_alpha_blend
+            .is_some(),
+        ..InterfaceFeats::default_for_backend(XrBackend::OpenXR)
+    };
+
     let mut app = {
         let (gfx, gfx_extras) = init_openxr_graphics(xr_instance.clone(), system)?;
-        AppState::from_graphics(gfx, gfx_extras, XrBackend::OpenXR)?
+        AppState::from_graphics(gfx, gfx_extras, feats)?
     };
 
     app.session.no_autostart = args.no_autostart;

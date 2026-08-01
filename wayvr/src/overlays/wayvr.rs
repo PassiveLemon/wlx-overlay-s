@@ -248,7 +248,11 @@ impl WvrWindowBackend {
             just_resumed: false,
             meta: None,
             mouse: None,
-            stereo: app.xr_backend.is_open_xr().then_some(StereoMode::None),
+            stereo: app
+                .feats
+                .xr_backend
+                .is_open_xr()
+                .then_some(StereoMode::None),
             stereo_full_frame: false,
             stereo_adjust_mouse: false,
             cur_image: None,

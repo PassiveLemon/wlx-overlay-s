@@ -81,7 +81,7 @@ impl ScreenCastBackend {
             use wlx_capture::frame::Transform;
 
             let mut backend =
-                ScreenBackend::new_raw(name, app.xr_backend, CaptureType::PipeWire, capture);
+                ScreenBackend::new_raw(name, app.feats.xr_backend, CaptureType::PipeWire, capture);
 
             backend.logical_pos = logical_pos;
             backend.logical_size = logical_size;

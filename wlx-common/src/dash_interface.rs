@@ -50,7 +50,20 @@ pub struct InterfaceFeats {
 	pub xr_backend: XrBackend,
 	pub desktop_backend: DesktopBackend,
 	pub monado: bool,
+	pub passthru: bool,
 	pub whisper: bool,
+}
+
+impl InterfaceFeats {
+	pub fn default_for_backend(xr_backend: XrBackend) -> Self {
+		Self {
+			xr_backend,
+			desktop_backend: DesktopBackend::Headless,
+			monado: false,
+			passthru: false,
+			whisper: false,
+		}
+	}
 }
 
 pub trait DashInterface<T> {

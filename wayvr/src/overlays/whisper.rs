@@ -72,7 +72,7 @@ impl WhisperState {
 }
 
 pub fn create_whisper(app: &mut AppState) -> anyhow::Result<OverlayWindowConfig> {
-    let clipboard_provider: Option<Box<dyn ClipboardProvider>> = match app.desktop_backend {
+    let clipboard_provider: Option<Box<dyn ClipboardProvider>> = match app.feats.desktop_backend {
         #[cfg(feature = "wayland")]
         DesktopBackend::Wayland => clipboard::wl::Provider::new()
             .log_err("Could not create Wayland clipboard provider")

@@ -29,7 +29,7 @@ impl ScreenBackend {
         );
         Some(Self::new_raw(
             output.name.clone(),
-            app.xr_backend,
+            app.feats.xr_backend,
             CaptureType::ScreenCopy,
             capture,
         ))
