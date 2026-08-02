@@ -206,8 +206,7 @@
 		"POINTER_ACCELERATION": "Mausbeschleunigung",
 		"POINTER_ACCELERATION_HELP": "An: Adaptive Mausbeschleunigung\nAus: Konstante Geschwindigkeit",
 		"POINTER_SPEED": "Mausgeschwindigkeit",
-		"INPUT_CAPTURE_METHOD_HELP": "Ermöglicht die Nutzung physischer Peripheriegeräte innerhalb von WayVR.\n Super+Z: Eingabe zwischen WayVR und echtem Desktop umschalten\n Super+X: Zwischen WayVR-Apps umschalten",
-		"SPACE_DRAG_AFFECTS_WORLD": "Space-Drag bewegt Overlays"
+		"INPUT_CAPTURE_METHOD_HELP": "Ermöglicht die Nutzung physischer Peripheriegeräte innerhalb von WayVR.\n Super+Z: Eingabe zwischen WayVR und echtem Desktop umschalten\n Super+X: Zwischen WayVR-Apps umschalten"
 	},
 	"HELLO": "Hallo!",
 	"AUDIO": {

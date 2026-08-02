@@ -205,7 +205,7 @@
 		"SKYMAP_ALREADY_DOWNLOADED": "This skymap is already downloaded. Select desired action.",
 		"SPACE_DRAG": "Space drag",
 		"SPACE_DRAG_MULTIPLIER": "Space drag multiplier",
-		"SPACE_DRAG_AFFECTS_WORLD": "Space drag moves overlays",
+		"SPACE_DRAG_AFFECTS_WORLD": "Leave overlays behind during space move",
 		"SPACE_DRAG_UNLOCKED": "Allow space drag on all axes",
 		"SPACE_GRAVITY_DAMPING": "Damping",
 		"SPACE_GRAVITY_DAMPING_HELP": "Artificial drag to slow down movement. 0.1 - high drag, 1.0 - no drag",

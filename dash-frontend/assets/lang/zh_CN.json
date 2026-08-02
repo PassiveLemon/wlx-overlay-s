@@ -227,8 +227,7 @@
 		"POINTER_ACCELERATION": "鼠标加速",
 		"POINTER_ACCELERATION_HELP": "开启：自适应鼠标加速\n关闭：恒定速度",
 		"POINTER_SPEED": "鼠标速度",
-		"INPUT_CAPTURE_METHOD_HELP": "允许在 WayVR 中使用物理外设。\n Super+Z: 在 WayVR 和真实桌面之间切换输入\n Super+X: 在 WayVR 应用之间切换",
-		"SPACE_DRAG_AFFECTS_WORLD": "空间拖拽移动覆盖层"
+		"INPUT_CAPTURE_METHOD_HELP": "允许在 WayVR 中使用物理外设。\n Super+Z: 在 WayVR 和真实桌面之间切换输入\n Super+X: 在 WayVR 应用之间切换"
 	},
 	"APPLICATION_LAUNCHER": "应用启动器",
 	"APPLICATION_STARTED": "应用已启动",

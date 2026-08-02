@@ -206,8 +206,7 @@
 		"POINTER_ACCELERATION": "マウス加速",
 		"POINTER_ACCELERATION_HELP": "オン: 適応型マウス加速\nオフ: 一定速度",
 		"POINTER_SPEED": "マウス速度",
-		"INPUT_CAPTURE_METHOD_HELP": "WayVR内で物理周辺機器を使用できるようにします。\n Super+Z: WayVRと実際のデスクトップ間で入力を切り替え\n Super+X: WayVRアプリ間で切り替え",
-		"SPACE_DRAG_AFFECTS_WORLD": "スペースドラッグでオーバーレイを移動"
+		"INPUT_CAPTURE_METHOD_HELP": "WayVR内で物理周辺機器を使用できるようにします。\n Super+Z: WayVRと実際のデスクトップ間で入力を切り替え\n Super+X: WayVRアプリ間で切り替え"
 	},
 	"HELLO": "こんにちは！",
 	"AUDIO": {

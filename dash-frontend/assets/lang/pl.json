@@ -201,8 +201,7 @@
 		"POINTER_ACCELERATION": "Akceleracja myszy",
 		"POINTER_ACCELERATION_HELP": "Wł.: Adaptacyjna akceleracja myszy\nWył.: Stała prędkość",
 		"POINTER_SPEED": "Prędkość myszy",
-		"INPUT_CAPTURE_METHOD_HELP": "Umożliwia korzystanie z fizycznych urządzeń peryferyjnych wewnątrz WayVR.\n Super+Z: Przełącz wejście między WayVR a rzeczywistym pulpitem\n Super+X: Przełącz między aplikacjami WayVR",
-		"SPACE_DRAG_AFFECTS_WORLD": "Space-drag przesuwa nakładki"
+		"INPUT_CAPTURE_METHOD_HELP": "Umożliwia korzystanie z fizycznych urządzeń peryferyjnych wewnątrz WayVR.\n Super+Z: Przełącz wejście między WayVR a rzeczywistym pulpitem\n Super+X: Przełącz między aplikacjami WayVR"
 	},
 	"APPLICATION_LAUNCHER": "Uruchamiacz aplikacji",
 	"APPLICATIONS": "Aplikacje",
