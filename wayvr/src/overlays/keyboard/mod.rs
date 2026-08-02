@@ -2,9 +2,10 @@ use std::{
     cell::Cell,
     collections::HashMap,
     process::{Child, Command},
-    sync::atomic::Ordering,
+    sync::{Arc, atomic::Ordering},
 };
 
+use crate::overlays::toast::Toast;
 use crate::{
     KEYMAP_CHANGE,
     backend::{
@@ -40,7 +41,7 @@ use wgui::{
 use wlx_common::windowing::{OverlayWindowState, Positioning};
 use wlx_common::{
     config::AltModifier,
-    overlays::{BackendAttrib, BackendAttribValue},
+    overlays::{BackendAttrib, BackendAttribValue, ToastTopic},
 };
 
 pub mod builder;
@@ -75,13 +76,7 @@ pub fn create_keyboard(app: &mut AppState) -> anyhow::Result<OverlayWindowConfig
         overlay_list: OverlayList::default(),
         set_list: SetList::default(),
         clock_12h: app.session.config.clock_12h,
-        keymap_switch_layouts: app
-            .session
-            .config
-            .keyboard_layouts
-            .iter()
-            .map(|s| s.to_string())
-            .collect(),
+        keymap_switch_layouts: app.session.config.keyboard_layouts.clone(),
         keymap_switch_index: 0,
         keymap_switch_pending: false,
     };
@@ -396,7 +391,7 @@ struct KeyboardState {
     overlay_list: OverlayList,
     set_list: SetList,
     clock_12h: bool,
-    keymap_switch_layouts: Vec<String>,
+    keymap_switch_layouts: Vec<Arc<str>>,
     keymap_switch_index: usize,
     keymap_switch_pending: bool,
 }
@@ -467,7 +462,7 @@ enum KeyButtonData {
         release_args: Vec<String>,
     },
     KeymapSwitch {
-        layouts: Vec<String>,
+        layouts: Vec<Arc<str>>,
     },
 }
 
@@ -518,6 +513,15 @@ fn handle_press(
             play_key_click(app);
         }
         KeyButtonData::KeymapSwitch { layouts } => {
+            if layouts.is_empty() {
+                Toast::new(
+                    ToastTopic::System,
+                    "NO_KEYMAPS_CONFIGURED".into(),
+                    "NO_KEYMAPS_CONFIGURED_HELP".into(),
+                )
+                .submit(app);
+                return;
+            }
             keyboard.keymap_switch_index = (keyboard.keymap_switch_index + 1) % layouts.len();
             keyboard.keymap_switch_pending = true;
             play_key_click(app);

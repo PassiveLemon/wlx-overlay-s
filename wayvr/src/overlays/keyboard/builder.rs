@@ -109,12 +109,7 @@ pub(super) fn create_keyboard_panel(
                 has_altgr,
                 col,
                 row,
-                &app.session
-                    .config
-                    .keyboard_layouts
-                    .iter()
-                    .map(|s| s.to_string())
-                    .collect::<Vec<_>>(),
+                &app.session.config.keyboard_layouts,
             ) else {
                 let _ = panel.layout.add_child(
                     div.id,

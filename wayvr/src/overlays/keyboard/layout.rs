@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr, sync::LazyLock};
+use std::{collections::HashMap, str::FromStr, sync::Arc, sync::LazyLock};
 
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -66,7 +66,7 @@ impl Layout {
         has_altgr: bool,
         col: usize,
         row: usize,
-        keyboard_layouts: &[String],
+        keyboard_layouts: &[Arc<str>],
     ) -> Option<KeyData> {
         let key = self.main_layout[row][col].as_ref()?;
         let mut label = Vec::with_capacity(3);
