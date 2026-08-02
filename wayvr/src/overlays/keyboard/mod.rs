@@ -516,9 +516,10 @@ fn handle_press(
             if layouts.is_empty() {
                 Toast::new(
                     ToastTopic::System,
-                    "NO_KEYMAPS_CONFIGURED".into(),
-                    "NO_KEYMAPS_CONFIGURED_HELP".into(),
+                    "TOAST.NO_KEYMAPS_CONFIGURED".into(),
+                    "TOAST.NO_KEYMAPS_CONFIGURED_HELP".into(),
                 )
+                .with_timeout(5.)
                 .submit(app);
                 return;
             }
