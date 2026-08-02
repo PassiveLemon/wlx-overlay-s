@@ -89,6 +89,7 @@ pub fn create_keyboard(app: &mut AppState) -> anyhow::Result<OverlayWindowConfig
         wlx_layout: layout,
         wayland: app.feats.desktop_backend.is_wayland(),
         re_fcitx: Regex::new(r"^keyboard-([^-]+)(?:-([^-]+))?$").unwrap(),
+        re_keymap: Regex::new(r"^([a-zA-Z][a-zA-Z0-9]*)(?:\(([^)]+)\))?$").unwrap(),
     };
 
     backend.active_layout = backend.add_new_keymap(maybe_keymap.as_ref(), app)?;
@@ -136,6 +137,7 @@ struct KeyboardBackend {
     wlx_layout: layout::Layout,
     wayland: bool,
     re_fcitx: Regex,
+    re_keymap: Regex,
 }
 
 impl KeyboardBackend {
@@ -234,9 +236,11 @@ impl KeyboardBackend {
         keymap_name: &str,
         app: &mut AppState,
     ) -> anyhow::Result<bool> {
-        let mut parts = keymap_name.splitn(2, '/');
-        let layout = parts.next().unwrap_or("");
-        let variant = parts.next().unwrap_or("");
+        let Some(captures) = self.re_keymap.captures(keymap_name) else {
+            anyhow::bail!("invalid layout name for keymap switch: {keymap_name}");
+        };
+        let layout = captures.get(1).map_or("", |g| g.as_str());
+        let variant = captures.get(2).map_or("", |g| g.as_str());
         let keymap = XkbKeymap::from_layout_variant(layout, variant)
             .context("invalid layout/variant for keymap switch")?;
         app.hid_provider
