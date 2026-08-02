@@ -126,8 +126,8 @@
 		"LETS_ADD_OVERLAYS": "Let's add some overlays from the taskbar!",
 		"MAXIMUM_SETS_REACHED": "Maximum number of sets reached.",
 		"NO_SET_SELECTED": "No set is selected.",
-		"ONE_CONTROLLER_ON_FLOOR": "Place one controller on the floor!"
-		"NO_KEYMAPS_CONFIGURED": "No keymaps configured."
+		"ONE_CONTROLLER_ON_FLOOR": "Place one controller on the floor!",
+		"NO_KEYMAPS_CONFIGURED": "No keymaps configured.",
 		"NO_KEYMAPS_CONFIGURED_HELP": "Check the wayvr.org on how to set up your keymaps!"
 	},
 	"WATCH": {
