@@ -104,7 +104,18 @@ pub(super) fn create_keyboard_panel(
                 height: length(PIXELS_PER_UNIT),
             };
 
-            let Some(key) = layout.get_key_data(keymap, has_altgr, col, row) else {
+            let Some(key) = layout.get_key_data(
+                keymap,
+                has_altgr,
+                col,
+                row,
+                &app.session
+                    .config
+                    .keyboard_layouts
+                    .iter()
+                    .map(|s| s.to_string())
+                    .collect::<Vec<_>>(),
+            ) else {
                 let _ = panel.layout.add_child(
                     div.id,
                     WidgetDiv::create(),

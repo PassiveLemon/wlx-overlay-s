@@ -786,10 +786,7 @@ const MAGNETRA2_USER_PATHS: &[XrInputSubpath] = &[
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Trigger,
-		components: &[
-			XrInputComponent::Click,
-			XrInputComponent::Value,
-		],
+		components: &[XrInputComponent::Click, XrInputComponent::Value],
 	},
 	XrInputSubpath {
 		kind: XrInputSubpathKind::Thumbstick,

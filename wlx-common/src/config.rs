@@ -345,6 +345,9 @@ pub struct GeneralConfig {
 	pub default_keymap: Option<String>,
 
 	#[serde(default)]
+	pub keyboard_layouts: Vec<Arc<str>>,
+
+	#[serde(default)]
 	pub attribs: AStrMap<Vec<BackendAttribValue>>,
 
 	#[serde(default = "def_click_freeze_time_ms")]
